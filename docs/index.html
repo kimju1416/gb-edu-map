@@ -422,9 +422,47 @@ body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
 .risk p{font-size:12px;color:var(--tx-3);margin:6px 0 0}
 .sharebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:10px;border-radius:var(--r1);border:1px solid var(--line-2);background:var(--card);font-weight:600;font-size:14px}
 .sharebtn:hover{border-color:var(--pt);color:var(--pt)}
+.dlrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dlrow .sharebtn{border-color:var(--pt);color:var(--pt);font-weight:700}
 body.dark .risk.hi{background:rgba(232,57,28,.1)}
 body.dark .risk .lvl{background:rgba(255,255,255,.08)}
 body.dark .toast{background:#E9EEF2;color:#0B0F14}
+/* 공시 뷰어 */
+.dv{position:fixed;inset:0;z-index:45;background:rgba(20,26,22,.38);display:none;align-items:stretch;justify-content:flex-end}
+.dv.on{display:flex}
+.dv .box{width:min(760px,100%);height:100%;background:var(--card);display:grid;grid-template-columns:200px 1fr;grid-template-rows:auto 1fr;box-shadow:var(--float)}
+.dv .hd{grid-column:1/3;display:flex;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dv .hd h3{margin:0;font-size:17px;flex:1;min-width:0}
+.dv .hd h3 small{display:block;font-size:12px;color:var(--tx-2);font-weight:500;margin-top:2px}
+.dv .hd input{height:36px;border:1px solid var(--line-2);border-radius:8px;padding:0 10px;width:180px;background:var(--card);color:var(--tx)}
+.dv .hd .x{border:0;background:none;font-size:24px;line-height:1;color:var(--tx-2);padding:4px 6px}
+.dv nav{border-right:1px solid var(--line);overflow:auto;padding:10px 8px}
+.dv nav h5{font-size:11.5px;color:var(--tx-3);margin:12px 8px 4px;font-weight:600;letter-spacing:.02em}
+.dv nav button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:7px;font-size:13.5px;color:var(--tx)}
+.dv nav button:hover{background:#F4F2EC}
+.dv nav button[aria-current=true]{background:var(--pt-soft);color:var(--pt);font-weight:700}
+.dv main{overflow:auto;padding:6px 22px 40px;overscroll-behavior:contain}
+.dv section{padding-top:14px}
+.dv section h4{font-size:15px;margin:10px 0 8px;display:flex;align-items:baseline;gap:8px}
+.dv section h4 small{font-size:12px;color:var(--tx-3);font-weight:500}
+.dv table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:8px}
+.dv td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.dv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.dv .sub{font-size:12.5px;color:var(--tx-2);font-weight:700;margin:12px 0 4px}
+.dv .empty{color:var(--tx-3);font-size:13px;padding:10px 0}
+.dv .opt{font-size:12.5px;color:var(--tx-2);display:flex;align-items:center;gap:6px}
+body.dark .dv nav button:hover{background:rgba(255,255,255,.06)}
+@media (max-width:860px){
+  .dv .box{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;width:100%}
+  .dv .hd{flex-wrap:wrap}
+  .dv .hd input{width:100%;order:3}
+  .dv nav{grid-column:1;display:flex;gap:4px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+  .dv nav h5{display:none}
+  .dv nav button{white-space:nowrap;width:auto;border:1px solid var(--line-2);border-radius:999px;padding:6px 11px;font-size:12.5px}
+  .dv main{padding:4px 16px 40px}
+}
+.discbtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:44px;margin-top:10px;border-radius:var(--r1);border:1px solid var(--pt);background:var(--pt-soft);color:var(--pt);font-weight:700;font-size:14px}
+.discbtn:hover{background:var(--pt);color:#fff}
 /* ---------- 휴대폰 다듬기 ---------- */
 .peek{display:none}
 .gyro{display:none}
@@ -540,6 +578,7 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
   <div class="bar"><i id="tBar"></i></div>
 </div>
 
+<div class="dv" id="dv" role="dialog" aria-modal="true" aria-labelledby="dvT"><div class="box"><div class="hd"><h3 id="dvT"></h3><input id="dvQ" type="search" placeholder="항목 찾기 (예: 돌봄, 비만, 사서)" aria-label="공시 항목 찾기"><button class="x" data-act="dv-x" aria-label="닫기">×</button></div><nav id="dvNav"></nav><main id="dvMain"></main></div></div>
 <div class="modal" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutT"><div class="box" id="aboutBox"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
@@ -842,10 +881,10 @@ function setupLayers() {
   const firstSymbol = layers.find((l) => l.type === 'symbol')?.id;
   const waterId = layers.find((l) => /^water/.test(l.id) && l.type === 'fill')?.id;
 
-  map.addSource('dem', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 12, attribution: '지형: Mapzen/AWS Terrain Tiles' });
+  map.addSource('dem', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: MOBILE ? 11 : 12, attribution: '지형: Mapzen/AWS Terrain Tiles' });
   map.addSource('dem-hs', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 8 }); // 음영은 z10 조각까지만(새 조각마다 그림판을 만들어 비행이 끊기므로)
   map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem-hs', maxzoom: 9.5, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
-  map.addSource('dem-hs2', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 12 }); // 지형 보기 전용
+  map.addSource('dem-hs2', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: MOBILE ? 11 : 12 }); // 지형 보기 전용
   map.addLayer({ id: 'hillshade-hi', type: 'hillshade', source: 'dem-hs2', layout: { visibility: 'none' }, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
 
   map.addSource('nb', { type: 'geojson', data: D.nbGeo });
@@ -879,6 +918,7 @@ function setupLayers() {
     'fill-extrusion-color': '#E4E0D6', 'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.4, ['coalesce', ['get', 'render_height'], 7]],
     'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#23704A', 'fill-opacity': 0.14 } });
+  map.addLayer({ id: 'zone-ext', type: 'fill-extrusion', source: 'zone', paint: { 'fill-extrusion-color': '#23704A', 'fill-extrusion-opacity': 0.28, 'fill-extrusion-height': 0, 'fill-extrusion-base': 0 } });
   map.addLayer({ id: 'zone-line', type: 'line', source: 'zone', paint: { 'line-color': '#23704A', 'line-width': 2.5, 'line-dasharray': [2, 1] } });
   map.addLayer({ id: 'hover-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2.2 } });
   map.addLayer({ id: 'emd-hover', type: 'line', source: 'emd', filter: ['==', ['get', 'code'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 1.8 } });
@@ -1070,7 +1110,7 @@ function tweenBars(lv, target) {
   const quick = S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches || (touring && lv !== 'sigun') || Object.keys(target).length > 60;
   if (quick) { set(1); barPrev[lv] = target; return; }
   const t0 = performance.now(), dur = barPrev[lv] ? 700 : 1400; let last = 0;
-  const step = (now) => { const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3); if (now - last > 30 || t === 1) { set(e); last = now; } if (t < 1) barRaf = requestAnimationFrame(step); else barPrev[lv] = target; };
+  const step = (now) => { const t = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - t, 3); if (now - last > 30 || t === 1) { set(e); last = now; } if (t < 1) barRaf = requestAnimationFrame(step); else barPrev[lv] = target; };
   barRaf = requestAnimationFrame(step);
 }
 let labelMarkers = [];
@@ -1216,7 +1256,7 @@ function vbRender(newFeats) {
   cancelAnimationFrame(VB.growRaf);
   const t0 = performance.now();
   const step = (now) => {
-    const t = Math.min(1, (now - t0) / 600), e = 1 - Math.pow(1 - t, 3);
+    const t = Math.max(0, Math.min(1, (now - t0) / 600)), e = 1 - Math.pow(1 - t, 3);
     map.setPaintProperty('vbld-new', 'fill-extrusion-height', ['*', ['get', 'h'], e]);
     if (t < 1) { VB.growRaf = requestAnimationFrame(step); return; }
     VB.fresh = []; nsrc.setData({ type: 'FeatureCollection', features: [] });
@@ -1363,7 +1403,7 @@ function animateColumns(from, to, animate) {
   if (!animate || !visible || from === to || matchMedia('(prefers-reduced-motion:reduce)').matches) { src.setData(schoolColumns(to, 1, to)); return; }
   const t0 = performance.now(), dur = 650;
   const step = (now) => {
-    const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+    const t = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - t, 3);
     src.setData(schoolColumns(from, e, to));
     if (t < 1) colRaf = requestAnimationFrame(step);
   };
@@ -1387,7 +1427,9 @@ function stopPlay() { clearInterval(playTimer); playTimer = null; $('#play').inn
 function applyView(first) {
   const terrain = S.view === '3d', bar = S.view === 'bar', is3d = pitched();
   $$('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === S.view));
-  if (terrain) map.setTerrain({ source: 'dem', exaggeration: 2.8 }); else map.setTerrain(null);
+  if (terrain) map.setTerrain({ source: 'dem', exaggeration: MOBILE ? 2 : 2.8 }); else map.setTerrain(null);
+  // 휴대폰 지형 보기는 그리는 해상도를 1.5배로 제한
+  try { if (MOBILE) map.setPixelRatio(terrain ? Math.min(devicePixelRatio, 1.5) : devicePixelRatio); } catch (e) {}
   // 음영: 지형 보기는 선명한 음영(z12), 그 밖은 도 전체를 볼 때만 가벼운 음영(z8)
   map.setLayoutProperty('hillshade-hi', 'visibility', terrain ? 'visible' : 'none');
   map.setLayoutProperty('hillshade', 'visibility', terrain ? 'none' : 'visible');
@@ -1936,7 +1978,23 @@ async function showZone(s) {
     zoneCache[lv] ||= await fetch(`data/zones_${lv}.geojson`).then((r) => r.json());
     if (S.school !== s.i) return;
     src.setData({ type: 'FeatureCollection', features: [zoneCache[lv].features[idx]] });
+    // 학구가 땅에서 살짝 떠오른다(입체 보기에서만)
+    const top = pitched() ? 900 : 0, t0 = performance.now();
+    const up = (now) => { const t = Math.max(0, Math.min(1, (now - t0) / 900)), e = 1 - Math.pow(1 - t, 3); map.setPaintProperty('zone-ext', 'fill-extrusion-height', top * e); map.setPaintProperty('zone-ext', 'fill-extrusion-base', top * e * 0.82); if (t < 1 && S.school === s.i) requestAnimationFrame(up); };
+    if (top) requestAnimationFrame(up); else { map.setPaintProperty('zone-ext', 'fill-extrusion-height', 0); }
   } catch (e) { src.setData(empty); }
+}
+async function fillDiscSum(s) {
+  const x = discSummary(await discFile(s)); const box = $('#discSum'); if (!box || S.school !== s.i || !x) return;
+  const f0 = (v, u = '') => (v === null || v === undefined ? '–' : fmt(v) + u);
+  const rows = [
+    x.after !== undefined ? ['방과후학교', `${f0(x.after, '개')} 프로그램 · 참여 ${x.afterRate !== null && x.afterRate !== undefined ? fmt(x.afterRate, 0) + '%' : '–'}`] : null,
+    x.care ? ['돌봄교실', `${f0(x.care, '실')} · ${f0(x.careN, '명')}`] : null,
+    x.counselIn !== undefined ? ['상담 실적', `교내 ${f0(x.counselIn, '건')} · 외부 ${f0(x.counselOut, '건')}${x.wee ? ' · Wee클래스' : ''}`] : null,
+    x.paps ? ['체력 1~2등급', fmt(x.paps.top, 0) + '% (4~5등급 ' + fmt(x.paps.low, 0) + '%)'] : null,
+    x.spec && x.spec.length ? ['전문 교사', x.spec.join(' · ')] : null,
+  ].filter(Boolean);
+  box.innerHTML = rows.length ? '<dl class="kv" style="margin-top:6px">' + rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>' : '';
 }
 function openSchool(i, fly = true) {
   if (MOBILE) buzz();
@@ -1945,8 +2003,84 @@ function openSchool(i, fly = true) {
   const s = D.schools[i];
   if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 12), pitch: pitched() ? 50 : 0, bearing: map.getBearing(), duration: 1500, padding: MOBILE ? { bottom: innerHeight * 0.45 } : { right: 240 } });
   openSheet(); renderPanel(); pbody.scrollTop = 0; syncHash();
-  loadNeis(s);
+  loadNeis(s); fillDiscSum(s);
 }
+/* 공시 뷰어: data/disc/{학교id}.json 을 필요할 때 불러 앱 안에서 보여 준다 */
+const DV_GROUPS = [
+  ['학생', ['51', '10', '90']],
+  ['교원·직원', ['22', '64', '68']],
+  ['교육활동', ['08', '56', '59', '61', '94', '43']],
+  ['급식·보건', ['34', '35', '38']],
+  ['시설', ['16', '17', '18', '21', '58']],
+  ['기타', ['73']],
+];
+// 사람이 읽을 필요 없는 칸(코드·구분값)
+const DV_HIDE = /^[A-Z0-9_]+$|^항목$|^설립유형$|^주야과정구분$|구분값|코드|\(2-3-4\)|학교과정구분|^설립구분$|^학교급$|^시도|^지역|^학교명|공시연도|학교ID|기준년도|^SHL|^PBAN/;
+const dvCache = {};
+let DV = { s: null, data: null, hideZero: true };
+async function openDV(i) {
+  const s = D.schools[i]; DV.s = s;
+  $('#dvT').innerHTML = `${esc(s.name)} 공시정보<small>학교알리미 2026 공시 · ${esc(s.sigun)} ${esc(s.emd || '')}</small>`;
+  $('#dvNav').innerHTML = ''; $('#dvMain').innerHTML = '<p class="empty">불러오는 중…</p>'; $('#dvQ').value = '';
+  $('#dv').classList.add('on'); document.body.style.overflow = 'hidden';
+  try { DV.data = dvCache[s.id] ||= await fetch(`data/disc/${s.id}.json`).then((r) => { if (!r.ok) throw 0; return r.json(); }); }
+  catch (e) { $('#dvMain').innerHTML = '<p class="empty">이 학교의 공시 자료를 찾지 못했습니다.</p>'; return; }
+  renderDV();
+}
+const dvVal = (k, v) => {
+  if (v === '' || v === null || v === undefined || v === '-') return null;
+  const n = Number(String(v).replace(/,/g, ''));
+  if (String(v).trim() !== '' && isFinite(n)) {
+    if (/금액|비용|단가|예산|결산|원\)|지원금|부담금|식품비|급식비/.test(k)) return n.toLocaleString('ko-KR') + '원';
+    if (/율|비율|%/.test(k)) return fmt(n, 1) + '%';
+    if (/면적/.test(k)) return n.toLocaleString('ko-KR') + '㎡';
+    return n.toLocaleString('ko-KR');
+  }
+  return String(v);
+};
+// '항목|값' 줄이 끼어 여러 묶음(학년·성별)이 한 표로 온 경우를 나눈다
+function dvSplit(tables) {
+  const out = [];
+  for (const t of tables) {
+    if (!t.head || t.head.length !== 2 || !t.rows.some((r) => r[0] === '항목')) { out.push(t); continue; }
+    let cur = [];
+    const flush = () => { if (!cur.length) return; const g = (k) => (cur.find((r) => r[0] === k) || [])[1]; const lab = [g('학년'), g('성별')].filter(Boolean).join(' '); out.push({ sub: lab || t.sub, head: t.head, rows: cur }); cur = []; };
+    for (const r of t.rows) { if (r[0] === '항목') flush(); else cur.push(r); }
+    flush();
+  }
+  return out;
+}
+function renderDV() {
+  const d = DV.data, q = $('#dvQ').value.trim().replace(/\s+/g, '');
+  const nav = [], body = [];
+  for (const [g, items] of DV_GROUPS) {
+    const have = items.filter((it) => d[it]);
+    if (!have.length) continue;
+    nav.push(`<h5>${g}</h5>` + have.map((it) => `<button data-dvgo="${it}">${esc(d[it].title.replace(/ 현황$| 실시현황$/, ''))}</button>`).join(''));
+    for (const it of have) {
+      const blocks = [];
+      for (const t0 of dvSplit(d[it].tables)) {
+        const t = t0;
+        const kv = t.head && t.head.length === 2 && /항목/.test(t.head[0]);
+        let rows = kv ? t.rows : t.rows.map((r) => [r.slice(0, -1).join(' · '), r[r.length - 1]]);
+        rows = rows.filter(([k, v]) => !DV_HIDE.test(k)).map(([k, v]) => [k, dvVal(k, v)]).filter(([, v]) => v !== null && (!DV.hideZero || !/^0(원|%|㎡)?$|^0\.0%$/.test(v)));
+        if (q) rows = rows.filter(([k]) => k.replace(/\s+/g, '').includes(q));
+        // 합계·계를 먼저, 나머지는 학년 등 숫자 순서대로
+        const rank = (k) => (/합계|\(계\)|^계|총|검사인원/.test(k) ? 0 : 1);
+        rows.sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0], 'ko', { numeric: true }));
+        if (!rows.length) continue;
+        blocks.push(`${t.sub && t.sub !== d[it].title ? `<div class="sub">${esc(t.sub)}</div>` : ''}<table>${rows.map(([k, v]) => `<tr><td>${esc(k.replace(/\(2021년 이후\)|\(.*?이후\)/g, ''))}</td><td>${esc(v)}</td></tr>`).join('')}</table>`);
+      }
+      if (blocks.length) body.push(`<section id="dv-${it}"><h4>${esc(d[it].title)} <small>${g}</small></h4>${blocks.join('')}</section>`);
+    }
+  }
+  $('#dvNav').innerHTML = nav.join('') + `<label class="opt" style="margin:14px 8px 0"><input type="checkbox" id="dvZero" ${DV.hideZero ? 'checked' : ''}> 0인 항목 숨기기</label>`;
+  $('#dvMain').innerHTML = body.join('') || `<p class="empty">${q ? '「' + esc($('#dvQ').value) + '」가 들어간 항목이 없습니다.' : '공시 자료가 없습니다.'}</p>`;
+}
+function closeDV() { $('#dv').classList.remove('on'); document.body.style.overflow = ''; }
+$('#dvQ').addEventListener('input', () => DV.data && renderDV());
+$('#dv').addEventListener('change', (e) => { if (e.target.id === 'dvZero') { DV.hideZero = e.target.checked; renderDV(); } });
+$('#dv').addEventListener('click', (e) => { if (e.target.id === 'dv') closeDV(); const b = e.target.closest('[data-dvgo]'); if (b) { const sec = $('#dv-' + b.dataset.dvgo); if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); $$('#dvNav button').forEach((x) => x.setAttribute('aria-current', x === b)); } });
 function discHtml(s) {
   if (!s.disc) return '';
   const d = s.disc, peers = D.schools.filter((x) => x.kind === s.kind && x.sigun === s.sigun && x.disc);
@@ -1957,10 +2091,12 @@ function discHtml(s) {
   ${row('기간제 교원', d.temp, med2('temp'), '%')}
   ${row('동아리', d.club, med2('club'), '개')}
   ${row('학급당 학생', d.perClass, med2('perClass'), '명')}</dl>
-  <p class="small muted" style="margin:6px 0 0">학교알리미 공시 원자료(참고용, 우열 비교가 아님). 더 많은 공시 항목은 <a href="https://www.schoolinfo.go.kr/" target="_blank" rel="noopener" style="color:var(--pt)">학교알리미</a>에서 학교 이름으로 찾아보세요.</p>`;
+  <div id="discSum"></div>
+  <button class="discbtn" data-dv="${s.i}">공시정보 전체 보기 <span class="small" style="font-weight:500">학생·교원·교육활동·급식·시설 등 21개 항목</span></button>
+  <p class="small muted" style="margin:6px 0 0">학교알리미 2026 공시 원자료(참고용, 우열 비교가 아님)</p>`;
 }
 function forecastHtml(s) {
-  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 추정하지 않습니다.</p><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
+  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 추정하지 않습니다.</p><div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
   const all = [...s.stu, ...s.pj.stu], lab = FYEARS.map((y) => "'" + String(y).slice(2));
   const c31 = pct(s.stu[4], s.pj.stu[4]);
   const lines = [];
@@ -1973,7 +2109,7 @@ function forecastHtml(s) {
   return `<div class="sec-l">학생 수 추정 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
   <p class="small muted">미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}). 자료·방법 참고.</p></div>
   ${sim ? `<button class="simbtn" data-sim="${s.i}">가장 가까운 다른 학교까지 통학 거리 비교</button>` : ''}<div id="simOut"></div>
-  <button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
+  <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
 }
 function cmpRow(label, v, med, unit, d = 1) {
   if (v === null || med === null) return '';
@@ -2130,7 +2266,7 @@ async function runSim(i) {
   const t0 = performance.now();
   cancelAnimationFrame(simRaf);
   const frame = (now) => {
-    const t = Math.min(1, (now - t0) / 1600), e = 1 - Math.pow(1 - t, 3);
+    const t = Math.max(0, Math.min(1, (now - t0) / 1600)), e = 1 - Math.pow(1 - t, 3);
     deckOverlay.setProps({ layers: [
       new deck.ScatterplotLayer({ id: 'sim-home', data: pts, getPosition: (q) => q.p, getRadius: (q) => 60 + 240 * Math.sqrt(q.w / wmax), getFillColor: (q) => [...color(q.d1), 170], radiusUnits: 'meters', stroked: false }),
       new deck.ArcLayer({ id: 'sim-arc', data: pts.filter((q) => q.w > wmax * 0.05), getSourcePosition: (q) => q.p,
@@ -2149,6 +2285,216 @@ function stopSim() {
   if (deckOverlay) deckOverlay.setProps({ layers: [] });
   $('#simbar').classList.remove('on');
   const o = $('#simOut'); if (o) o.innerHTML = '';
+}
+
+/* ---------- 공시 요약: 18개 항목에서 보고서에 쓸 핵심 값만 뽑는다 ---------- */
+async function discFile(s) { try { return (dvCache[s.id] ||= await fetch(`data/disc/${s.id}.json`).then((r) => { if (!r.ok) throw 0; return r.json(); })); } catch (e) { return null; } }
+function discSummary(j) {
+  if (!j) return null;
+  const kv = (it) => { const m = {}; if (!j[it]) return m; for (const t of j[it].tables) for (const r of t.rows) if (r.length >= 2 && !(r[0] in m)) m[r[0]] = r[r.length - 1]; return m; };
+  const num = (v) => { const n = Number(String(v ?? '').replace(/,/g, '')); return isFinite(n) && String(v ?? '').trim() !== '' ? n : null; };
+  const t22 = kv('22'), t34 = kv('34'), t38 = kv('38'), t56 = kv('56'), t59 = kv('59'), t61 = kv('61'), t10 = kv('10'), t17 = kv('17'), t18 = kv('18'), t08 = kv('08'), t68 = kv('68');
+  const has = (m, k) => (num(m[k]) || 0) > 0;
+  // 체력: 학년·성별 묶음을 모두 더해 등급 비율
+  let paps = null;
+  if (j['90']) {
+    const g = [0, 0, 0, 0, 0]; let n = 0;
+    for (const t of dvSplit(j['90'].tables)) for (const [k, v] of t.rows) { const m = k.match(/^([1-5])등급.*인원$/); if (m) g[+m[1] - 1] += num(v) || 0; if (k === '검사인원수') n += num(v) || 0; }
+    const tot = g.reduce((a, b) => a + b, 0);
+    if (tot) paps = { n: n || tot, top: (g[0] + g[1]) / tot * 100, low: (g[3] + g[4]) / tot * 100 };
+  }
+  // 장애인 편의시설: 적정설치 비율
+  let bf = null; if (j['21']) { const rows = j['21'].tables.flatMap((t) => t.rows).filter((r) => /설치/.test(r[0])); if (rows.length) bf = { ok: rows.filter((r) => /적정/.test(r[1])).length, all: rows.length }; }
+  const students = num(t10['전체학생수(계)']) ?? num(t34['전체학생수']);
+  return {
+    teachers: num(t22['총계(계)']), temp: num(t22['기간제교사(계)']), leave: num(t22['휴직교원수']) ?? num(t22['총계(휴직교원)']),
+    spec: ['전문상담교사(계)', '사서교사(계)', '보건교사(계)', '영양교사(계)', '특수교사(계)'].filter((k) => has(t22, k)).map((k) => k.replace('(계)', '')),
+    staff: (num(t68['일반직계']) || 0) + (num(t68['교육공무직계(2019년이후)']) || 0) || null,
+    hours: num(t08['주당평균수업시수(교사 1인당)']), days: num(t08['1학년']),
+    meal: t34['운영방식 - 급식종류'] || null, cooks: (num(t34['급식담당인력(명) - 조리사']) || 0) + (num(t34['급식담당인력(명) - 조리원']) || 0) || null,
+    health: num(t38['연간1인당 보건실이용건수']),
+    after: num(t59['프로그램수계']), afterN: num(t59['방과후학교참여학생수']), afterRate: students && num(t59['방과후학교참여학생수']) !== null ? Math.min(100, num(t59['방과후학교참여학생수']) / students * 100) : null,
+    care: num(t59['초등돌봄교실 오후돌봄운영교실수']), careN: num(t59['초등돌봄교실 오후돌봄참여학생수']), careEve: num(t59['초등돌봄교실 저녁돌봄참여학생수']),
+    clubs: (num(t56['창의적체험활동동아리 동아리수']) || 0) + (num(t56['학생자율동아리 동아리수']) || 0) || null, selfClubs: num(t56['학생자율동아리 동아리수']),
+    counselIn: num(t61['상담실적(내부상담전문가)']), counselOut: num(t61['상담실적(외부상담전문가)']), wee: t61['교내 WEE클래스 설치여부(2025년 이후 적용)'] === 'Y',
+    moveIn: num(t10['전입학생수(계)']), moveOut: num(t10['전출학생수(계)']), dropout: num(t10['학업중단학생수(계)']),
+    rooms: num(t17['교수학습공간 일반교실']), special: (num(t17['교수학습공간 특별교실']) || 0) + (num(t17['교수학습공간 교과교실']) || 0),
+    gym: has(t18, '체육관'), hall: has(t18, '강당'), dorm: num(t17['기숙사실수']), dormN: num(t18['기숙사 재실인원']),
+    paps, bf,
+  };
+}
+
+/* ---------- 학교 한 장 보고서: 지도 사진 + 핵심 숫자 → 새 창에서 인쇄(PDF 저장) ---------- */
+function mapSnapshot() {
+  return new Promise((ok) => { map.once('render', () => { try { ok(map.getCanvas().toDataURL('image/jpeg', 0.85)); } catch (e) { ok(''); } }); map.triggerRepaint(); });
+}
+function reportHtml(s, img, forPrint, ds) {
+  const r = riskOf(s), m = D.med[s.kind], d = s.disc;
+  const all = s.pj ? [...s.stu, ...s.pj.stu] : s.stu, lab = (s.pj ? FYEARS : YEARS).map((y) => "'" + String(y).slice(2));
+  const chart = barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: s.pj ? 5 : 99, h: 96, w: 520 });
+  const nGr = s.kind === '초등학교' ? 6 : s.kind === '특수학교' ? 0 : 3;
+  const f0 = (v, u = '') => (v === null || v === undefined ? '–' : fmt(v) + u), f1 = (v, u = '') => (v === null || v === undefined ? '–' : fmt(v, 1) + u);
+  const kv = (rows) => '<table>' + rows.filter((x) => x).map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('') + '</table>';
+  const cmp = (v, med, u = '', dg = 1) => (v === null || v === undefined ? '–' : `${fmt(v, dg)}${u} <span class="m">경북 중앙값 ${fmt(med, dg)}${u}</span>`);
+  const x = ds || {};
+  const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${esc(s.name)} — 경북교육지도</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>@page{size:A4;margin:11mm}*{box-sizing:border-box}body{font-family:"Pretendard Variable",sans-serif;color:#1F2A24;margin:0;font-size:11.5px;line-height:1.45;word-break:keep-all}
+  header{display:flex;align-items:center;gap:10px;border-bottom:2px solid #23704A;padding-bottom:7px}header img{width:32px;height:32px;border-radius:7px}
+  header h1{font-size:21px;margin:0;flex:1}header small{color:#5A635C;font-size:10.5px;text-align:right}
+  .sub{color:#5A635C;margin:5px 0 8px}.grid{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid #E4E0D6;border-radius:8px;margin-bottom:8px}
+  .grid div{padding:6px 8px;border-right:1px solid #E4E0D6}.grid div:last-child{border-right:0}.grid b{display:block;font-size:16px}.grid span{font-size:10px;color:#5A635C}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}.map{width:100%;height:170px;object-fit:cover;border-radius:8px;border:1px solid #E4E0D6}
+  h2{font-size:12.5px;margin:9px 0 4px;color:#23704A;display:flex;gap:6px;align-items:center}h2 i{font-style:normal;background:#23704A;color:#fff;border-radius:4px;padding:0 5px;font-size:10.5px}
+  table{width:100%;border-collapse:collapse}th,td{padding:3px 5px;border-bottom:1px solid #EEE9DF;text-align:left;font-size:11px;vertical-align:top}th{color:#5A635C;font-weight:500;width:38%}
+  .m{color:#8A918A;font-size:10px;margin-left:4px}.risk{border:1px solid #E8391C;background:#FFF6F3;border-radius:6px;padding:5px 8px}.risk li{margin:1px 0}
+  ul{margin:0;padding-left:15px}.grades{display:flex;gap:4px}.grades div{flex:1;text-align:center;background:#F4F2EC;border-radius:4px;padding:3px 0;font-size:10.5px}.grades b{display:block;font-size:12.5px}
+  .note{font-size:9.5px;color:#6F766F;margin-top:8px;border-top:1px solid #E4E0D6;padding-top:5px}svg text{font-family:inherit}
+  @media screen{body{max-width:820px;margin:20px auto;padding:0 16px}}</style></head><body>
+  <header><img src="${location.origin + location.pathname.replace(/[^/]*$/, '')}art/logo-96.png" alt=""><h1>${esc(s.name)}</h1><small>경북교육지도 학교 보고서<br>${new Date().toLocaleDateString('ko-KR')} 작성</small></header>
+  <div class="sub">${esc(s.sigun)} ${esc(s.emd || '')} · ${esc(s.kind)}${s.sub ? '(' + esc(s.sub) + ')' : ''} · ${esc(s.found)} · ${esc(s.region)}${s.bj ? ' · 도서벽지 ' + esc(s.bj) : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}${s.opened ? ' · 개교 ' + s.opened.slice(0, 4) : ''}</div>
+  <div class="grid"><div><span>학생</span><b>${f0(s.stu[4], '명')}</b></div><div><span>학급</span><b>${f0(s.cls[4])}</b></div><div><span>교원</span><b>${f0(s.tch[4], '명')}</b></div><div><span>학급당 학생</span><b>${f1(s.perClass)}</b></div><div><span>교원 1인당 학생</span><b>${f1(s.perTeacher)}</b></div><div><span>2026 입학</span><b>${f0(s.entrants, '명')}</b></div></div>
+  <div class="cols">
+  <div>
+    <h2><i>1</i>학생 수 변화${s.pj ? '와 추정' : ''}</h2>${chart}
+    ${nGr ? kv([['학년별 학생(2026)', s.g.slice(0, nGr).map((v, i) => `${i + 1}학년 ${f0(v)}`).join(' · ')]]) : ''}
+    ${kv([
+      s.pj ? ['2031년 추정', `약 ${f0(s.pj.stu[4], '명')} (${sgn(pct(s.stu[4], s.pj.stu[4]), 0)}%)`] : null,
+      s.pj ? ['해마다 입학생 추정', s.pj.g1.map((v, i) => `${2027 + i} ${f0(v)}`).join(' · ')] : null,
+      s.pj && s.pj.kids05 !== undefined ? ['통학구역 안 0~5세', `약 ${f0(s.pj.kids05, '명')}`] : null,
+      x.moveIn !== undefined ? ['전입·전출(지난 학년도)', `전입 ${f0(x.moveIn)} · 전출 ${f0(x.moveOut)}${x.dropout ? ' · 학업중단 ' + f0(x.dropout) : ''}`] : null,
+    ])}
+    <h2><i>2</i>교원·직원</h2>${kv([
+      ['교원', `${f0(x.teachers ?? s.tch[4], '명')}${x.temp ? ' (기간제 ' + f0(x.temp) + ')' : ''}${x.leave ? ' · 휴직 ' + f0(x.leave) : ''}`],
+      ['교원 1인당 학생', cmp(s.perTeacher, m.perTeacher, '명')],
+      x.spec && x.spec.length ? ['전문 교사 배치', x.spec.join(' · ')] : null,
+      x.hours !== undefined ? ['교사 1인당 주당 수업', f1(x.hours, '시간') + (x.days ? ` · 수업일수 ${f0(x.days, '일')}` : '')] : null,
+      x.staff ? ['직원(행정·교육공무직)', f0(x.staff, '명')] : null,
+    ])}
+    <h2><i>3</i>교육활동</h2>${kv([
+      x.after !== undefined ? ['방과후학교', `프로그램 ${f0(x.after, '개')} · 참여 ${f0(x.afterN, '명')}${x.afterRate !== null && x.afterRate !== undefined ? ' (' + fmt(x.afterRate, 0) + '%)' : ''}`] : null,
+      x.care ? ['초등 돌봄교실', `${f0(x.care, '실')} · 오후 ${f0(x.careN, '명')}${x.careEve ? ' · 저녁 ' + f0(x.careEve, '명') : ''}`] : null,
+      x.clubs ? ['동아리', `${f0(x.clubs, '개')}${x.selfClubs ? ' (자율 ' + f0(x.selfClubs) + ')' : ''}`] : null,
+      x.counselIn !== undefined ? ['상담 실적', `교내 ${f0(x.counselIn, '건')} · 외부 ${f0(x.counselOut, '건')}${x.wee ? ' · Wee클래스 있음' : ''}`] : null,
+    ])}
+  </div>
+  <div>
+    ${img ? `<img class="map" src="${img}" alt="지도">` : ''}
+    <h2><i>4</i>학생 건강</h2>
+    ${x.paps ? `<div class="grades"><div>체력 1~2등급<b>${fmt(x.paps.top, 0)}%</b></div><div>4~5등급<b>${fmt(x.paps.low, 0)}%</b></div><div>검사 인원<b>${fmt(x.paps.n)}명</b></div>${x.health !== null && x.health !== undefined ? `<div>1인당 보건실<b>${fmt(x.health, 1)}회</b></div>` : ''}</div>` : kv([['체력·보건', '공시 자료 없음']])}
+    <h2><i>5</i>급식·시설</h2>${kv([
+      ['급식', `${esc(x.meal || (d && d.meal) || '–')}${x.cooks ? ' · 조리 인력 ' + f0(x.cooks, '명') : ''}`],
+      ['교실', `일반 ${f0(x.rooms ?? s.rooms[0])} · 특별·교과 ${f0(x.special ?? (s.rooms[1] + s.rooms[2]))}${x.gym ? ' · 체육관' : ''}${x.hall ? ' · 강당' : ''}`],
+      x.dorm ? ['기숙사', `${f0(x.dorm, '실')}${x.dormN ? ' · ' + f0(x.dormN, '명') : ''}`] : null,
+      ['학생 1인당 교지', cmp(s.sitePer, m.sitePer, '㎡', 0)],
+      x.bf ? ['장애인 편의시설', `적정 설치 ${x.bf.ok}/${x.bf.all}항목`] : null,
+    ])}
+    <h2><i>6</i>비교와 학생 감소 신호</h2>${kv([['학급당 학생', cmp(s.perClass, m.perClass, '명')], ['학생 수', cmp(s.stu[4], m.stu, '명', 0)]])}
+    <div class="risk" style="margin-top:5px">${r.length ? '<ul>' + r.map((y) => '<li>' + esc(y) + '</li>').join('') + '</ul>' : '통계로 보이는 감소 신호가 없습니다.'}</div>
+    <h2><i>7</i>통학구역</h2>${kv([
+      ['통학구역', s.zen || s.zmn ? `${esc(s.zen || s.zmn)} · ${f1(s.zea ?? s.zma, '㎢')}` : '자료 없음(고등학교는 통학구역 없음)'],
+      s.near ? [`가장 가까운 ${esc(KIND_SHORT[s.kind])}`, `${esc(s.nearName)} · 직선 ${f1(s.near, 'km')}`] : null,
+    ])}
+  </div></div>
+  <div class="note">자료: KESS 교육기본통계(2026. 4. 1.) · 학교알리미 공시(2026) · 행정안전부 주민등록 인구(2026. 8.) · 학구도안내시스템. 중앙값은 경북 같은 학교급 기준. 추정은 이미 태어나 지금 통학구역에 사는 아이가 지금 비율대로 입학한다고 본 단순 계산이며, 학교 운영에 관한 판단이 아닙니다. 경북교육지도 ${esc(location.origin + location.pathname)}</div>
+  ${forPrint ? '<script>window.onload=()=>setTimeout(()=>window.print(),600)<\/script>' : ''}</body></html>`;
+  return html;
+}
+async function schoolReport(s) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('팝업이 막혀 있습니다. 이 사이트의 팝업을 허용해 주세요.'); return; }
+  w.document.write('<p style="font-family:sans-serif;padding:20px">보고서를 만드는 중…</p>');
+  const [img, j] = await Promise.all([mapSnapshot(), discFile(s)]);
+  w.document.open(); w.document.write(reportHtml(s, img, true, discSummary(j))); w.document.close();
+}
+/* 필요할 때만 라이브러리를 불러온다 */
+const libs = {};
+function lib(url) { return (libs[url] ||= new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = url; sc.onload = ok; sc.onerror = () => no(new Error('라이브러리를 불러오지 못했습니다')); document.head.appendChild(sc); })); }
+function saveBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+const fileBase = (s) => `${s.name}_경북교육지도_${new Date().toISOString().slice(0, 10)}`;
+/* PDF: 보고서를 보이지 않는 창에 그려 그림으로 떠서 A4 PDF로(한글 글꼴 걱정 없음) */
+async function reportPdf(s, btn) {
+  const old = btn.innerHTML; btn.disabled = true; btn.textContent = 'PDF 만드는 중…';
+  try {
+    const [img, j] = await Promise.all([mapSnapshot(), discFile(s)]);
+    await Promise.all([lib('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'), lib('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js')]);
+    const fr = document.createElement('iframe');
+    fr.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0';
+    document.body.appendChild(fr);
+    fr.srcdoc = reportHtml(s, img, false, discSummary(j)).replace('@media screen{body{max-width:820px;margin:20px auto;padding:0 16px}}', 'body{padding:28px 32px;width:794px}');
+    await new Promise((r) => (fr.onload = r));
+    await fr.contentDocument.fonts.ready; await new Promise((r) => setTimeout(r, 300));
+    const cv = await html2canvas(fr.contentDocument.body, { scale: 2, backgroundColor: '#ffffff', useCORS: true, windowWidth: 794 });
+    fr.remove();
+    const pdf = new jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    const pw = 210, ph = 297, h = (cv.height * pw) / cv.width;
+    const data = cv.toDataURL('image/jpeg', 0.92);
+    // 8mm 미만 넘침은 빈 쪽을 만들지 않음
+    for (let y = 0; y < h - 8; y += ph) { if (y) pdf.addPage(); pdf.addImage(data, 'JPEG', 0, -y, pw, h); }
+    pdf.save(fileBase(s) + '.pdf');
+    toast('PDF를 내려받았습니다');
+  } catch (e) { toast('PDF를 만들지 못했습니다: ' + e.message); }
+  btn.disabled = false; btn.innerHTML = old;
+}
+/* 한글(HWPX): 틀(data/report-template.hwpx)의 자리표시자를 학교 숫자로 바꿔 내려받기 */
+async function reportHwpx(s, btn) {
+  const old = btn.innerHTML; btn.disabled = true; btn.textContent = '한글 문서 만드는 중…';
+  try {
+    await lib('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+    const zip = await JSZip.loadAsync(await fetch('data/report-template.hwpx').then((r) => r.arrayBuffer()));
+    const m = D.med[s.kind], d = s.disc, r = riskOf(s);
+    const f1 = (v) => (v === null || v === undefined ? '-' : fmt(v, 1));
+    const f0 = (v) => (v === null || v === undefined ? '-' : fmt(v));
+    const V = {
+      NAME: s.name, SUB: `${s.sigun} ${s.emd || ''} · ${s.kind} · ${s.found}${s.bj ? ' · ' + s.bj : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}`,
+      STU: f0(s.stu[4]) + '명', CLS: f0(s.cls[4]), TCH: f0(s.tch[4]) + '명', PC: f1(s.perClass), PT: f1(s.perTeacher), ENT: f0(s.entrants) + '명',
+      FCNOTE: s.pj ? '이미 태어나 지금 통학구역에 사는 아이(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값' : '이 학교급은 추정하지 않음',
+      RISK: r.length ? r.join(' · ') : '통계로 보이는 감소 신호가 없습니다',
+      SP: f0(s.sitePer) + '㎡', MPC: f1(m.perClass), MPT: f1(m.perTeacher), MSP: f0(m.sitePer) + '㎡',
+      MEAL: d ? d.meal || '-' : '-', TEMP: d && d.temp !== null ? fmt(d.temp, 1) + '%' : '-', CLUB: d && d.club !== null ? fmt(d.club) + '개' : '-',
+      ZONE: s.zen || s.zmn ? `${s.zen || s.zmn} · ${fmt(s.zea ?? s.zma, 1)}㎢` : '통학구역 자료 없음(고등학교는 통학구역 없음)',
+      NEAR: s.near ? `${s.nearName} · 직선 ${fmt(s.near, 1)}km` : '-',
+      DATE: new Date().toLocaleDateString('ko-KR'),
+    };
+    // 공시 요약(학교알리미)
+    const x = discSummary(await discFile(s)) || {};
+    const nGr = s.kind === '초등학교' ? 6 : s.kind === '특수학교' ? 0 : 3;
+    Object.assign(V, {
+      SUB: `${s.sigun} ${s.emd || ''} · ${s.kind} · ${s.found} · ${s.region}${s.bj ? ' · 도서벽지 ' + s.bj : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}${s.opened ? ' · 개교 ' + s.opened.slice(0, 4) : ''}`,
+      GRADES: nGr ? s.g.slice(0, nGr).map((v, i) => `${i + 1}학년 ${f0(v)}`).join(' · ') : '-',
+      KIDS: s.pj && s.pj.kids05 !== undefined ? `약 ${f0(s.pj.kids05)}명` : '-',
+      MOVE: x.moveIn !== undefined ? `전입 ${f0(x.moveIn)} · 전출 ${f0(x.moveOut)}${x.dropout ? ' · 학업중단 ' + f0(x.dropout) : ''}` : '-',
+      TEACH: `${f0(x.teachers ?? s.tch[4])}명${x.temp ? ' (기간제 ' + f0(x.temp) + ')' : ''}${x.leave ? ' · 휴직 ' + f0(x.leave) : ''}`,
+      PTCMP: `${f1(s.perTeacher)}명 (경북 중앙값 ${f1(m.perTeacher)}명)`,
+      SPEC: x.spec && x.spec.length ? x.spec.join(' · ') : '-',
+      HOURS: x.hours !== undefined && x.hours !== null ? `${f1(x.hours)}시간${x.days ? ' · 수업일수 ' + f0(x.days) + '일' : ''}` : '-',
+      STAFF: x.staff ? f0(x.staff) + '명' : '-',
+      AFTER: x.after !== undefined ? `프로그램 ${f0(x.after)}개 · 참여 ${f0(x.afterN)}명${x.afterRate !== null && x.afterRate !== undefined ? ' (' + fmt(x.afterRate, 0) + '%)' : ''}` : '-',
+      CARE: x.care ? `${f0(x.care)}실 · 오후 ${f0(x.careN)}명${x.careEve ? ' · 저녁 ' + f0(x.careEve) + '명' : ''}` : '-',
+      CLUB: x.clubs ? `${f0(x.clubs)}개${x.selfClubs ? ' (자율 ' + f0(x.selfClubs) + ')' : ''}` : d && d.club !== null ? fmt(d.club) + '개' : '-',
+      COUNSEL: x.counselIn !== undefined ? `교내 ${f0(x.counselIn)}건 · 외부 ${f0(x.counselOut)}건${x.wee ? ' · Wee클래스 있음' : ''}` : '-',
+      PTOP: x.paps ? fmt(x.paps.top, 0) + '%' : '-', PLOW: x.paps ? fmt(x.paps.low, 0) + '%' : '-', PN: x.paps ? f0(x.paps.n) + '명' : '-',
+      HEALTH: x.health !== undefined && x.health !== null ? fmt(x.health, 1) + '회' : '-',
+      MEAL: `${x.meal || (d && d.meal) || '-'}${x.cooks ? ' · 조리 인력 ' + f0(x.cooks) + '명' : ''}`,
+      ROOMS: `일반 ${f0(x.rooms ?? s.rooms[0])} · 특별·교과 ${f0(x.special ?? (s.rooms[1] + s.rooms[2]))}${x.gym ? ' · 체육관' : ''}${x.hall ? ' · 강당' : ''}`,
+      DORM: x.dorm ? `${f0(x.dorm)}실${x.dormN ? ' · ' + f0(x.dormN) + '명' : ''}` : '없음',
+      SPCMP: `${f0(s.sitePer)}㎡ (경북 중앙값 ${f0(m.sitePer)}㎡)`,
+      BF: x.bf ? `적정 설치 ${x.bf.ok}/${x.bf.all}항목` : '-',
+      MSTU: f0(m.stu) + '명',
+    });
+    for (let i = 0; i <= 10; i++) { V['Y' + i] = f0(stuIdx(s, i)); V['E' + i] = i < 4 ? '-' : i === 4 ? f0(s.g[0]) : s.pj ? f0(s.pj.g1[i - 5]) : '-'; }
+    const xmlEsc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    for (const path of Object.keys(zip.files).filter((p) => /\.(xml|txt)$/.test(p))) {
+      let x = await zip.file(path).async('string');
+      x = x.replace(/QQ([A-Z0-9]+)QQ/g, (all, k) => (k in V ? xmlEsc(V[k]) : all));
+      zip.file(path, x);
+    }
+    zip.file('mimetype', 'application/hwp+zip', { compression: 'STORE' });
+    const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/hwp+zip', compression: 'DEFLATE' });
+    saveBlob(blob, fileBase(s) + '.hwpx');
+    toast('한글 문서를 내려받았습니다');
+  } catch (e) { toast('한글 문서를 만들지 못했습니다: ' + e.message); }
+  btn.disabled = false; btn.innerHTML = old;
 }
 
 /* ---------- 학생 감소 신호 ----------
@@ -2325,6 +2671,7 @@ function renderAbout() {
   <li>초등학구 색칠: 학구도안내시스템 초등 통학구역 535곳. 학구 안 0~5세는 읍면동 주민등록 인구를 겹치는 면적 비율로 나눈 값입니다.</li>
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
   <li>5년 뒤 추정(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
+  <li>공시정보 뷰어: 학교알리미 공시 21개 항목(입학생·전출입·체력·교원·방과후·상담·급식·보건·시설 등)을 학교마다 모아 앱 안에서 보여 줍니다. 코드처럼 사람이 읽을 필요 없는 칸은 숨겼습니다.</li>
   <li>통학 거리 비교: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
   <li>건물 3D: 크게 확대하면 브이월드 오픈API(국토교통부 도로명주소건물)에서 화면 둘레 건물만 그때그때 불러와 지상층수 × 3.3m 높이로 세웁니다(저장하지 않음). 색은 건물이 속한 읍면동의 지표, 초록은 이름에 '학교'가 들어간 건물입니다.</li>
   <li>해발 고도: AWS Terrain Tiles(z12) 지형 값. 지형 보기에서는 산 높이를 실제의 2.8배로 키워 보여 줍니다.</li>
@@ -2406,6 +2753,11 @@ document.addEventListener('click', (e) => {
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }
   if (t.id === 'tPrev') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); return; }
   if (t.id === 'btnTheme') { setTheme(!DARK); return; }
+  if (d.dv !== undefined) { openDV(+d.dv); return; }
+  if (d.act === 'dv-x') { closeDV(); return; }
+  if (d.act === 'report') { schoolReport(D.schools[S.school]); return; }
+  if (d.act === 'pdf') { reportPdf(D.schools[S.school], t); return; }
+  if (d.act === 'hwpx') { reportHwpx(D.schools[S.school], t); return; }
   if (t.id === 'btnGyro') { toggleGyro(); return; }
   if (t.id === 'btnShare' || d.act === 'share') { share(); return; }
   if (t.id === 'btnAbout') { renderAbout(); $('#about').classList.add('on'); return; }
@@ -2413,6 +2765,7 @@ document.addEventListener('click', (e) => {
 $('#about').addEventListener('click', (e) => { if (e.target.id === 'about') $('#about').classList.remove('on'); });
 document.addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('li[data-sg], li[data-emd], tr[data-sg], tr[data-kind]')) { e.preventDefault(); e.target.click(); return; }
+  if (e.key === 'Escape' && $('#dv').classList.contains('on')) { closeDV(); return; }
   if (e.key === 'Escape') { if ($('#about').classList.contains('on')) $('#about').classList.remove('on'); else if (touring) stopTour(); else $('#inddd').classList.remove('open'); }
   if (touring && e.key === 'ArrowRight') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }
   if (touring && e.key === 'ArrowLeft') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); }

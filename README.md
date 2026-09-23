@@ -41,6 +41,7 @@ node scripts/05_zones.js   # 학구 경계(키 없음) → raw/zones_*.geojson, 
 node scripts/06_population.js   # 행정동 연령별 인구·학구 연결
 node scripts/07_elevation.js   # 학교 해발 고도
 node scripts/08_forecast.js   # 학교별 2027~2032 학생 수 예측(비율법)
+node scripts/10_disclosure_full.js   # 공시 21개 항목 → docs/data/disc (약 30분, 이어받기 됨)
 node scripts/09_disclosure.js   # 학교알리미 공시(raw/disclosure.json) 붙이기
 python scripts/04_verify.py   # 한 곳이라도 다르면 실패로 끝남
 ```
