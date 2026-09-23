@@ -6,7 +6,7 @@
 <title>경북교육지도</title>
 <meta name="description" content="경상북도 초·중·고·특수학교 925곳의 학생 수 변화, 작은학교, 도서벽지, 폐교, 통학 거리를 3D 지도로 보는 교사용 교육 통계 지도">
 <meta property="og:title" content="경북교육지도">
-<meta property="og:description" content="경북 학교 925곳 · 학생 수 5년 변화 · 작은학교 · 도서벽지 · 폐교 · 통학 거리를 3D 지도로">
+<meta property="og:description" content="우리 학교는 5년 뒤 몇 명일까? 경북 학교 925곳의 5년 변화와 2032년까지 예측, 통폐합 위험 신호를 3D 지도로">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://kimju1416.github.io/gb-edu-map/og.jpg">
 <meta property="og:url" content="https://kimju1416.github.io/gb-edu-map/">
@@ -407,6 +407,23 @@ body.dark .maplibregl-ctrl-attrib{background:rgba(11,15,20,.7);color:#8894A0}
 body.dark .maplibregl-ctrl-attrib a{color:#A7B2BC}
 body.dark svg.chart text{fill:#A7B2BC}
 body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);z-index:60;background:rgba(20,24,22,.94);color:#fff;border-radius:10px;padding:10px 16px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.risk{border:1px solid var(--line);border-radius:var(--r2);padding:12px 14px;margin-top:12px}
+.risk.hi{border-color:#E8391C;background:#FFF6F3}
+.risk .h{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
+.risk .lvl{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:#F1EFE9;color:var(--tx-2)}
+.risk.mid .lvl{background:#FBF0DE;color:#8A4B1E}
+.risk.hi .lvl{background:#E8391C;color:#fff}
+.risk ul{list-style:none;margin:8px 0 0;padding:0;font-size:13.5px;line-height:1.7}
+.risk li::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#E8391C;margin-right:8px;vertical-align:1px}
+.risk li.ok::before{background:#2E8B57}
+.risk p{font-size:12px;color:var(--tx-3);margin:6px 0 0}
+.sharebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:42px;margin-top:10px;border-radius:var(--r1);border:1px solid var(--line-2);background:var(--card);font-weight:600;font-size:14px}
+.sharebtn:hover{border-color:var(--pt);color:var(--pt)}
+body.dark .risk.hi{background:rgba(232,57,28,.1)}
+body.dark .risk .lvl{background:rgba(255,255,255,.08)}
+body.dark .toast{background:#E9EEF2;color:#0B0F14}
 /* ---------- 휴대폰 다듬기 ---------- */
 .peek{display:none}
 @media (max-width:860px){
@@ -454,6 +471,7 @@ body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
   <div class="top-r">
     <span class="ref" id="refdate"></span>
     <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">드론 둘러보기</span></button>
+    <button class="tbtn themebtn" id="btnShare" aria-label="지금 화면 링크 공유" title="지금 보고 있는 화면 그대로 링크 공유"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     <button class="tbtn themebtn" id="btnTheme" aria-label="어두운 화면으로" title="어두운 관제실 화면 / 밝은 화면"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
     <button class="tbtn" id="btnAbout">자료·방법</button>
   </div>
@@ -502,6 +520,7 @@ body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
 </div>
 
 <div class="tip" id="tip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="simbar" id="simbar"><span id="simbarTxt"></span><button id="simStop">시뮬레이션 끝내기</button></div>
 
 <div class="tour" id="tour" aria-live="polite">
@@ -610,6 +629,8 @@ const IND = {
     sigun: (s) => s.pjChg, hi: '앞으로 많이 줄 곳', desc: '초·중 학생 2026 → 2031 예측 변화율' },
   pjBelow: { g: '미래 학생', label: '2031년까지 60명 아래로', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
     sigun: (s) => s.pjBelow, hi: '작은학교가 새로 많이 생길 곳', desc: '지금은 60명이 넘지만 2031년까지 60명 이하로 예측되는 초·중' },
+  risk: { g: '미래 학생', label: '위험 신호 3개 이상 학교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
+    sigun: (s) => s.risk3, hi: '통폐합 위험 신호가 겹친 학교가 많은 곳', desc: '60명 이하·신입생 0명·60명 아래로 전망·10명 이하 전망·입학생 0명 전망·학구 0~5세 12명 미만 가운데 3개 이상인 초·중' },
   cohort: { g: '미래 학생', label: '입학생 전망', unit: '%', ramp: 'warm', invert: true, yearly: false, lv: ['sigun', 'emd'], d: 1, signed: true, kindless: true,
     sigun: (s) => s.cohort, emd: (e) => e.cohort, hi: '앞으로 입학생이 많이 줄 곳',
     desc: '0~2세 인구 ÷ 지금 초1~3 또래(6~8세) − 1. −30%면 몇 년 뒤 초등 입학생이 지금보다 약 30% 적다는 뜻(주민등록 기준, 6~8세 30명 미만 읍면동은 비움)' },
@@ -648,6 +669,9 @@ async function load() {
   D = { stats, schools, closed, sigunGeo: sigun, emdGeo: emd, nbGeo: nb };
   D.sigunNames = Object.keys(stats.sigun);
   schools.forEach((s, i) => { s.i = i; });
+  // 통폐합 위험 신호(시군별 3개 이상 학교 수)
+  for (const sg of D.sigunNames) stats.sigun[sg].risk3 = 0;
+  for (const s of schools) { s.riskN = riskOf(s).length; if (s.riskN >= 3) stats.sigun[s.sigun].risk3++; }
   // 학교급별 중앙값(학교 카드 비교용)
   D.med = {};
   for (const k of KIND_KEYS.slice(1)) {
@@ -1317,8 +1341,8 @@ function applyView(first) {
   $('#schHint').textContent = terrain ? '기둥 높이 = 학생 수' : bar ? '크게 확대하면 보임' : '원 크기 = 학생 수';
   if (map.getLayer('sigun-bar')) paint();
   // 지형에서는 색을 옅게 깔아 산 음영이 비치게
-  map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : 0.82);
-  map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : 0.82);
+  map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
+  map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   // 어두운 지형: 능선이 달빛처럼 보이게 음영을 밝게
   map.setPaintProperty('hillshade', 'hillshade-highlight-color', DARK ? (terrain ? '#8FA3B8' : '#2B3642') : '#FFFFFF');
   map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrain ? (DARK ? 1 : 0.85) : 0.42);
@@ -1495,7 +1519,7 @@ const STORIES = [
       return `<p>4년 사이 경북 학생이 <b>${fmt(T()[0].students - T()[4].students)}명</b> 줄었습니다. 22개 시군 가운데 학생이 늘어난 곳은 ${up.length ? `<b>${esc(up.join(', '))}</b>` : '<b>한 곳도 없습니다</b>'}.</p>
       <p>가장 많이 줄어든 곳은 ${t.map(([sg, v]) => `<b>${sg}(${sgn(v)}%)</b>`).join(', ')}입니다. 인구감소지역 15곳을 합치면 <b>${sgn(dAvg)}%</b>, 나머지 7곳은 <b>${sgn(nAvg)}%</b>로 감소 속도가 달랐습니다.</p>`;
     }, note: '같은 기간의 재학생 수 변화입니다. 미래 인구 예측이나 정책 효과를 뜻하지 않습니다.', rank: 'change' },
-  { id: 'forecast', g: '앞으로 5년', q: '우리 학교는 5년 뒤 몇 명일까?', s: '2032년까지 학교별 학생 수 예측 · ▶로 재생', ind: 'pjStu', chips: ['pjStu', 'pjChg', 'pjBelow'], play: true,
+  { id: 'forecast', g: '앞으로 5년', q: '우리 학교는 5년 뒤 몇 명일까?', s: '2032년까지 학교별 학생 수 예측 · ▶로 재생', ind: 'pjStu', chips: ['pjStu', 'pjChg', 'pjBelow', 'risk'], play: true,
     filter: { label: '60명 아래로 내려갈 학교', fn: (s) => s.pj && s.pj.below60 && s.pj.below60 <= 2031 },
     cam: { pitch: 58, bearing: -16 },
     hero: () => { const T = D.stats.pjTotal; return { l: '경북 초·중 학생 2026 → 2031 (예측)', v: `${sgn(pct(T.stu[4], T.stu[9]))}%`, d: `${fmt(T.stu[4])}명 → 약 ${fmt(Math.round(T.stu[9] / 100) * 100)}명` }; },
@@ -1506,6 +1530,7 @@ const STORIES = [
       return `<p>아래 ▶를 누르면 2022년부터 2032년까지 시군 기둥이 줄어드는 모습을 볼 수 있습니다. 2027년부터는 예측입니다.</p>
       <p>지금 학생 60명 이하 학교는 ${fmt(T.small2026)}곳인데, 2031년에는 <b>약 ${fmt(T.small2031)}곳</b>으로 늘어날 것으로 보입니다. 지금은 60명이 넘지만 5년 안에 60명 아래로 내려갈 학교가 <b>${list.length}곳</b>입니다.</p>
       <p>가장 많이 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다. 학교를 누르면 해마다의 예측과 통폐합 시뮬레이션을 볼 수 있습니다.</p>
+      <p>숫자로 보이는 통폐합 위험 신호가 3개 이상 겹친 초·중은 <b>${D.schools.filter((x) => x.riskN >= 3).length}곳</b>입니다. 지표 <b>「위험 신호 3개 이상 학교」</b>로 시군별로 볼 수 있습니다.</p>
       <div class="sec-l">5년 안에 60명 아래로 내려갈 학교</div><ul class="slist">${list.map((s) => schoolRow(s).replace('</span></button>', `</span></button>`)).join('')}</ul>`;
     }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 예측입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했고, 고등·특수학교는 예측하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
   { id: 'future', g: '앞으로 5년', q: '몇 년 뒤 초등 입학생은 얼마나 줄어들까?', s: '0~2세와 지금 초1~3 또래 비교', ind: 'cohort', chips: ['cohort', 'k05', 'kidShare'],
@@ -1654,6 +1679,7 @@ function renderStory() {
   <div class="hero"><div class="l">${esc(h.l)}</div><div class="v num">${h.v}</div><div class="d">${esc(h.d)}</div></div>
   <div class="story">${st.body()}</div>
   ${st.note ? `<div class="note">${esc(st.note)}</div>` : ''}
+  <button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 질문 화면 링크 공유</button>
   <div class="sec-l">${st.rankEmd ? `${esc(IND[S.ind].label)} 먼 읍면동 20곳` : `22개 시군 비교 · ${esc(IND[S.ind].label)}`}</div>${rk}`;
 }
 function rankHtml(indKey) {
@@ -1679,11 +1705,12 @@ function emdRankHtml(indKey) {
 const SQ = { q: '', sg: '', k: '', cond: '', n: 60 };
 function schoolRow(s) {
   const y = 4;
-  return `<li><button data-sch="${s.i}"><span class="dot" style="background:${KIND_COLOR[s.kind]}"></span><span><div class="sn">${esc(s.name)}</div><div class="sm">${esc(s.sigun)} ${esc(s.emd || '')}${s.branch ? ' · 분교' : ''}${s.bj ? ' · ' + esc(s.bj) : ''}${s.state ? ' · ' + esc(s.state) : ''}</div></span><span class="sv num">${fmt(s.stu[y])}명<small>${s.stu[0] ? sgn(pct(s.stu[0], s.stu[y]), 0) + '%' : '신설'}</small></span></button></li>`;
+  return `<li><button data-sch="${s.i}"><span class="dot" style="background:${KIND_COLOR[s.kind]}"></span><span><div class="sn">${esc(s.name)}</div><div class="sm">${s.riskN >= 3 ? '<b style="color:#E8391C">위험 신호 ' + s.riskN + '</b> · ' : ''}${esc(s.sigun)} ${esc(s.emd || '')}${s.branch ? ' · 분교' : ''}${s.bj ? ' · ' + esc(s.bj) : ''}${s.state ? ' · ' + esc(s.state) : ''}</div></span><span class="sv num">${fmt(s.stu[y])}명<small>${s.stu[0] ? sgn(pct(s.stu[0], s.stu[y]), 0) + '%' : '신설'}</small></span></button></li>`;
 }
 function searchResults() {
   const q = SQ.q.replace(/\s+/g, '');
   const conds = {
+    risk: (s) => s.riskN >= 3, below: (s) => s.pj && s.pj.below60,
     small: (s) => s.stu[4] !== null && s.stu[4] <= 60 && s.kind !== '특수학교', zero: (s) => s.entrants === 0 && s.kind !== '특수학교',
     bj: (s) => !!s.bj, branch: (s) => !!s.branch, sp: (s) => (s.spClass || 0) > 0, grow: (s) => s.stu[0] && s.stu[4] > s.stu[0],
   };
@@ -1695,7 +1722,7 @@ function renderSearch() {
     pbody.innerHTML = `<div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sq" type="search" placeholder="학교 이름, 읍면동, 시군" autocomplete="off" aria-label="학교 검색"></div>
     <div class="frow"><select class="sel" id="ssg" aria-label="시군"><option value="">시군 전체</option>${D.sigunNames.map((s) => `<option>${s}</option>`).join('')}</select>
     <select class="sel" id="sk" aria-label="학교급"><option value="">학교급 전체</option>${KIND_KEYS.slice(1).map((k) => `<option>${k}</option>`).join('')}</select>
-    <select class="sel" id="sc" aria-label="조건"><option value="">조건 없음</option><option value="small">60명 이하</option><option value="zero">신입생 0명</option><option value="bj">도서벽지</option><option value="branch">분교</option><option value="sp">특수학급 있음</option><option value="grow">5년간 학생 증가</option></select></div>
+    <select class="sel" id="sc" aria-label="조건"><option value="">조건 없음</option><option value="small">60명 이하</option><option value="zero">신입생 0명</option><option value="bj">도서벽지</option><option value="branch">분교</option><option value="sp">특수학급 있음</option><option value="grow">5년간 학생 증가</option><option value="risk">위험 신호 3개 이상</option><option value="below">5년 안 60명 아래로</option></select></div>
     <div class="count" id="scount"></div><ul class="slist" id="slist"></ul>`;
     const on = () => { SQ.q = $('#sq').value.trim(); SQ.sg = $('#ssg').value; SQ.k = $('#sk').value; SQ.cond = $('#sc').value; SQ.n = 60; renderSearch(); };
     $('#sq').addEventListener('input', on); ['#ssg', '#sk', '#sc'].forEach((id) => $(id).addEventListener('change', on));
@@ -1824,7 +1851,7 @@ function openSchool(i, fly = true) {
   loadNeis(s);
 }
 function forecastHtml(s) {
-  if (!s.pj) return `<div class="sec-l">5년 뒤 예측</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 예측하지 않습니다.</p>`;
+  if (!s.pj) return `<div class="sec-l">5년 뒤 예측</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 예측하지 않습니다.</p><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
   const all = [...s.stu, ...s.pj.stu], lab = FYEARS.map((y) => "'" + String(y).slice(2));
   const c31 = pct(s.stu[4], s.pj.stu[4]);
   const lines = [];
@@ -1832,10 +1859,12 @@ function forecastHtml(s) {
   if (s.pj.below60) lines.push(`<span class="warn">${s.pj.below60}년에 60명 아래로 내려갈 것으로 보입니다.</span>`);
   else if ((s.stu[4] || 0) <= 60) lines.push('지금도 60명 이하 작은학교입니다.');
   lines.push(`해마다 입학생: ${s.pj.g1.map((v, i) => `${2027 + i} <b class="num">${fmt(v)}</b>`).join(' · ')}명`);
+  if (s.pj.kids05 !== undefined) lines.push(`통학구역에 사는 0~5세 아이 약 <b class="num">${fmt(s.pj.kids05)}명</b> (앞으로 6년 동안 입학할 아이들, 사립·다른 학교 진학 포함)`);
   const sim = s.ze !== undefined || s.zm !== undefined;
   return `<div class="sec-l">5년 뒤 예측 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
   <p class="small muted">통학구역 안 아이 수로 추정한 값(${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}). 자료·방법 참고.</p></div>
-  ${sim ? `<button class="simbtn" data-sim="${s.i}">이 학교가 문을 닫으면? 통학 시뮬레이션</button>` : ''}<div id="simOut"></div>`;
+  ${sim ? `<button class="simbtn" data-sim="${s.i}">이 학교가 문을 닫으면? 통학 시뮬레이션</button>` : ''}<div id="simOut"></div>
+  <button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
 }
 function cmpRow(label, v, med, unit, d = 1) {
   if (v === null || med === null) return '';
@@ -1863,6 +1892,7 @@ function renderSchool() {
   </div>
   ${geoNote}
   ${s.ze !== undefined || s.zm !== undefined ? `<div class="zone-box"><span>통학구역 <b>${esc((s.zen || s.zmn || '').replace(/통학구역|학교군|중학구$/g, (m) => m))}</b><br><span class="muted small">면적 ${fmt(s.zea ?? s.zma, 1)}㎢ · 지도에 점선으로 표시</span></span></div>` : ''}
+  ${riskHtml(s)}
   ${forecastHtml(s)}
   <div class="sec-l">학생 수 2022~2026</div>${barsSvg(s.stu, YEARS.map(String), { color: KIND_COLOR[s.kind], unit: '명' })}
   ${nGr ? `<div class="sec-l">학년별 학생 (2026)</div>${barsSvg(s.g.slice(0, nGr), s.g.slice(0, nGr).map((_, i) => i + 1 + '학년'), { color: KIND_COLOR[s.kind], h: 70, unit: '명' })}` : ''}
@@ -2011,6 +2041,54 @@ function stopSim() {
   const o = $('#simOut'); if (o) o.innerHTML = '';
 }
 
+/* ---------- 통폐합 위험 신호 ----------
+   숫자로 확인되는 신호만 모은다(실제 통폐합 결정과는 다름) */
+function riskOf(s) {
+  if (s.kind === '특수학교' || s.kind === '고등학교' && !s.pj) {
+    const out = [];
+    if (s.kind === '고등학교') { if ((s.stu[4] || 0) <= 60) out.push('지금 학생 60명 이하'); if (s.entrants === 0) out.push('올해 신입생 0명'); }
+    return out;
+  }
+  const out = [];
+  if ((s.stu[4] || 0) <= 60) out.push(`지금 학생 ${fmt(s.stu[4])}명(60명 이하)`);
+  if (s.entrants === 0) out.push('2026학년도 신입생 0명');
+  if (s.pj) {
+    if (s.pj.below60) out.push(`${s.pj.below60}년 60명 아래로 내려갈 전망`);
+    if (s.pj.stu[4] <= 10) out.push(`2031년 약 ${fmt(s.pj.stu[4])}명(10명 이하) 전망`);
+    if (s.kind === '초등학교' && s.pj.g1.slice(0, 5).some((v) => v === 0)) out.push(`${2027 + s.pj.g1.findIndex((v) => v === 0)}년 입학생 0명 전망`);
+    if (s.pj.kids05 !== undefined && s.pj.kids05 < 12) out.push(`통학구역에 사는 0~5세 약 ${fmt(s.pj.kids05)}명`);
+  }
+  return out;
+}
+const riskLevel = (n) => (n >= 3 ? 'hi' : n >= 1 ? 'mid' : 'lo');
+function riskHtml(s) {
+  const r = riskOf(s), lv = riskLevel(r.length);
+  const label = { hi: '높음', mid: '주의', lo: '낮음' }[lv];
+  return `<div class="risk ${lv}"><div class="h">통폐합 위험 신호 <span class="lvl">${label} · ${r.length}개</span></div>
+  <ul>${r.length ? r.map((x) => `<li>${esc(x)}</li>`).join('') : '<li class="ok">숫자로 보이는 위험 신호가 없습니다</li>'}</ul>
+  <p>통계와 예측에서 뽑은 신호입니다. 실제 통폐합은 학부모 의견과 교육청 계획으로 정해집니다.</p></div>`;
+}
+
+/* ---------- 링크 공유: 지금 화면 그대로 ---------- */
+function shareUrl() {
+  syncHash();
+  const c = map.getCenter();
+  const p = new URLSearchParams(location.hash.slice(1));
+  p.set('c', [c.lng.toFixed(4), c.lat.toFixed(4), map.getZoom().toFixed(2), Math.round(map.getPitch()), Math.round(map.getBearing())].join(','));
+  if (S.view !== (MOBILE ? '2d' : 'bar')) p.set('v', S.view);
+  if (DARK) p.set('t', 'd');
+  if (isFuture() && S.fy !== 4) p.set('fy', FYEARS[S.fy]);
+  return location.origin + location.pathname + '#' + p.toString();
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2400); }
+async function share(title) {
+  const url = shareUrl();
+  const text = title || (S.school !== null ? D.schools[S.school].name + ' — 경북교육지도' : S.story ? S.story.q : '경북교육지도');
+  if (navigator.share && MOBILE) { try { await navigator.share({ title: text, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(url); toast('링크를 복사했습니다. 카톡이나 메신저에 붙여 넣으세요.'); }
+  catch (e) { prompt('이 주소를 복사하세요', url); }
+}
+
 /* ---------- 모바일 시트 ---------- */
 function openSheet() { if (!MOBILE) return; const p = $('#panel'); p.classList.remove('min'); document.body.classList.remove('sheet-min'); }
 // 손가락으로 밀기: 위로 → 한 단계 크게, 아래로 → 한 단계 작게
@@ -2131,6 +2209,9 @@ function readHash() {
   if (p.get('lv')) S.level = p.get('lv');
   if (p.get('k') && KIND_KEYS.includes(p.get('k'))) S.kind = p.get('k');
   if (p.get('y')) { const y = YEARS.indexOf(+p.get('y')); if (y >= 0) S.yi = y; }
+  if (p.get('fy')) { const y = FYEARS.indexOf(+p.get('fy')); if (y >= 0) S.fy = y; }
+  if (['bar', '3d', '2d'].includes(p.get('v'))) S.view = p.get('v');
+  if (p.get('t') === 'd') { DARK = true; document.body.classList.add('dark'); }
   return p;
 }
 
@@ -2179,6 +2260,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }
   if (t.id === 'tPrev') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); return; }
   if (t.id === 'btnTheme') { setTheme(!DARK); return; }
+  if (t.id === 'btnShare' || d.act === 'share') { share(); return; }
   if (t.id === 'btnAbout') { renderAbout(); $('#about').classList.add('on'); return; }
 });
 $('#about').addEventListener('click', (e) => { if (e.target.id === 'about') $('#about').classList.remove('on'); });
@@ -2196,10 +2278,13 @@ document.addEventListener('keydown', (e) => {
   initMap();
   // 지도 레이어가 준비되면(setupLayers 끝) 한 번 실행 — 'load' 이벤트 순서에 기대지 않는다
   routeInitial = () => {
-    if (p.get('s')) { const s = D.schools.find((x) => x.id === p.get('s') || x.name === p.get('s')); if (s) { setTab('s'); openSchool(s.i); } }
+    const cam = (p.get('c') || '').split(',').map(Number);
+    const hasCam = cam.length === 5 && cam.every(isFinite);
+    if (p.get('s')) { const s = D.schools.find((x) => x.id === p.get('s') || x.name === p.get('s')); if (s) { setTab('s'); openSchool(s.i, !hasCam); } }
     else if (p.get('sg') && D.stats.sigun[p.get('sg')]) openSigun(p.get('sg'));
-    else if (p.get('q')) openStory(p.get('q'));
+    else if (p.get('q')) { openStory(p.get('q'), !hasCam); if (p.get('fy') && isFuture()) setFutureYear(FYEARS.indexOf(+p.get('fy')), false); }
     else renderPanel();
+    if (hasCam) { map.stop(); map.jumpTo({ center: [cam[0], cam[1]], zoom: cam[2], pitch: cam[3], bearing: cam[4] }); }
   };
   if (layersReady) routeInitial();
   if (MOBILE) { $('#panel').classList.add('min'); document.body.classList.add('sheet-min'); }

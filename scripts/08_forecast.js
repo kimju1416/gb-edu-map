@@ -91,6 +91,8 @@ function projectElem(s) {
   return out;
 }
 for (const s of els) { const p = projectElem(s); s.pj = { stu: p.stu, g1: p.g1, how: s.ze !== undefined ? (s._r !== null ? 'zone' : 'zone-sg') : 'flat' }; s._g6 = p.g6; }
+// 학구 안 0~5세(앞으로 이 학교에 올 아이들), 공동학구는 올해 1학년 비중으로 나눔
+for (const s of els) if (s.ze !== undefined && zAgeE[s.ze]) s.pj.kids05 = Math.round(s._share * zAgeE[s.ze].slice(0, 6).reduce((x, y) => x + y, 0));
 
 /* ---------- 중학교 ---------- */
 const zonesM = rd('raw/zones_m.geojson').features;
