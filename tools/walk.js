@@ -1,0 +1,37 @@
+// 주요 화면을 차례로 눌러 보고 캡처 + 오류 수집
+const { chromium } = require('playwright-core');
+(async () => {
+  const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const errs = [];
+  const run = async (name, vp, fn, mobile) => {
+    const ctx = await b.newContext({ viewport: vp, deviceScaleFactor: 1, isMobile: !!mobile, hasTouch: !!mobile });
+    const p = await ctx.newPage();
+    p.on('pageerror', (e) => errs.push(name + ' PAGEERROR ' + e.message));
+    p.on('console', (m) => { if (m.type() === 'error') errs.push(name + ' console ' + m.text().slice(0, 200)); });
+    await p.goto('http://localhost:8795/');
+    await p.waitForFunction(() => document.querySelector('#loading.done'), null, { timeout: 30000 });
+    await p.waitForTimeout(2500);
+    await fn(p);
+    await p.screenshot({ path: `../work/w_${name}.png` });
+    await ctx.close();
+  };
+  const D = { width: 1440, height: 900 };
+  await run('story_zero', D, async (p) => { await p.click('[data-story=zero]'); await p.waitForTimeout(4000); });
+  await run('story_dist', D, async (p) => { await p.click('[data-story=distance]'); await p.waitForTimeout(4500); });
+  await run('story_closed', D, async (p) => { await p.click('[data-story=closed]'); await p.waitForTimeout(4000); });
+  await run('story_bj', D, async (p) => { await p.click('[data-story=bj]'); await p.waitForTimeout(4000); });
+  await run('school', D, async (p) => { await p.click('[data-tab=s]'); await p.fill('#sq', '양서초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(5500); });
+  await run('school_small', D, async (p) => { await p.click('[data-tab=s]'); await p.fill('#sq', '천부초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(5500); });
+  await run('sigun', D, async (p) => { await p.click('[data-tab=r]'); await p.waitForTimeout(500); await p.click('tr[data-sg="봉화군"]'); await p.waitForTimeout(4000); });
+  await run('flat_year', D, async (p) => { await p.click('[data-v="2d"]'); await p.waitForTimeout(1500); await p.click('.kpi[data-ind=students]'); await p.waitForTimeout(800); await p.click('.tl-bar[data-y="0"]'); await p.waitForTimeout(1500); await p.click('[data-k="초등학교"]'); await p.waitForTimeout(1500); });
+  await run('emd_back', D, async (p) => { await p.click('[data-tab=r]'); await p.waitForTimeout(500); await p.click('tr[data-sg="의성군"]'); await p.waitForTimeout(2500); await p.click('li[data-emd]'); await p.waitForTimeout(2500); await p.click('[data-act=close]'); await p.waitForTimeout(1500); });
+  await run('menu_mobile', { width: 390, height: 844 }, async (p) => { await p.click('#indBtn'); await p.waitForTimeout(600); }, true);
+  await run('special', D, async (p) => { await p.click('[data-story=special]'); await p.waitForTimeout(4000); });
+  await run('about', D, async (p) => { await p.click('#btnAbout'); await p.waitForTimeout(800); });
+  await run('tour', D, async (p) => { await p.click('#btnTour'); await p.waitForTimeout(6000); });
+  await run('mobile', { width: 390, height: 844 }, async (p) => { await p.waitForTimeout(1500); }, true);
+  await run('mobile_story', { width: 390, height: 844 }, async (p) => { await p.click('#handle'); await p.waitForTimeout(500); await p.click('[data-story=decline]'); await p.waitForTimeout(4000); }, true);
+  await run('mobile_school', { width: 390, height: 844 }, async (p) => { await p.click('#handle'); await p.click('[data-tab=s]'); await p.fill('#sq', '울릉초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(5000); }, true);
+  console.log(errs.length ? errs.join('\n') : '오류 없음');
+  await b.close();
+})();
