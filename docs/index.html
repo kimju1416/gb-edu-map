@@ -214,6 +214,26 @@ body.menu-open .legend{visibility:hidden}
 .gl-grid em{display:block;font-style:normal;font-size:12px;color:var(--pt);margin-top:5px;font-weight:600}
 .zone-box{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--pt-line);background:var(--pt-soft);border-radius:var(--r1);padding:9px 12px;font-size:13.5px;margin-top:12px}
 .zone-box b{font-weight:700}
+.tl-bar.pred i{background:repeating-linear-gradient(135deg,#D8D3C6 0 4px,#EFEBE2 4px 8px)}
+.tl-bar.pred[aria-pressed=true] i{background:repeating-linear-gradient(135deg,#23704A 0 4px,#5E9C7C 4px 8px)}
+.tl-bar.pred span::after{content:" 예측";font-size:10.5px;color:var(--tx-3)}
+.fc{border:1px solid var(--line);border-radius:var(--r2);padding:12px 14px;margin-top:4px;background:#FCFBF8}
+.fc p{margin:6px 0 0;font-size:14px;line-height:1.6}
+.fc .big{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.fc .warn{color:#8A3E14;font-weight:700}
+.simbtn{width:100%;height:46px;margin-top:12px;border-radius:var(--r1);border:1px solid #8A3E14;background:#FFF7F1;color:#8A3E14;font-weight:700;font-size:14.5px}
+.simbtn:hover{background:#8A3E14;color:#fff}
+.sim{border:2px solid #8A3E14;border-radius:var(--r2);padding:14px;margin-top:12px;background:#FFFCF9}
+.sim h4{margin:0 0 8px;font-size:15px;color:#8A3E14}
+.sim .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.sim .row3 div{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
+.sim .row3 b{display:block;font-size:18px}
+.sim .row3 small{font-size:11.5px;color:var(--tx-2)}
+.sim-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx-2);margin-top:6px}
+.sim-leg i{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,#2E8B57,#E3AE80,#B03A1A)}
+.simbar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:8;background:#8A3E14;color:#fff;border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--float);display:none;align-items:center;gap:12px}
+.simbar.on{display:flex}
+.simbar button{border:0;background:#fff;color:#8A3E14;border-radius:999px;padding:5px 12px;font-weight:700;font-size:12.5px}
 .ctl-r .tbtn{width:100%;justify-content:center;margin-top:8px}
 .kleg{display:flex;flex-wrap:wrap;gap:4px 10px;padding:2px 6px 4px;font-size:12px;color:var(--tx-2)}
 .kleg span{display:inline-flex;align-items:center;gap:5px}
@@ -330,7 +350,7 @@ body.touring #map{left:0}
   .ctl-r .row2{display:none}
   .readme{display:none}
   .gl-grid b{font-size:20px}
-  .legend{left:10px;top:calc(var(--top) + 94px);bottom:auto;width:200px;padding:7px 9px}
+  .legend{left:10px;top:calc(var(--top) + 112px);bottom:auto;width:200px;padding:7px 9px}
   .legend .t small{display:block;margin:1px 0 0}
   .legend .foot{display:none}
   .timeline{display:none}
@@ -408,6 +428,7 @@ body.touring #map{left:0}
 </div>
 
 <div class="tip" id="tip"></div>
+<div class="simbar" id="simbar"><span id="simbarTxt"></span><button id="simStop">시뮬레이션 끝내기</button></div>
 
 <div class="tour" id="tour" aria-live="polite">
   <div class="nav"><button id="tPrev">이전</button><button id="tNext">다음</button><button id="tStop">끝내기</button></div>
@@ -452,7 +473,7 @@ const median = (arr) => { const a = arr.filter((v) => v !== null && isFinite(v))
 let D = {};            // 자료
 let map;               // 지도
 const S = {            // 화면 상태
-  ind: 'change', level: 'sigun', kind: 'all', yi: 4,
+  ind: 'change', level: 'sigun', kind: 'all', yi: 4, fy: 4,
   view: MOBILE ? '2d' : 'bar', layers: { schools: true, closed: false, bj: false, rotate: false },
   tab: 'q', story: null, school: null, sigun: null, emd: null, filter: null,
 };
@@ -495,6 +516,12 @@ const IND = {
     emd: (e) => e.nearM, desc: '읍면동 대표점에서 가장 가까운 중학교까지 직선거리', kindless: true },
   nearH: { g: '통학 거리', hi: '고등학교가 먼 곳', label: '가까운 고등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearH, desc: '읍면동 대표점에서 가장 가까운 고등학교까지 직선거리', kindless: true },
+  pjStu: { g: '미래 학생', label: '초·중 학생 수(예측 포함)', unit: '명', ramp: 'green', future: true, yearly: false, lv: ['sigun'], d: 0, kindless: true, fixed: true,
+    sigun: (s) => s.pj[S.fy], hi: '학생이 많은 곳', desc: '2022~2026 실제, 2027~2032 예측(초·중, 지금 있는 학교 기준). 높이는 모든 해를 같은 눈금으로 그려 줄어드는 만큼 낮아집니다' },
+  pjChg: { g: '미래 학생', label: '5년 뒤 학생 변화(예측)', unit: '%', ramp: 'warm', invert: true, signed: true, yearly: false, lv: ['sigun'], d: 1, kindless: true,
+    sigun: (s) => s.pjChg, hi: '앞으로 많이 줄 곳', desc: '초·중 학생 2026 → 2031 예측 변화율' },
+  pjBelow: { g: '미래 학생', label: '2031년까지 60명 아래로', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
+    sigun: (s) => s.pjBelow, hi: '작은학교가 새로 많이 생길 곳', desc: '지금은 60명이 넘지만 2031년까지 60명 이하로 예측되는 초·중' },
   cohort: { g: '미래 학생', label: '입학생 전망', unit: '%', ramp: 'warm', invert: true, yearly: false, lv: ['sigun', 'emd'], d: 1, signed: true, kindless: true,
     sigun: (s) => s.cohort, emd: (e) => e.cohort, hi: '앞으로 입학생이 많이 줄 곳',
     desc: '0~2세 인구 ÷ 지금 초1~3 또래(6~8세) − 1. −30%면 몇 년 뒤 초등 입학생이 지금보다 약 30% 적다는 뜻(주민등록 기준, 6~8세 30명 미만 읍면동은 비움)' },
@@ -517,6 +544,11 @@ const yearlyNow = (k = S.ind) => IND[k].yearly && S.level === 'sigun';
 const kindlessNow = (k = S.ind) => IND[k].kindless || S.level === 'emd';
 const yearOf = () => (yearlyNow() ? S.yi : 4);
 const pitched = () => S.view !== '2d';
+const FYEARS = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032];
+const isFuture = () => !!IND[S.ind].future;
+const colIdx = () => (isFuture() ? S.fy : S.yi);
+// i: 0~4 실제, 5~10 예측(초·중만, 고·특수는 예측 없음 → null)
+const stuIdx = (s, i) => (i <= 4 ? s.stu[i] : s.pj ? s.pj.stu[i - 5] : null);
 const indUnit = (k = S.ind) => IND[k].unit;
 const fmtInd = (v, k = S.ind) => { const I = IND[k]; if (I.cat) return v; if (v === null || v === undefined) return '–'; return (I.signed ? sgn(v, I.d) : fmt(v, I.d)) + (I.unit === '%' ? '%' : ''); };
 const fmtIndU = (v, k = S.ind) => { const I = IND[k]; if (I.cat || v === null || v === undefined) return fmtInd(v, k); return fmtInd(v, k) + (I.unit && I.unit !== '%' ? I.unit : ''); };
@@ -666,6 +698,7 @@ function setupLayers() {
     'circle-stroke-color': ['match', ['get', 'use'], '대부', USE_STYLE.대부.stroke, '자체활용', USE_STYLE.자체활용.stroke, USE_STYLE.미활용.stroke], 'circle-pitch-alignment': 'map' } });
   map.addLayer({ id: 'sch-sel', type: 'circle', source: 'sch-pt', filter: ['==', ['get', 'i'], -1], paint: { 'circle-radius': 14, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#23704A', 'circle-stroke-width': 3, 'circle-pitch-alignment': 'map' } });
 
+  try { map.setLight({ anchor: 'viewport', color: '#FFFFFF', intensity: 0.42, position: [1.4, 205, 38] }); } catch (e) {}
   bindMapEvents();
   applyView(true);
   paint();
@@ -678,16 +711,16 @@ let layersReady = false, routeInitial = null;
 
 /* 학교 자료 → 지도 도형 */
 function schoolPoints() {
-  const y = S.yi;
-  return { type: 'FeatureCollection', features: D.schools.map((s) => ({ type: 'Feature', id: s.i, geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-    properties: { i: s.i, k: s.kind, n: shortName(s.name), r: s.stu[y] ? Math.max(2.2, Math.sqrt(s.stu[y]) * 0.3) : 0 } })) };
+  const y = colIdx();
+  return { type: 'FeatureCollection', features: D.schools.map((s) => { const v = stuIdx(s, y); return { type: 'Feature', id: s.i, geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
+    properties: { i: s.i, k: s.kind, n: shortName(s.name), r: v ? Math.max(2.2, Math.sqrt(v) * 0.3) : 0 } }; }) };
 }
 const shortName = (n) => n.replace('초등학교', '초').replace('중학교', '중').replace('고등학교', '고').replace(/분교장$/, '분교');
 function colHeight(stu) { return stu ? 170 * Math.sqrt(stu) + 250 : 0; }
-function schoolColumns(yF = S.yi, t = 1, yT = S.yi) {
+function schoolColumns(yF = colIdx(), t = 1, yT = colIdx()) {
   const R = 620;
   return { type: 'FeatureCollection', features: D.schools.map((s) => {
-    const hx = colHeight(s.stu[yF]), hy = colHeight(s.stu[yT]);
+    const hx = colHeight(stuIdx(s, yF)), hy = colHeight(stuIdx(s, yT));
     const h = hx + (hy - hx) * t;
     const dx = R / (111320 * Math.cos((s.lat * Math.PI) / 180)), dy = R / 110540;
     const ring = [];
@@ -707,6 +740,7 @@ function paint() {
   if (!I.lv.includes(S.level)) S.level = I.lv[0];
   const lv = S.level;
   // 연도 구분 없는 지표로 오면 학교 표시도 2026으로 맞춘다. 증감률은 2022(기준 연도)를 고를 수 없다
+  if (!I.future && S.fy !== 4) { S.fy = 4; }
   if ((!yearlyNow() && S.yi !== 4) || (S.ind === 'change' && S.yi === 0)) { const from = S.yi; S.yi = 4; if (map.getSource('sch-pt')) { animateColumns(from, 4, false); map.getSource('sch-pt').setData(schoolPoints()); applySchoolFilter(); } }
   $('#refdate').textContent = `${YEARS[yearOf()]}. 4. 1. 기준${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}`;
   curVals = valuesFor();
@@ -718,24 +752,26 @@ function paint() {
   map.setPaintProperty(lv + '-bar', 'fill-extrusion-color', expr);
   // 높이: 값을 0~1로 펴서(감소 지표는 뒤집어 많이 줄수록 높게) 시군 최대 4만 m, 읍면 2.4만 m
   const vals = Object.values(curVals).filter((v) => v !== null && isFinite(v));
-  const mn = Math.min(...vals), mx = Math.max(...vals);
+  let mn = Math.min(...vals), mx = Math.max(...vals);
+  if (I.fixed) { mn = 0; mx = Math.max(...D.sigunNames.map((sg) => Math.max(...SG()[sg].pj))); } // 모든 해 같은 눈금
   const top = lv === 'sigun' ? 26000 : 16000;
-  curH = {};
+  const target = {};
   const hp = [];
   for (const [k, v] of Object.entries(curVals)) {
     let t = 0;
     if (I.cat) t = { 인구감소지역: 1, 인구감소관심지역: 0.5 }[v] || 0.05;
     else if (v !== null && isFinite(v)) t = mx > mn ? (v - mn) / (mx - mn) : 0.5;
     if (I.invert && !I.cat && v !== null) t = 1 - t;
-    curH[k] = Math.round(1500 + t * top);
-    hp.push(k, curH[k]);
+    target[k] = Math.round(1500 + t * top);
   }
-  map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['match', ['get', lv === 'sigun' ? 'sigun' : 'code'], ...hp, 0] : 0);
-  const bar = S.view === 'bar';
+  tweenBars(lv, target);
+  const bar = S.view === 'bar' && !S.simFlat; // 시뮬레이션 중에는 벽을 눕혀 3D 곡선이 보이게
   // 값 입체는 시군 전체가 보이는 배율에서만. 크게 확대하면(9.6 이상) 평면 색칠로 바뀌어 학교가 보인다
   for (const l of ['sigun', 'emd']) { map.setLayerZoomRange(l + '-fill', bar ? BAR_MAXZ : 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ); }
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
+  if (S.simFlat) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
+  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.82);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
   renderReadme(); placeLabels();
@@ -745,7 +781,7 @@ function paint() {
 }
 function renderLegend() {
   const I = IND[S.ind], y = YEARS[yearOf()];
-  const yTxt = S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : I.g === '미래 학생' ? `${D.stats.meta.popMonth} 주민등록` : `${y}`;
+  const yTxt = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 예측' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 예측' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : I.g === '미래 학생' ? `${D.stats.meta.popMonth} 주민등록` : `${y}`;
   let h = `<div class="t">${esc(I.label)}<small>${esc(yTxt)} · ${S.level === 'sigun' ? '시군' : '읍면동(전체 학교)'}${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}</small></div>`;
   if (I.cat) {
     h += '<div class="lg-cat">' + Object.entries(I.colors).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k)}</span>`).join('') + '</div>';
@@ -765,6 +801,22 @@ function renderLegend() {
   }
   h += `<div class="foot">${esc(I.desc)}${S.level === 'emd' && S.ind === 'change' ? ' · 읍면동은 2022→2026 고정' : ''}${S.layers.closed ? `<br>폐교: ${useDot('대부')} 대부 ${useDot('자체활용')} 자체활용 ${useDot('미활용')} 미활용 (읍면 대표점 둘레)` : ''}</div>`;
   $('#legend').innerHTML = h;
+}
+// 값 입체 높이를 이전 값에서 새 값으로 0.7초 동안 옮긴다(처음엔 바닥에서 솟아오름)
+const barPrev = {}; let barRaf = 0;
+function tweenBars(lv, target) {
+  cancelAnimationFrame(barRaf);
+  const key = lv === 'sigun' ? 'sigun' : 'code', from = barPrev[lv] || {};
+  const set = (e) => {
+    const hp = []; curH = {};
+    for (const [k, v] of Object.entries(target)) { const h = Math.round((from[k] ?? 0) + (v - (from[k] ?? 0)) * e); curH[k] = h; hp.push(k, h); }
+    map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['match', ['get', key], ...hp, 0] : 0);
+    placeLabels();
+  };
+  if (S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches) { set(1); barPrev[lv] = target; return; }
+  const t0 = performance.now(), dur = barPrev[lv] ? 700 : 1400;
+  const step = (now) => { const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3); set(e); if (t < 1) barRaf = requestAnimationFrame(step); else barPrev[lv] = target; };
+  barRaf = requestAnimationFrame(step);
 }
 let labelMarkers = [];
 // 값 입체에서는 이름표를 기둥 꼭대기 높이만큼 화면 위로 올린다
@@ -803,7 +855,7 @@ function updateLabels() {
 function renderReadme() {
   const I = IND[S.ind], y = YEARS[yearOf()];
   const unit = S.level === 'sigun' ? '시군' : '읍면동';
-  const when = S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
+  const when = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 예측' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 예측' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
   const how = S.view === 'bar' ? '높이·색' : '색';
   const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
   $('#readme').innerHTML = `<b>${how}</b> = ${unit}별 ${esc(I.label)}${when ? ' (' + esc(when) + ')' : ''} · ${S.view === 'bar' ? '높고 ' : ''}진할수록 ${esc(hi.replace('높을수록 ', ''))}${S.view === '3d' ? ' · 산 높이는 실제의 2.8배' + (S.layers.schools ? ' · 기둥 = 학교(높이 = 학생 수)' : '') : ''}`;
@@ -846,6 +898,7 @@ function renderKinds() {
 /* ---------- 연도 막대 ---------- */
 function renderTimeline() {
   const I = IND[S.ind];
+  if (I.future) return renderFutureTimeline();
   const tk = S.kind === 'all' || kindlessNow() ? 'all' : S.kind;
   const yr = yearlyNow();
   const tot = D.stats.total[tk];
@@ -860,6 +913,20 @@ function renderTimeline() {
   const ch = pct(series[0], series[y]);
   $('#tlInfo').innerHTML = `<div class="a">${YEARS[y]}년 경북 ${tk === 'all' ? '' : KIND_SHORT[tk] + ' '}학생</div><div class="b num">${fmt(series[y])}명</div><div class="c">${y ? `2022년보다 ${sgn(ch)}%` : "기준 연도"}${yr ? "" : " · 지표는 2026"}</div>`;
   $('#play').disabled = !yr; $('#play').style.opacity = yr ? 1 : 0.4;
+}
+function renderFutureTimeline() {
+  const T = D.stats.pjTotal, mx = Math.max(...T.stu);
+  $('#tlBars').innerHTML = FYEARS.map((yr, i) => `<button class="tl-bar${i > 4 ? ' pred' : ''}" data-fy="${i}" aria-pressed="${i === S.fy}" title="${yr}년 경북 초·중 학생 ${i > 4 ? '(예측) ' : ''}${fmt(T.stu[i])}명"><b class="num">${fmt(T.stu[i] / 10000, 1)}만</b><i style="height:${Math.round((T.stu[i] / mx) * 22)}px"></i><span>${yr}</span></button>`).join('');
+  const ch = pct(T.stu[4], T.stu[S.fy]);
+  $('#tlInfo').innerHTML = `<div class="a">${FYEARS[S.fy]}년 경북 초·중 학생${S.fy > 4 ? ' (예측)' : ''}</div><div class="b num">${fmt(T.stu[S.fy])}명</div><div class="c">${S.fy === 4 ? '기준 2026' : `2026년보다 ${sgn(ch)}%`}</div>`;
+  $('#play').disabled = false; $('#play').style.opacity = 1;
+}
+function setFutureYear(i, animate = true) {
+  const from = S.fy; S.fy = i;
+  paint();
+  animateColumns(from, i, animate);
+  map.getSource('sch-pt').setData(schoolPoints());
+  if (S.story) renderPanel();
 }
 let playTimer = null;
 function setYear(i, animate = true) {
@@ -886,6 +953,12 @@ function animateColumns(from, to, animate) {
 }
 function togglePlay() {
   if (playTimer) { stopPlay(); return; }
+  if (isFuture()) {
+    let i = 0; setFutureYear(0);
+    $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+    playTimer = setInterval(() => { i++; if (i > 10) { stopPlay(); return; } setFutureYear(i); }, 1000);
+    return;
+  }
   let i = S.ind === 'change' ? 1 : 0; setYear(i);
   $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
   playTimer = setInterval(() => { i++; if (i > 4) { stopPlay(); return; } setYear(i); }, 1300);
@@ -1048,6 +1121,7 @@ function goHome() { map.flyTo({ ...(pitched() ? HOME : HOME2D), duration: 1400 }
    ========================================================= */
 const pbody = $('#pbody');
 function setTab(t) {
+  stopSim();
   S.tab = t; S.story = null; S.school = null; S.sigun = null; S.emd = null; S.closedSel = null;
   setFilter(null); S.layers.closed = false; if (map) applyView(true);
   $$('.ptab').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
@@ -1071,7 +1145,7 @@ const T = () => D.stats.total.all;
 const SG = () => D.stats.sigun;
 const topN = (fn, n = 3, asc = false) => D.sigunNames.map((sg) => [sg, fn(SG()[sg])]).filter(([, v]) => v !== null && isFinite(v)).sort((a, b) => (asc ? a[1] - b[1] : b[1] - a[1])).slice(0, n);
 const STORIES = [
-  { id: 'decline', g: '지역소멸과 작은학교', q: '학생이 줄어드는 지역의 학교는 어떤 상황인가?', s: '22개 시군의 5년 학생 수 변화', ind: 'change', chips: ['change', 'decline', 'smallShare', 'zero'],
+  { id: 'decline', g: '지난 5년', q: '학생이 줄어드는 지역의 학교는 어떤 상황인가?', s: '22개 시군의 5년 학생 수 변화', ind: 'change', chips: ['change', 'decline', 'smallShare', 'zero'],
     cam: { pitch: 55, bearing: -18 },
     hero: () => ({ l: '학생 수 2022→2026 증감률', v: `경북 전체 ${sgn(pct(T()[0].students, T()[4].students))}%`, d: `${fmt(T()[0].students)}명 → ${fmt(T()[4].students)}명` }),
     body: () => {
@@ -1083,7 +1157,20 @@ const STORIES = [
       return `<p>4년 사이 경북 학생이 <b>${fmt(T()[0].students - T()[4].students)}명</b> 줄었습니다. 22개 시군 가운데 학생이 늘어난 곳은 ${up.length ? `<b>${esc(up.join(', '))}</b>` : '<b>한 곳도 없습니다</b>'}.</p>
       <p>가장 많이 줄어든 곳은 ${t.map(([sg, v]) => `<b>${sg}(${sgn(v)}%)</b>`).join(', ')}입니다. 인구감소지역 15곳을 합치면 <b>${sgn(dAvg)}%</b>, 나머지 7곳은 <b>${sgn(nAvg)}%</b>로 감소 속도가 달랐습니다.</p>`;
     }, note: '같은 기간의 재학생 수 변화입니다. 미래 인구 예측이나 정책 효과를 뜻하지 않습니다.', rank: 'change' },
-  { id: 'future', g: '지역소멸과 작은학교', q: '몇 년 뒤 초등 입학생은 얼마나 줄어들까?', s: '0~2세와 지금 초1~3 또래 비교', ind: 'cohort', chips: ['cohort', 'k05', 'kidShare'],
+  { id: 'forecast', g: '앞으로 5년', q: '우리 학교는 5년 뒤 몇 명일까?', s: '2032년까지 학교별 학생 수 예측 · ▶로 재생', ind: 'pjStu', chips: ['pjStu', 'pjChg', 'pjBelow'], play: true,
+    filter: { label: '60명 아래로 내려갈 학교', fn: (s) => s.pj && s.pj.below60 && s.pj.below60 <= 2031 },
+    cam: { pitch: 58, bearing: -16 },
+    hero: () => { const T = D.stats.pjTotal; return { l: '경북 초·중 학생 2026 → 2031 (예측)', v: `${sgn(pct(T.stu[4], T.stu[9]))}%`, d: `${fmt(T.stu[4])}명 → 약 ${fmt(Math.round(T.stu[9] / 100) * 100)}명` }; },
+    body: () => {
+      const T = D.stats.pjTotal;
+      const list = D.schools.filter((s) => s.pj && s.pj.below60 && s.pj.below60 <= 2031).sort((a, b) => a.pj.below60 - b.pj.below60 || b.stu[4] - a.stu[4]);
+      const t = topN((s) => s.pjChg, 3, true);
+      return `<p>아래 ▶를 누르면 2022년부터 2032년까지 시군 기둥이 줄어드는 모습을 볼 수 있습니다. 2027년부터는 예측입니다.</p>
+      <p>지금 학생 60명 이하 학교는 ${fmt(T.small2026)}곳인데, 2031년에는 <b>약 ${fmt(T.small2031)}곳</b>으로 늘어날 것으로 보입니다. 지금은 60명이 넘지만 5년 안에 60명 아래로 내려갈 학교가 <b>${list.length}곳</b>입니다.</p>
+      <p>가장 많이 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다. 학교를 누르면 해마다의 예측과 통폐합 시뮬레이션을 볼 수 있습니다.</p>
+      <div class="sec-l">5년 안에 60명 아래로 내려갈 학교</div><ul class="slist">${list.map((s) => schoolRow(s).replace('</span></button>', `</span></button>`)).join('')}</ul>`;
+    }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 예측입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했고, 고등·특수학교는 예측하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
+  { id: 'future', g: '앞으로 5년', q: '몇 년 뒤 초등 입학생은 얼마나 줄어들까?', s: '0~2세와 지금 초1~3 또래 비교', ind: 'cohort', chips: ['cohort', 'k05', 'kidShare'],
     cam: { pitch: 55, bearing: -10 },
     hero: () => { const p = D.stats.popTotal; return { l: '경북 0~2세 ÷ 6~8세 (주민등록)', v: `${sgn(p.cohort)}%`, d: `0~2세 ${fmt(p.a0)}명 · 6~8세 ${fmt(p.a6)}명 · ${D.stats.meta.popMonth} 기준` }; },
     body: () => {
@@ -1093,7 +1180,7 @@ const STORIES = [
       <p>가장 크게 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다.${up.length ? ` 반대로 ${esc(up.join(', '))}은 아이가 조금 늘었습니다.` : ''}</p>
       <p class="muted small">읍면동으로 바꾸면 우리 학교 주변 동네의 아이 수를 볼 수 있습니다.</p>`;
     }, note: '주민등록 인구 기준 단순 비교입니다. 전입·전출, 사립·특수학교 진학, 조기·유예 입학은 반영하지 않았습니다.', rank: 'cohort' },
-  { id: 'small', g: '지역소멸과 작은학교', q: '학생 60명 이하 작은학교는 어디에 몰려 있나?', s: '소규모학교 비율과 위치', ind: 'smallShare', chips: ['smallShare', 'small', 'ruralShare'],
+  { id: 'small', g: '지난 5년', q: '학생 60명 이하 작은학교는 어디에 몰려 있나?', s: '소규모학교 비율과 위치', ind: 'smallShare', chips: ['smallShare', 'small', 'ruralShare'],
     filter: { label: '60명 이하 학교', fn: (s) => s.stu[S.yi] !== null && s.stu[S.yi] <= 60 && s.kind !== '특수학교' },
     cam: { pitch: 58, bearing: 10, b: [[127.85, 35.9], [129.6, 37.15]] },
     hero: () => ({ l: '학생 60명 이하 학교 (2026)', v: `${fmt(T()[4].small)}곳 <small>/ ${fmt(T()[4].smallShare, 1)}%</small>`, d: `2022년 ${fmt(T()[0].small)}곳 (${fmt(T()[0].smallShare, 1)}%)` }),
@@ -1105,7 +1192,7 @@ const STORIES = [
       <p>비율이 가장 높은 곳은 ${t.map(([sg, v]) => `<b>${sg}(${fmt(v, 1)}%)</b>`).join(', ')}입니다. 학생이 <b>10명 이하</b>인 학교도 <b>${tiny.length}곳</b> 있습니다.</p>
       <p class="muted small">지도에는 60명 이하 학교만 진하게 표시했습니다.</p>`;
     }, note: '소규모학교 기준은 교육부 적정규모 권고 기준 가운데 면·도서벽지 기준(60명 이하)을 모든 지역에 똑같이 적용했습니다.', rank: 'smallShare' },
-  { id: 'zero', g: '지역소멸과 작은학교', q: '올해 신입생이 한 명도 없는 학교는?', s: '2026학년도 입학자 0명', ind: 'zero', chips: ['zero', 'small'],
+  { id: 'zero', g: '지난 5년', q: '올해 신입생이 한 명도 없는 학교는?', s: '2026학년도 입학자 0명', ind: 'zero', chips: ['zero', 'small'],
     filter: { label: '신입생 0명', fn: (s) => s.kind !== '특수학교' && s.entrants === 0 },
     cam: { pitch: 56, bearing: -25 },
     hero: () => ({ l: '신입생 0명 학교 (2026)', v: `${fmt(T()[4].zero)}곳`, d: `2022년 ${fmt(T()[0].zero)}곳` }),
@@ -1185,7 +1272,8 @@ const STORIES = [
 ];
 function renderQList() {
   const groups = {};
-  STORIES.forEach((s, i) => (groups[s.g] ||= []).push([s, i]));
+  const order = ['앞으로 5년', '지난 5년'];
+  [...STORIES].map((s, i) => [s, i]).sort((a, b) => ((order.indexOf(a[0].g) + 1 || 9) - (order.indexOf(b[0].g) + 1 || 9)) || a[1] - b[1]).forEach(([s], n) => (groups[s.g] ||= []).push([s, n]));
   const t0 = T()[0], t4 = T()[4], p = D.stats.popTotal;
   const up = D.sigunNames.filter((sg) => SG()[sg].all[4].students > SG()[sg].all[0].students).length;
   const far = Object.values(D.stats.emd).filter((e) => e.nearM >= 10).length;
@@ -1193,7 +1281,7 @@ function renderQList() {
   <p class="why">경북 초·중·고·특수학교 ${fmt(D.schools.length)}곳의 5년 공식 통계와 주민등록 인구를 한 지도에 모았습니다. 학교를 옮기거나, 지역 교육 여건을 설명하거나, 우리 학교의 몇 년 뒤를 가늠할 때 쓰세요.</p>
   <div class="gl-grid">
     <button data-story="decline"><b class="num">${sgn(pct(t0.students, t4.students))}%</b><span>4년 새 학생 ${fmt(t0.students - t4.students)}명 감소. 22개 시군 중 ${up ? up + '곳만 증가' : '늘어난 곳 없음'}</span><em>어디가 많이 줄었나 →</em></button>
-    <button data-story="future"><b class="num">${sgn(p.cohort)}%</b><span>0~2세가 지금 초1~3 또래보다 이만큼 적음. 입학생은 더 줄어듭니다</span><em>몇 년 뒤 우리 동네는 →</em></button>
+    <button data-story="forecast"><b class="num">${sgn(pct(D.stats.pjTotal.stu[4], D.stats.pjTotal.stu[9]))}%</b><span>2031년 초·중 학생 예측. 지금 60명 넘는 학교 중 ${D.stats.pjTotal.below}곳이 60명 아래로</span><em>우리 학교 5년 뒤 →</em></button>
     <button data-story="small"><b class="num">${fmt(t4.small)}곳</b><span>학생 60명 이하 학교. 경북 학교 ${fmt(t4.smallShare, 0)}%, 신입생 0명 학교 ${fmt(t4.zero)}곳</span><em>작은학교는 어디에 →</em></button>
     <button data-story="mountain"><b class="num g">${D.schools.filter((x) => x.alt !== null && x.alt >= 300).length}곳</b><span>해발 300m 넘는 산골 학교. 학생 중앙값 ${fmt(median(D.schools.filter((x) => x.alt !== null && x.alt >= 300).map((x) => x.stu[4])))}명 · 중학교 10km 넘는 읍면동 ${far}곳</span><em>지형으로 보기 →</em></button>
   </div></section>` +
@@ -1215,6 +1303,7 @@ function openStory(id, fly = true) {
   map.getSource('sch-col').setData(schoolColumns(S.yi, 1, S.yi));
   map.getSource('sch-pt').setData(schoolPoints());
   if (fly) map.flyTo({ ...storyCam(st), duration: 1800, essential: true });
+  if (st.play && !touring) { S.fy = 4; setTimeout(() => { if (S.story === st && !playTimer) togglePlay(); }, 2000); }
   renderPanel(); pbody.scrollTop = 0;
 }
 function renderStory() {
@@ -1300,12 +1389,13 @@ function openSigun(sg) {
   map.setFilter('sel-line', ['==', ['get', 'sigun'], sg]);
   flySigun(sg); openSheet(); renderPanel(); pbody.scrollTop = 0; syncHash();
 }
-function barsSvg(vals, labels, { w = 360, h = 120, color = '#23704A', unit = '' } = {}) {
+function barsSvg(vals, labels, { w = 360, h = 120, color = '#23704A', unit = '', predFrom = 99 } = {}) {
   const mx = Math.max(...vals.map((v) => v || 0)) || 1;
   const bw = (w - 8) / vals.length, pad = 18;
   return `<svg class="chart" viewBox="0 0 ${w} ${h + pad + 16}" width="100%" role="img" aria-label="${labels.map((l, i) => `${l} ${fmt(vals[i])}${unit}`).join(', ')}">
   <line x1="0" x2="${w}" y1="${h + pad}" y2="${h + pad}" stroke="#D6D1C4"/>
-  ${vals.map((v, i) => { const bh = v ? Math.max(2, (v / mx) * h) : 0; const x = 4 + i * bw + bw * 0.2; return `<g><title>${labels[i]}: ${fmt(v)}${unit}</title><rect x="${x}" y="${h + pad - bh}" width="${bw * 0.6}" height="${bh}" rx="4" fill="${i === vals.length - 1 ? color : '#CFC9BB'}"/><text x="${x + bw * 0.3}" y="${h + pad - bh - 5}" text-anchor="middle" font-size="11.5" fill="#5D665F" font-weight="600">${v === null ? '–' : fmt(v)}</text><text x="${x + bw * 0.3}" y="${h + pad + 13}" text-anchor="middle" font-size="11.5" fill="#5D665F">${labels[i]}</text></g>`; }).join('')}</svg>`;
+  <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#F3EFE6"/><rect width="2.2" height="5" fill="${color}" opacity=".55"/></pattern></defs>
+  ${vals.map((v, i) => { const bh = v ? Math.max(2, (v / mx) * h) : 0; const x = 4 + i * bw + bw * 0.2; const pred = i >= predFrom; return `<g><title>${labels[i]}${pred ? ' 예측' : ''}: ${fmt(v)}${unit}</title><rect x="${x}" y="${h + pad - bh}" width="${bw * 0.6}" height="${bh}" rx="3" fill="${pred ? 'url(#hatch)' : predFrom < 99 && i === predFrom - 1 ? color : i === vals.length - 1 && predFrom === 99 ? color : '#CFC9BB'}"/><text x="${x + bw * 0.3}" y="${h + pad - bh - 5}" text-anchor="middle" font-size="${vals.length > 8 ? 9.5 : 11.5}" fill="#5D665F" font-weight="600">${v === null ? '–' : fmt(v)}</text><text x="${x + bw * 0.3}" y="${h + pad + 13}" text-anchor="middle" font-size="${vals.length > 8 ? 10 : 11.5}" fill="${pred ? '#8A918A' : '#5D665F'}">${labels[i]}</text></g>`; }).join('')}</svg>`;
 }
 function renderSigun() {
   const sg = S.sigun, s = SG()[sg], a = s.all;
@@ -1395,6 +1485,20 @@ function openSchool(i, fly = true) {
   openSheet(); renderPanel(); pbody.scrollTop = 0; syncHash();
   loadNeis(s);
 }
+function forecastHtml(s) {
+  if (!s.pj) return `<div class="sec-l">5년 뒤 예측</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 예측하지 않습니다.</p>`;
+  const all = [...s.stu, ...s.pj.stu], lab = FYEARS.map((y) => "'" + String(y).slice(2));
+  const c31 = pct(s.stu[4], s.pj.stu[4]);
+  const lines = [];
+  lines.push(`2031년 약 <span class="big num">${fmt(s.pj.stu[4])}명</span> <span class="${c31 <= -20 ? 'warn' : ''}">(${sgn(c31, 0)}%)</span>`);
+  if (s.pj.below60) lines.push(`<span class="warn">${s.pj.below60}년에 60명 아래로 내려갈 것으로 보입니다.</span>`);
+  else if ((s.stu[4] || 0) <= 60) lines.push('지금도 60명 이하 작은학교입니다.');
+  lines.push(`해마다 입학생: ${s.pj.g1.map((v, i) => `${2027 + i} <b class="num">${fmt(v)}</b>`).join(' · ')}명`);
+  const sim = s.ze !== undefined || s.zm !== undefined;
+  return `<div class="sec-l">5년 뒤 예측 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
+  <p class="small muted">통학구역 안 아이 수로 추정한 값(${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}). 자료·방법 참고.</p></div>
+  ${sim ? `<button class="simbtn" data-sim="${s.i}">이 학교가 문을 닫으면? 통학 시뮬레이션</button>` : ''}<div id="simOut"></div>`;
+}
 function cmpRow(label, v, med, unit, d = 1) {
   if (v === null || med === null) return '';
   const lo = Math.min(v, med) * 0.6, hi = Math.max(v, med) * 1.25 || 1;
@@ -1421,6 +1525,7 @@ function renderSchool() {
   </div>
   ${geoNote}
   ${s.ze !== undefined || s.zm !== undefined ? `<div class="zone-box"><span>통학구역 <b>${esc((s.zen || s.zmn || '').replace(/통학구역|학교군|중학구$/g, (m) => m))}</b><br><span class="muted small">면적 ${fmt(s.zea ?? s.zma, 1)}㎢ · 지도에 점선으로 표시</span></span></div>` : ''}
+  ${forecastHtml(s)}
   <div class="sec-l">학생 수 2022~2026</div>${barsSvg(s.stu, YEARS.map(String), { color: KIND_COLOR[s.kind], unit: '명' })}
   ${nGr ? `<div class="sec-l">학년별 학생 (2026)</div>${barsSvg(s.g.slice(0, nGr), s.g.slice(0, nGr).map((_, i) => i + 1 + '학년'), { color: KIND_COLOR[s.kind], h: 70, unit: '명' })}` : ''}
   <div class="sec-l">경북 ${esc(KIND_SHORT[s.kind])} 중앙값과 비교 <span style="font-weight:400">(세로선 = 중앙값)</span></div>
@@ -1469,6 +1574,105 @@ async function loadNeis(s) {
   }
 }
 
+/* ---------- 통폐합 시뮬레이션 ----------
+   학구 안을 격자로 나누고, 칸마다 읍면동 아이 수를 면적 비율로 나눠 싣는다.
+   그 아이들이 이 학교 대신 가장 가까운 다른 같은 급 학교로 간다고 보고 직선거리를 비교한다. */
+let deckReady = null, deckOverlay = null, simState = null, simRaf = 0;
+function loadDeck() {
+  deckReady ||= new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/deck.gl@9.4.0/dist.min.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+  return deckReady;
+}
+const EMD_AREA = {};
+function emdIndex() {
+  if (D.emdIdx) return D.emdIdx;
+  D.emdIdx = D.emdGeo.features.map((f) => { const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates; const b = bboxOf(f.geometry); return { code: f.properties.code, polys, b }; });
+  return D.emdIdx;
+}
+const inPoly = (p, polys) => polys.some((pl) => inRing(p, pl[0]) && !pl.slice(1).some((h) => inRing(p, h)));
+const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1); return w + (c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? a : b); };
+function kmDist(a, b) { const R = 6371, dLat = ((b[1] - a[1]) * Math.PI) / 180, dLon = ((b[0] - a[0]) * Math.PI) / 180; const h = Math.sin(dLat / 2) ** 2 + Math.cos((a[1] * Math.PI) / 180) * Math.cos((b[1] * Math.PI) / 180) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+async function runSim(i) {
+  const s = D.schools[i];
+  const lv = s.ze !== undefined ? 'e' : 'm', zi = s.ze !== undefined ? s.ze : s.zm;
+  $('#simOut').innerHTML = '<p class="skel">계산하는 중…</p>';
+  zoneCache[lv] ||= await fetch(`data/zones_${lv}.geojson`).then((r) => r.json());
+  const zone = zoneCache[lv].features[zi];
+  const zp = zone.geometry.type === 'Polygon' ? [zone.geometry.coordinates] : zone.geometry.coordinates;
+  const [[x0, y0], [x1, y1]] = bboxOf(zone.geometry);
+  // 격자 간격: 학구 크기에 맞춰 칸이 200~400개가 되게
+  const km2 = (s.zea ?? s.zma ?? 20) || 20, step = Math.max(0.25, Math.sqrt(km2 / 300));
+  const dx = step / (111.32 * Math.cos((s.lat * Math.PI) / 180)), dy = step / 110.54;
+  const idx = emdIndex(), pts = [];
+  for (let x = x0 + dx / 2; x < x1; x += dx) for (let y = y0 + dy / 2; y < y1; y += dy) {
+    const p = [x, y]; if (!inPoly(p, zp)) continue;
+    const e = idx.find((m) => p[0] >= m.b[0][0] && p[0] <= m.b[1][0] && p[1] >= m.b[0][1] && p[1] <= m.b[1][1] && inPoly(p, m.polys));
+    if (!e) continue; pts.push({ p, code: e.code });
+  }
+  if (!pts.length) { $('#simOut').innerHTML = '<p class="skel">학구가 너무 작아 계산하지 못했습니다.</p>'; return; }
+  // 읍면동별 격자 수로 아이 수를 나눠 싣는다(초: 6~11세, 중: 12~14세)
+  const cnt = {}; pts.forEach((q) => (cnt[q.code] = (cnt[q.code] || 0) + 1));
+  const kids = (e) => (lv === 'e' ? e.k611 : Math.max(0, (e.k014 || 0) - (e.k611 || 0) - (e.k05 || 0)));
+  // 읍면동 전체 격자 수(학구 밖 포함)는 모르므로 면적 비율로: 칸 면적 / 읍면동 면적
+  const cellKm2 = step * step;
+  pts.forEach((q) => { const e = D.stats.emd[q.code]; const area = EMD_AREA[q.code] ||= (() => { const f = D.emdGeo.features.find((g) => g.properties.code === q.code); const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates; return polys.reduce((a, pl) => a + Math.abs(ringArea(pl[0])), 0) * 111.32 * 110.54 * Math.cos((e.cy * Math.PI) / 180); })(); q.w = (kids(e) * cellKm2) / area; });
+  const others = D.schools.filter((x) => x.kind === s.kind && x !== s && !x.state && !x.branch);
+  let W = 0, before = 0, after = 0, far = 0, maxAfter = 0; const recv = {};
+  pts.forEach((q) => {
+    q.d0 = kmDist(q.p, [s.lon, s.lat]);
+    let best = null; for (const o of others) { const d = kmDist(q.p, [o.lon, o.lat]); if (!best || d < best.d) best = { d, o }; }
+    q.d1 = best.d; q.to = best.o;
+    W += q.w; before += q.w * q.d0; after += q.w * q.d1; if (q.d1 >= 10) far += q.w; maxAfter = Math.max(maxAfter, q.d1);
+    (recv[best.o.i] ||= { o: best.o, w: 0 }).w += q.w;
+  });
+  const rv = Object.values(recv).sort((a, b) => b.w - a.w);
+  const cur = s.stu[4] || 0, main = rv[0];
+  simState = { s, pts, rv, lv };
+  const share = (r) => (W ? r.w / W : 0);
+  $('#simOut').innerHTML = `<div class="sim"><h4>${esc(josa(s.name, '이', '가'))} 문을 닫으면</h4>
+    <p class="small" style="margin:0">학구 안 ${lv === 'e' ? '6~11세' : '12~14세'} 아이 약 <b>${fmt(W)}명</b>이 가장 가까운 다른 ${esc(s.kind)}로 간다고 보고 계산했습니다.</p>
+    <div class="row3"><div><small>지금 평균 거리</small><b class="num">${fmt(before / W, 1)}km</b></div><div><small>통합 뒤 평균</small><b class="num" style="color:#8A3E14">${fmt(after / W, 1)}km</b></div><div><small>가장 먼 집</small><b class="num">${fmt(maxAfter, 1)}km</b></div></div>
+    <p class="small" style="margin:4px 0">10km 넘게 다녀야 하는 아이: <b>약 ${fmt(far)}명(${fmt((far / W) * 100, 0)}%)</b></p>
+    <div class="sec-l" style="margin-top:12px">받게 되는 학교</div>
+    <ul class="slist">${rv.slice(0, 4).map((r) => `<li><button data-sch="${r.o.i}"><span class="dot" style="background:${KIND_COLOR[r.o.kind]}"></span><span><div class="sn">${esc(r.o.name)}</div><div class="sm">${esc(r.o.sigun)} ${esc(r.o.emd || '')} · 지금 ${fmt(r.o.stu[4])}명</div></span><span class="sv num">+${fmt(cur * share(r))}명<small>${fmt(share(r) * 100, 0)}%</small></span></button></li>`).join('')}</ul>
+    <p class="small muted">+명은 이 학교 지금 학생 ${fmt(cur)}명을 거리 비율로 나눈 값. 직선거리라 실제 통학 거리는 더 깁니다. 지도에서 선의 높이·색이 거리입니다.</p>
+    <div class="sim-leg">가까움 <i></i> 10km 이상</div></div>`;
+  $('#simbarTxt').textContent = `${s.name} 통합 시뮬레이션 · 평균 ${fmt(before / W, 1)}km → ${fmt(after / W, 1)}km`;
+  $('#simbar').classList.add('on');
+  // 지형 보기에서는 3D 선이 땅에 맞지 않으므로 값 입체로 바꾼다
+  if (S.view === '3d') { S.view = 'bar'; applyView(); }
+  S.simFlat = true; paint();
+  const all = [[s.lon, s.lat], ...pts.map((q) => q.p), ...rv.slice(0, 3).map((r) => [r.o.lon, r.o.lat])];
+  const xs = all.map((p) => p[0]), ys = all.map((p) => p[1]);
+  const cam = map.cameraForBounds([[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)]], { padding: padding(), pitch: 55, bearing: map.getBearing() });
+  map.flyTo({ ...cam, pitch: 55, duration: 1600 });
+  try { await loadDeck(); } catch (e) { return; }
+  if (!deckOverlay) { deckOverlay = new deck.MapboxOverlay({ interleaved: false, layers: [] }); map.addControl(deckOverlay); }
+  const color = (d) => { const t = Math.min(1, d / 10); const a = [46, 139, 87], b = [227, 174, 128], c = [176, 58, 26]; const m = t < 0.5 ? [a, b, t * 2] : [b, c, (t - 0.5) * 2]; return m[0].map((v, k) => Math.round(v + (m[1][k] - v) * m[2])); };
+  const wmax = Math.max(...pts.map((q) => q.w));
+  const t0 = performance.now();
+  cancelAnimationFrame(simRaf);
+  const frame = (now) => {
+    const t = Math.min(1, (now - t0) / 1600), e = 1 - Math.pow(1 - t, 3);
+    deckOverlay.setProps({ layers: [
+      new deck.ScatterplotLayer({ id: 'sim-home', data: pts, getPosition: (q) => q.p, getRadius: (q) => 60 + 240 * Math.sqrt(q.w / wmax), getFillColor: (q) => [...color(q.d1), 170], radiusUnits: 'meters', stroked: false }),
+      new deck.ArcLayer({ id: 'sim-arc', data: pts.filter((q) => q.w > wmax * 0.05), getSourcePosition: (q) => q.p,
+        getTargetPosition: (q) => [q.p[0] + (q.to.lon - q.p[0]) * e, q.p[1] + (q.to.lat - q.p[1]) * e],
+        getSourceColor: (q) => [...color(q.d1), 90], getTargetColor: (q) => [...color(q.d1), 230], getWidth: (q) => 1 + 3 * Math.sqrt(q.w / wmax), getHeight: 0.5, widthUnits: 'pixels', updateTriggers: { getTargetPosition: e } }),
+      new deck.ScatterplotLayer({ id: 'sim-closed', data: [s], getPosition: (x) => [x.lon, x.lat], getRadius: 14, radiusUnits: 'pixels', getFillColor: [255, 255, 255, 230], getLineColor: [176, 58, 26, 255], lineWidthMinPixels: 4, stroked: true }),
+      new deck.ScatterplotLayer({ id: 'sim-recv', data: rv.slice(0, 4), getPosition: (r) => [r.o.lon, r.o.lat], getRadius: (r) => 9 + 12 * Math.sqrt(share(r)), radiusUnits: 'pixels', getFillColor: [35, 112, 74, 255], getLineColor: [255, 255, 255, 255], lineWidthMinPixels: 2, stroked: true }),
+    ] });
+    if (t < 1) simRaf = requestAnimationFrame(frame);
+  };
+  simRaf = requestAnimationFrame(frame);
+}
+function stopSim() {
+  cancelAnimationFrame(simRaf); simState = null;
+  if (S.simFlat) { S.simFlat = false; if (map) paint(); }
+  if (deckOverlay) deckOverlay.setProps({ layers: [] });
+  $('#simbar').classList.remove('on');
+  const o = $('#simOut'); if (o) o.innerHTML = '';
+}
+
 /* ---------- 모바일 시트 ---------- */
 function openSheet() { if (!MOBILE) return; const p = $('#panel'); p.classList.remove('min'); document.body.classList.remove('sheet-min'); }
 $('#handle').addEventListener('click', () => {
@@ -1484,7 +1688,7 @@ $('#handle').addEventListener('click', () => {
    시연(드론 투어)
    ========================================================= */
 let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, tourYearT = null;
-const TOUR = ['decline', 'future', 'small', 'mountain', 'bj', 'closed'];
+const TOUR = ['decline', 'forecast', 'future', 'small', 'mountain', 'closed'];
 const TOUR_MS = 11000;
 function startTour() {
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
@@ -1509,6 +1713,7 @@ function tourStep() {
   bar();
   clearTimeout(tourYearT);
   if (st.ind === 'change' || st.ind === 'smallShare') { setYear(st.ind === 'change' ? 1 : 0, false); tourYearT = setTimeout(() => touring && setYear(4, true), 3600); }
+  if (st.play) { setFutureYear(0, false); let k = 0; const adv = () => { if (!touring || S.story !== st) return; k++; if (k > 10) return; setFutureYear(k); tourYearT = setTimeout(adv, 700); }; tourYearT = setTimeout(adv, 2600); }
   tourTimer = setTimeout(() => { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }, TOUR_MS);
 }
 function stopTour() {
@@ -1535,6 +1740,8 @@ function renderAbout() {
   <li>도서벽지: 법령 별표의 경북 학교 ${m.bjTotal}곳 중 운영 중인 ${D.schools.filter((s) => s.bj).length}곳. 별표에 있으나 이미 폐교된 곳: ${m.bjClosed.map((b) => esc(b.name)).join(', ')}. 경북교육청 인사 가산점 급지표와는 다릅니다.</li>
   <li>입학생 전망: 행정동별 주민등록 0~2세 ÷ 6~8세 − 1(${esc(m.popMonth)} 말). 전입·전출, 사립·특수학교 진학은 반영하지 않은 단순 비교입니다.</li>
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
+  <li>5년 뒤 예측(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 예측에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
+  <li>통폐합 시뮬레이션: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
   <li>해발 고도: AWS Terrain Tiles(z12) 지형 값. 지형 보기에서는 산 높이를 실제의 2.8배로 키워 보여 줍니다.</li>
   <li>인구감소지역: 안동·영주·영천·상주·문경·의성·청송·영양·영덕·청도·고령·성주·봉화·울진·울릉(15곳), 관심지역: 경주·김천.</li></ul>
   <h4>한계</h4><ul>
@@ -1581,16 +1788,18 @@ document.addEventListener('click', (e) => {
   if (d.v) { const was = S.view; S.view = d.v; applyView(); if (d.v === '3d' && was !== '3d' && S.school === null && !S.story) flyMountain(); return; }
   if (d.l) { S.layers[d.l] = !S.layers[d.l]; applyView(); applySchoolFilter(); renderLegend(); return; }
   if (d.y !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setYear(+d.y); return; }
+  if (d.fy !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setFutureYear(+d.fy); return; }
   if (d.tab) { setTab(d.tab); return; }
   if (d.story) { openStory(d.story); return; }
-  if (d.sch !== undefined) { openSchool(+d.sch); return; }
+  if (d.sim !== undefined) { runSim(+d.sim); return; }
+  if (d.sch !== undefined) { stopSim(); openSchool(+d.sch); return; }
   if (d.schname) { const s = D.schools.find((x) => x.name === d.schname && (!d.schsg || x.sigun === d.schsg)); if (s) openSchool(s.i); return; }
   if (d.closed !== undefined) { openClosed(+d.closed); return; }
   if (d.sg) { openSigun(d.sg); return; }
   if (d.emd) { if (S.level !== 'emd' && !IND[S.ind].lv.includes('emd')) S.ind = 'nearM'; S.level = 'emd'; paint(); openEmd(d.emd); return; }
   if (d.act === 'qlist') { S.story = null; setFilter(null); S.layers.closed = false; applyView(true); renderPanel(); syncHash(); return; }
   if (d.act === 'close') { // 한 단계씩 뒤로: 학교 → 폐교 → 읍면동 → 시군
-    if (S.school !== null) { S.school = null; selectSchool(-1); }
+    if (S.school !== null) { S.school = null; selectSchool(-1); stopSim(); }
     else if (S.closedSel !== null && S.closedSel !== undefined) S.closedSel = null;
     else if (S.emd) { S.emd = null; map.setFilter('emd-hover', ['==', ['get', 'code'], '']); }
     else if (S.sigun) { S.sigun = null; map.setFilter('sel-line', ['==', ['get', 'sigun'], '']); }
@@ -1602,6 +1811,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'btnReset') { goHome(); return; }
   if (t.id === 'btnUlleung') { map.flyTo({ center: [131.2, 37.42], zoom: 9.4, pitch: pitched() ? 50 : 0, bearing: 0, duration: 1800 }); return; }
   if (t.id === 'home') { stopTour(); setTab('q'); S.ind = 'change'; S.level = 'sigun'; S.kind = 'all'; S.yi = 4; setFilter(null); S.layers.closed = false; S.layers.bj = false; applyView(true); paint(); map.getSource('sch-col').setData(schoolColumns()); map.getSource('sch-pt').setData(schoolPoints()); goHome(); return; }
+  if (t.id === 'simStop') { stopSim(); return; }
   if (t.id === 'btnTour') { touring ? stopTour() : startTour(); return; }
   if (t.id === 'tStop') { stopTour(); return; }
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }

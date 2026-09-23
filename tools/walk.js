@@ -32,6 +32,8 @@ const { chromium } = require('playwright-core');
   await run('zone', D, async (p) => { await p.click('[data-tab=s]'); await p.fill('#sq', '봉화초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(5500); });
   await run('terrain', D, async (p) => { await p.click('[data-v="3d"]'); await p.waitForTimeout(4000); });
   await run('mountain', D, async (p) => { await p.click('[data-story=mountain]'); await p.waitForTimeout(5000); });
+  await run('forecast', D, async (p) => { await p.click('[data-story=forecast]'); await p.waitForTimeout(8000); });
+  await run('sim', D, async (p) => { await p.click('[data-tab=s]'); await p.fill('#sq', '봉화초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(3000); await p.click('[data-sim]'); await p.waitForTimeout(6000); await p.click('#simStop'); await p.waitForTimeout(1000); await p.click('[data-act=close]'); await p.waitForTimeout(1000); });
   await run('about', D, async (p) => { await p.click('#btnAbout'); await p.waitForTimeout(800); });
   await run('tour', D, async (p) => { await p.click('#btnTour'); await p.waitForTimeout(6000); });
   await run('mobile', { width: 390, height: 844 }, async (p) => { await p.waitForTimeout(1500); }, true);

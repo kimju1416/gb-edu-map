@@ -150,6 +150,7 @@ for (const r of kess[LAST]) {
     region: r.region, opened: r.opened, addr: r.addr, tel: (r.tel || '').replace(/\s+/g, ''), web: r.web || undefined,
     stu, cls: series('classes'), tch: series('teachers'),
     g: [r.g1, r.g2, r.g3, r.g4, r.g5, r.g6].map(n),
+    g25: rowOf(2025) ? ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].map((f) => n(rowOf(2025)[f])) : null, // 학년 진급 비율 계산용
     perClass: n(r.perClass), perTeacher: n(r.perTeacher),
     tReg: n(r.teachersReg), tTmp: n(r.teachersTemp), staff: n(r.staff),
     spClass: r.kind === '특수학교' ? null : n(r.spClass), spStu: r.kind === '특수학교' ? null : n(r.spStu), entrants: n(r.entrants),
