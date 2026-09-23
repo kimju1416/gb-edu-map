@@ -366,6 +366,47 @@ body.touring #map{left:0}
   .maplibregl-ctrl-attrib{max-width:calc(100vw - 90px)}
   .maplibregl-ctrl-group{display:none}
 }
+/* 유리 패널: 지도가 비쳐 보이게 */
+.ctl-r,.legend,.timeline,.readme,.seg,.inddd>button,.tour{background:rgba(255,255,255,.8)!important;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+.timeline{border-radius:16px}
+.themebtn{width:34px;padding:0;justify-content:center}
+/* ---------- 어두운 관제실 테마 ---------- */
+body.dark{--bg:#0B0F14;--card:#121820;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.16);--tx:#E9EEF2;--tx-2:#A7B2BC;--tx-3:#7E8994;--pt:#3DDC97;--pt-h:#2FC585;--pt-soft:rgba(61,220,151,.12);--pt-line:rgba(61,220,151,.35);--shadow:0 1px 3px rgba(0,0,0,.4);--float:0 10px 40px rgba(0,0,0,.55)}
+body.dark #map{background:#0B0F14}
+body.dark .top{background:rgba(11,15,20,.92)}
+body.dark .panel{background:rgba(14,19,25,.94);border-color:var(--line)}
+body.dark .ctl-r,body.dark .legend,body.dark .timeline,body.dark .readme,body.dark .seg,body.dark .inddd>button,body.dark .tour{background:rgba(16,22,29,.72)!important;border-color:rgba(255,255,255,.12)!important;color:var(--tx)}
+body.dark .seg button[aria-pressed=true]{background:#E9EEF2;color:#0B0F14}
+body.dark .seg.kinds button[aria-pressed=true]{background:var(--pt);color:#06140D}
+body.dark .three{background:rgba(255,255,255,.06)}
+body.dark .three button[aria-pressed=true]{background:rgba(255,255,255,.14);color:#fff}
+body.dark .tbtn{background:rgba(255,255,255,.06);border-color:var(--line-2);color:var(--tx)}
+body.dark .tbtn.pri{background:var(--pt);color:#06140D;border-color:var(--pt)}
+body.dark .menu,body.dark .modal .box{background:#121820;color:var(--tx)}
+body.dark .menu button:hover,body.dark .tg:hover,body.dark .rank li:hover,body.dark .tbl tr:hover td,body.dark .gl-grid button:hover{background:rgba(255,255,255,.06)}
+body.dark .hero,body.dark .note,body.dark .fc,body.dark .glance,body.dark .gl-grid button,body.dark .grid5,body.dark .intro{background:rgba(255,255,255,.03);border-color:var(--line)}
+body.dark .gl-grid b{color:#FF9A4D} body.dark .gl-grid b.g{color:var(--pt)}
+body.dark .cat,body.dark .rank .tag,body.dark .tag.bj{color:#FFB074}
+body.dark .tag{background:rgba(255,255,255,.08);color:var(--tx-2)} body.dark .tag.bj{background:rgba(255,154,77,.14)}
+body.dark .chip{background:transparent;border-color:var(--line-2);color:var(--tx)}
+body.dark .search input,body.dark select.sel{background:rgba(255,255,255,.05);color:var(--tx);border-color:var(--line-2)}
+body.dark .lbl{color:#F3F6F8;text-shadow:0 0 4px #000,0 0 8px #000}
+body.dark .lbl span{color:#C9D3DB}
+body.dark .lbl.box{background:rgba(10,14,19,.78);border-color:rgba(255,255,255,.18)}
+body.dark .sim,body.dark .simbtn{background:rgba(255,120,60,.08);border-color:#FF8A4C;color:#FFB074}
+body.dark .sim .row3 div{background:rgba(255,255,255,.04)}
+body.dark .zone-box{background:rgba(61,220,151,.1)}
+body.dark .tl-bar i{background:rgba(255,255,255,.18)}
+body.dark .tl-bar[aria-pressed=true] i{background:var(--pt);box-shadow:0 0 12px rgba(61,220,151,.7)}
+body.dark .tl-bar.pred i{background:repeating-linear-gradient(135deg,rgba(255,255,255,.22) 0 4px,rgba(255,255,255,.06) 4px 8px)}
+body.dark .loading{background:#0B0F14}
+body.dark .qn{background:rgba(61,220,151,.14)}
+body.dark .maplibregl-ctrl-group{background:#121820}
+body.dark .maplibregl-ctrl-group button span{filter:invert(1)}
+body.dark .maplibregl-ctrl-attrib{background:rgba(11,15,20,.7);color:#8894A0}
+body.dark .maplibregl-ctrl-attrib a{color:#A7B2BC}
+body.dark svg.chart text{fill:#A7B2BC}
+body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -381,7 +422,8 @@ body.touring #map{left:0}
   <div class="kpis" id="kpis"></div>
   <div class="top-r">
     <span class="ref" id="refdate"></span>
-    <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">둘러보기</span></button>
+    <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">드론 둘러보기</span></button>
+    <button class="tbtn themebtn" id="btnTheme" aria-label="어두운 화면으로" title="어두운 관제실 화면 / 밝은 화면"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
     <button class="tbtn" id="btnAbout">자료·방법</button>
   </div>
 </header>
@@ -457,7 +499,16 @@ const RAMP = {
   green: ['#E9F2EB', '#C3DECB', '#8EC3A0', '#4F9D6F', '#1F6B45'],
   warm: ['#F8EFE5', '#F0D5B8', '#E3AE80', '#CD7C45', '#9E4E1C'],
 };
-const NODATA = '#ECEAE4';
+let NODATA = '#ECEAE4';
+// 어두운 테마: 값이 클수록 밝게 빛나는 네온 단계
+const RAMP_DARK = {
+  green: ['#10302A', '#155A45', '#1E8C63', '#35C487', '#8CF5C4'],
+  warm: ['#3A1F14', '#70331A', '#B24E1C', '#F0782A', '#FFC07A'],
+};
+let DARK = false;
+try { DARK = localStorage.getItem('gbTheme') === 'dark'; } catch (e) {}
+if (DARK) document.body.classList.add('dark');
+const rampOf = (name) => (DARK ? RAMP_DARK : RAMP)[name];
 const NONE = ['==', ['get', 'i'], -999];
 const COL_MAXZ = 10.2;
 const BAR_MAXZ = 9.6; // 값 입체 기둥이 보이는 최대 배율 // 이보다 확대하면 기둥 대신 점과 학교 이름
@@ -604,7 +655,7 @@ function breaksOf(vals) {
 function colorOf(v, br, I) {
   if (I.cat) return I.colors[v] || NODATA;
   if (v === null || v === undefined || !isFinite(v)) return NODATA;
-  const ramp = RAMP[I.ramp];
+  const ramp = rampOf(I.ramp);
   let idx = br.findIndex((b) => v < b); if (idx < 0) idx = br.length;
   // 단계 수가 5보다 적으면 가운데로 모은다
   const k = br.length + 1;
@@ -641,6 +692,34 @@ function initMap() {
   map.once('load', () => { clearTimeout(loadFail); if (MOBILE) $$('.maplibregl-ctrl-attrib').forEach((a) => a.classList.remove('maplibregl-compact-show')); });
 }
 
+const BASE_ORIG = {};
+function themeBase() {
+  const dk = DARK;
+  NODATA = dk ? '#1B2129' : '#ECEAE4';
+  for (const l of map.getStyle().layers) {
+    if (!BASE_ORIG[l.id]) BASE_ORIG[l.id] = { type: l.type, paint: JSON.parse(JSON.stringify(l.paint || {})) };
+    if (/^(nb-|sigun|emd|hover|sel-|zone|sch-|col|closed|bld|hillshade)/.test(l.id)) continue;
+    const o = BASE_ORIG[l.id].paint;
+    const set = (p, v) => { try { map.setPaintProperty(l.id, p, v); } catch (e) {} };
+    if (!dk) { for (const [p, v] of Object.entries(o)) set(p, v); if (l.id === 'background') set('background-color', '#F2F0EA'); if (l.type === 'fill' && /^water/.test(l.id)) set('fill-color', '#DCE5E8'); continue; }
+    if (l.type === 'background') set('background-color', '#0B0F14');
+    else if (l.type === 'fill') set('fill-color', /water/.test(l.id) ? '#08151E' : /build/.test(l.id) ? '#161C23' : '#0F151B');
+    else if (l.type === 'line') set('line-color', /water|river/.test(l.id) ? '#0C2230' : /boundary|admin/.test(l.id) ? '#39424D' : '#1E252D');
+    else if (l.type === 'symbol') { set('text-color', '#7F8B96'); set('text-halo-color', '#0B0F14'); }
+  }
+  if (map.getLayer('nb-fill')) { map.setPaintProperty('nb-fill', 'fill-color', dk ? '#0B0F14' : '#F2F0EA'); map.setPaintProperty('nb-fill', 'fill-opacity', dk ? 0.6 : 0.55); map.setPaintProperty('nb-line', 'line-color', dk ? '#2A323B' : '#C9C3B5'); }
+  if (map.getLayer('sigun-line')) { map.setPaintProperty('sigun-line', 'line-color', dk ? 'rgba(255,255,255,.35)' : '#FFFFFF'); map.setPaintProperty('emd-line', 'line-color', dk ? 'rgba(255,255,255,.14)' : '#FFFFFF'); }
+  if (map.getLayer('hillshade')) { map.setPaintProperty('hillshade', 'hillshade-highlight-color', dk ? '#2B3642' : '#FFFFFF'); map.setPaintProperty('hillshade', 'hillshade-accent-color', dk ? '#05080B' : '#7F7A6C'); }
+  if (map.getLayer('sch-name')) { map.setPaintProperty('sch-name', 'text-color', dk ? '#E9EEF2' : '#1F2A24'); map.setPaintProperty('sch-name', 'text-halo-color', dk ? '#0B0F14' : '#FFFFFF'); }
+  if (map.getLayer('sch-glow')) map.setPaintProperty('sch-glow', 'circle-opacity', dk ? 0.55 : 0.22);
+  try { map.setLight({ anchor: 'viewport', color: dk ? '#DDEBFF' : '#FFFFFF', intensity: dk ? 0.5 : 0.42, position: [1.4, 205, 38] }); } catch (e) {}
+}
+function setTheme(dk) {
+  DARK = dk; document.body.classList.toggle('dark', dk);
+  try { localStorage.setItem('gbTheme', dk ? 'dark' : 'light'); } catch (e) {}
+  for (const k of Object.keys(barPrev)) delete barPrev[k];
+  themeBase(); applyView(true); updateBuildings();
+}
 function setupLayers() {
   const layers = map.getStyle().layers;
   // 바탕 지도 톤: 따뜻한 미색, 한글 지명, 큰 지명은 우리 라벨과 겹치므로 확대 시에만
@@ -674,6 +753,10 @@ function setupLayers() {
   map.addLayer({ id: 'sigun-bar', type: 'fill-extrusion', source: 'sigun', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'emd-bar', type: 'fill-extrusion', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
   map.addSource('zone', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  // 건물 3D: 배경 지도(OpenMapTiles)의 건물을 세우고 동네 지표로 칠한다(확대 12.5 이상)
+  map.addLayer({ id: 'bld', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building', minzoom: 12.5, paint: {
+    'fill-extrusion-color': '#E4E0D6', 'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.4, ['coalesce', ['get', 'render_height'], 7]],
+    'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#23704A', 'fill-opacity': 0.14 } });
   map.addLayer({ id: 'zone-line', type: 'line', source: 'zone', paint: { 'line-color': '#23704A', 'line-width': 2.5, 'line-dasharray': [2, 1] } });
   map.addLayer({ id: 'hover-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2.2 } });
@@ -691,14 +774,21 @@ function setupLayers() {
     'circle-color': kindColor, 'circle-opacity': 0.9, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-width': 1, 'circle-pitch-alignment': 'map' } });
   map.addLayer({ id: 'col-dim', type: 'fill-extrusion', source: 'sch-col', maxzoom: COL_MAXZ, filter: NONE, paint: { 'fill-extrusion-color': '#9C978A', 'fill-extrusion-height': ['get', 'h'], 'fill-extrusion-opacity': 0.35 } });
   map.addLayer({ id: 'col', type: 'fill-extrusion', source: 'sch-col', maxzoom: COL_MAXZ, filter: ['>', ['get', 'h'], 0], paint: { 'fill-extrusion-color': kindColor, 'fill-extrusion-height': ['get', 'h'], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
-  map.addLayer({ id: 'sch-name', type: 'symbol', source: 'sch-pt', minzoom: 10.4, filter: ['>', ['get', 'r'], 0], layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Regular'], 'text-size': 12.5, 'symbol-sort-key': ['-', 0, ['get', 'r']], 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true }, paint: { 'text-color': '#1F2A24', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.6 } });
+  // 학교 빛(번짐) + 깃발: 확대하면 건물 사이에 학교가 서 있다
+  makeFlags();
+  map.addLayer({ id: 'sch-glow', type: 'circle', source: 'sch-pt', minzoom: 10.4, filter: ['>', ['get', 'r'], 0], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10.4, 10, 15, 34], 'circle-blur': 1, 'circle-color': ['match', ['get', 'st'], 'drop', '#FF4D2E', 'small', '#FF9A3D', ['match', ['get', 'k'], '초등학교', KIND_COLOR.초등학교, '중학교', KIND_COLOR.중학교, '고등학교', KIND_COLOR.고등학교, KIND_COLOR.특수학교]], 'circle-opacity': 0.22, 'circle-pitch-alignment': 'map' } });
+  map.addLayer({ id: 'sch-name', type: 'symbol', source: 'sch-pt', minzoom: 10.4, filter: ['>', ['get', 'r'], 0], layout: {
+    'icon-image': ['match', ['get', 'st'], 'drop', 'flag-drop', 'small', 'flag-small', ['concat', 'flag-', ['get', 'k']]], 'icon-anchor': 'bottom-left', 'icon-offset': [-2, 0], 'icon-size': ['interpolate', ['linear'], ['zoom'], 10.4, 0.55, 14, 0.9], 'icon-allow-overlap': true,
+    'text-field': ['format', ['get', 'n'], {}, '\n', {}, ['get', 'cnt'], { 'font-scale': 0.85 }], 'text-font': ['Noto Sans Regular'], 'text-size': 12.5, 'symbol-sort-key': ['-', 0, ['get', 'r']], 'text-offset': [0.4, -2.9], 'text-anchor': 'bottom-left', 'text-justify': 'left', 'text-optional': true },
+    paint: { 'text-color': '#1F2A24', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.6 } });
+  map.addLayer({ id: 'closed-flag', type: 'symbol', source: 'closed', minzoom: 11, layout: { visibility: 'none', 'icon-image': 'flag-closed', 'icon-anchor': 'bottom-left', 'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 14, 0.8], 'icon-allow-overlap': true, 'text-field': ['concat', ['get', 'n'], '\n(폐교·', ['get', 'use'], ')'], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-offset': [0.4, -2.6], 'text-anchor': 'bottom-left', 'text-optional': true }, paint: { 'text-color': '#6B6558', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.4 } });
   map.addLayer({ id: 'closed-circ', type: 'circle', source: 'closed', layout: { visibility: 'none' }, paint: {
     'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5.5, 13, 8.5], 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 6, 1.4, 11, 2.4],
     'circle-color': ['match', ['get', 'use'], '대부', USE_STYLE.대부.fill, '자체활용', USE_STYLE.자체활용.fill, USE_STYLE.미활용.fill],
     'circle-stroke-color': ['match', ['get', 'use'], '대부', USE_STYLE.대부.stroke, '자체활용', USE_STYLE.자체활용.stroke, USE_STYLE.미활용.stroke], 'circle-pitch-alignment': 'map' } });
   map.addLayer({ id: 'sch-sel', type: 'circle', source: 'sch-pt', filter: ['==', ['get', 'i'], -1], paint: { 'circle-radius': 14, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#23704A', 'circle-stroke-width': 3, 'circle-pitch-alignment': 'map' } });
 
-  try { map.setLight({ anchor: 'viewport', color: '#FFFFFF', intensity: 0.42, position: [1.4, 205, 38] }); } catch (e) {}
+  themeBase();
   bindMapEvents();
   applyView(true);
   paint();
@@ -713,7 +803,7 @@ let layersReady = false, routeInitial = null;
 function schoolPoints() {
   const y = colIdx();
   return { type: 'FeatureCollection', features: D.schools.map((s) => { const v = stuIdx(s, y); return { type: 'Feature', id: s.i, geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-    properties: { i: s.i, k: s.kind, n: shortName(s.name), r: v ? Math.max(2.2, Math.sqrt(v) * 0.3) : 0 } }; }) };
+    properties: { i: s.i, k: s.kind, n: shortName(s.name), cnt: v ? fmt(v) + '명' : '', st: s.pj && s.pj.below60 && s.pj.below60 <= 2031 ? 'drop' : (s.stu[4] || 0) <= 60 && s.kind !== '특수학교' ? 'small' : '', r: v ? Math.max(2.2, Math.sqrt(v) * 0.3) : 0 } }; }) };
 }
 const shortName = (n) => n.replace('초등학교', '초').replace('중학교', '중').replace('고등학교', '고').replace(/분교장$/, '분교');
 function colHeight(stu) { return stu ? 170 * Math.sqrt(stu) + 250 : 0; }
@@ -729,8 +819,21 @@ function schoolColumns(yF = colIdx(), t = 1, yT = colIdx()) {
     return { type: 'Feature', id: s.i, geometry: { type: 'Polygon', coordinates: [ring] }, properties: { i: s.i, k: s.kind, h } };
   }) };
 }
+// 깃발 아이콘: 막대 + 삼각 깃 (학교급 색 / 60명 아래로 떨어질 학교 빨강 / 이미 작은학교 주황 / 폐교 회색)
+function makeFlags() {
+  const draw = (fill, id) => {
+    const W = 44, H = 64, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+    g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(6, H - 3, 6, 2.5, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#2B2F33'; g.fillRect(4, 6, 3, H - 8);
+    g.fillStyle = fill; g.beginPath(); g.moveTo(7, 6); g.lineTo(W - 2, 16); g.lineTo(7, 28); g.closePath(); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2; g.stroke();
+    if (!map.hasImage(id)) map.addImage(id, g.getImageData(0, 0, W, H), { pixelRatio: 2 });
+  };
+  for (const [k, c] of Object.entries(KIND_COLOR)) draw(c, 'flag-' + k);
+  draw('#E8391C', 'flag-drop'); draw('#F28A2E', 'flag-small'); draw('#8C877B', 'flag-closed');
+}
 function closedPoints() {
-  return { type: 'FeatureCollection', features: D.closed.map((c, i) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.lon, c.lat] }, properties: { i, use: c.use } })) };
+  return { type: 'FeatureCollection', features: D.closed.map((c, i) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.lon, c.lat] }, properties: { i, use: c.use, n: shortName(c.name) } })) };
 }
 
 /* ---------- 색칠·범례·라벨 ---------- */
@@ -771,10 +874,10 @@ function paint() {
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
   if (S.simFlat) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
-  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.82);
+  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.45 : 0.4]);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
-  renderReadme(); placeLabels();
+  renderReadme(); placeLabels(); bldKey = ''; updateBuildings();
   map.setPaintProperty('emd-line', 'line-opacity', lv === 'emd' ? 0.9 : 0.45);
   renderLegend(); renderTimeline(); renderKinds(); renderIndMenu(); updateLabels(); renderKPIs(); syncHash();
   if (S.tab === 'r' && !S.sigun) renderPanel();
@@ -786,7 +889,7 @@ function renderLegend() {
   if (I.cat) {
     h += '<div class="lg-cat">' + Object.entries(I.colors).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k)}</span>`).join('') + '</div>';
   } else {
-    const ramp = RAMP[I.ramp];
+    const ramp = rampOf(I.ramp);
     const vals = Object.values(curVals).filter((v) => v !== null && isFinite(v));
     const mn = Math.min(...vals), mx = Math.max(...vals);
     const sw = I.invert ? [...ramp].reverse() : ramp;
@@ -810,7 +913,8 @@ function tweenBars(lv, target) {
   const set = (e) => {
     const hp = []; curH = {};
     for (const [k, v] of Object.entries(target)) { const h = Math.round((from[k] ?? 0) + (v - (from[k] ?? 0)) * e); curH[k] = h; hp.push(k, h); }
-    map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['match', ['get', key], ...hp, 0] : 0);
+    const m = hp.length ? ['match', ['get', key], ...hp, 0] : 0;
+    map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['interpolate', ['linear'], ['zoom'], 7.6, m, 9.6, ['*', 0.08, m]] : 0);
     placeLabels();
   };
   if (S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches) { set(1); barPrev[lv] = target; return; }
@@ -851,6 +955,43 @@ function updateLabels() {
   }
 }
 
+/* ---------- 건물 색 ---------- */
+// 건물에 쓸 지표: 읍면동 값이 있으면 그 지표, 미래 지표면 입학생 전망, 그 밖엔 학생 증감률
+function bldInd() {
+  const I = IND[S.ind];
+  if (I.emd) return S.ind;
+  if (I.g === '미래 학생') return 'cohort';
+  return 'change';
+}
+let bldKey = '';
+function updateBuildings() {
+  if (!map || !map.getLayer('bld')) return;
+  const def = DARK ? '#1C232B' : '#E4E0D6';
+  if (map.getZoom() < 12.3) return;
+  const k = bldInd(), I = IND[k];
+  // 통학 거리: 건물에서 가장 가까운 해당 학교까지(m)
+  if (/^near[EMH]$/.test(k) && S.ind === k) {
+    const kind = { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[k];
+    const key = 'd' + kind + DARK; if (key === bldKey) return; bldKey = key;
+    const pts = D.schools.filter((x) => x.kind === kind && !x.state).map((x) => [x.lon, x.lat]);
+    const r = rampOf('warm');
+    map.setPaintProperty('bld', 'fill-extrusion-color', ['interpolate', ['linear'], ['distance', { type: 'MultiPoint', coordinates: pts }], 0, r[0], 1500, r[1], 3500, r[2], 6000, r[3], 10000, r[4]]);
+    return;
+  }
+  // 경북은 OSM 건물 자료가 드물어 동네별 색칠은 하지 않는다(기본색). 통학 거리 지표일 때만 위처럼 거리로 칠함
+  if (bldKey !== 'def' + DARK) { bldKey = 'def' + DARK; map.setPaintProperty('bld', 'fill-extrusion-color', def); }
+  return;
+  // eslint-disable-next-line no-unreachable
+  const b = map.getBounds(), vb = [[b.getWest(), b.getSouth()], [b.getEast(), b.getNorth()]];
+  const idx = emdIndex().filter((m) => !(m.b[0][0] > vb[1][0] || m.b[1][0] < vb[0][0] || m.b[0][1] > vb[1][1] || m.b[1][1] < vb[0][1])).slice(0, 40);
+  const vals = Object.entries(D.stats.emd).map(([c, e]) => I.emd(e));
+  const br = breaksOf(vals);
+  const key = k + DARK + idx.map((m) => m.code).join(); if (key === bldKey) return; bldKey = key;
+  const cases = [];
+  for (const m of idx) { const f = D.emdGeo.features.find((x) => x.properties.code === m.code); cases.push(['within', f.geometry], colorOf(I.emd(D.stats.emd[m.code]), br, I)); }
+  map.setPaintProperty('bld', 'fill-extrusion-color', cases.length ? ['case', ...cases, def] : def);
+}
+
 /* ---------- 지도 읽는 법(한 줄) ---------- */
 function renderReadme() {
   const I = IND[S.ind], y = YEARS[yearOf()];
@@ -858,6 +999,7 @@ function renderReadme() {
   const when = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 예측' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 예측' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
   const how = S.view === 'bar' ? '높이·색' : '색';
   const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
+  if (map && map.getZoom() >= 11) { const bk = bldInd(); $('#readme').innerHTML = `${/^near/.test(bk) && S.ind === bk ? '<b>건물 색</b> = 가장 가까운 ' + { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[bk] + '까지 거리 · 진할수록 멂 · ' : '<b>바닥 색</b> = ' + esc(IND[S.ind].label) + ' · '}깃발 = 학교(<b style="color:#E8391C">빨강</b> 5년 안에 60명 아래로 · <b style="color:#F28A2E">주황</b> 지금 60명 이하)`; return; }
   $('#readme').innerHTML = `<b>${how}</b> = ${unit}별 ${esc(I.label)}${when ? ' (' + esc(when) + ')' : ''} · ${S.view === 'bar' ? '높고 ' : ''}진할수록 ${esc(hi.replace('높을수록 ', ''))}${S.view === '3d' ? ' · 산 높이는 실제의 2.8배' + (S.layers.schools ? ' · 기둥 = 학교(높이 = 학생 수)' : '') : ''}`;
 }
 
@@ -970,8 +1112,8 @@ function applyView(first) {
   const terrain = S.view === '3d', bar = S.view === 'bar', is3d = pitched();
   $$('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === S.view));
   if (terrain) map.setTerrain({ source: 'dem', exaggeration: 2.8 }); else map.setTerrain(null);
-  map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrain ? 0.85 : 0.42);
-  map.setPaintProperty('hillshade', 'hillshade-shadow-color', terrain ? '#4F4A3E' : '#6E6A5E');
+  map.setPaintProperty('hillshade', 'hillshade-shadow-color', DARK ? '#000000' : terrain ? '#4F4A3E' : '#6E6A5E');
+  if (DARK) { try { map.setSky({ 'sky-color': '#05080C', 'horizon-color': '#15202B', 'fog-color': '#0B0F14', 'sky-horizon-blend': 0.5, 'horizon-fog-blend': 0.6, 'fog-ground-blend': terrain ? 0.5 : 1, 'atmosphere-blend': terrain ? 0.4 : 0 }); } catch (e) {} } else
   try { map.setSky(terrain ? { 'sky-color': '#CFE0EA', 'horizon-color': '#EEF1EE', 'fog-color': '#F2F0EA', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.55, 'atmosphere-blend': 0.5 } : { 'sky-color': '#F2F0EA', 'horizon-color': '#F2F0EA', 'fog-color': '#F2F0EA', 'fog-ground-blend': 1, 'atmosphere-blend': 0 }); } catch (e) {}
   // 값 입체에서는 학교를 크게 확대했을 때만(기둥 위로) 점으로, 지형에서는 기둥, 평면에서는 원
   const sch = S.layers.schools;
@@ -983,13 +1125,18 @@ function applyView(first) {
   map.setLayerZoomRange('sch-circ', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
   map.setLayerZoomRange('sch-dim', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
   map.setLayoutProperty('closed-circ', 'visibility', S.layers.closed && !bar ? 'visible' : 'none');
+  map.setLayoutProperty('closed-flag', 'visibility', S.layers.closed ? 'visible' : 'none');
+  map.setLayoutProperty('sch-glow', 'visibility', sch ? 'visible' : 'none');
   // 값 입체는 확대하면 기둥을 낮춰 학교 점이 보이게
   for (const id of ['sigun-bar', 'emd-bar']) map.setPaintProperty(id, 'fill-extrusion-opacity', 0.94);
   $('#schHint').textContent = terrain ? '기둥 높이 = 학생 수' : bar ? '크게 확대하면 보임' : '원 크기 = 학생 수';
   if (map.getLayer('sigun-bar')) paint();
   // 지형에서는 색을 옅게 깔아 산 음영이 비치게
-  map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? 0.42 : 0.82);
-  map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? 0.42 : 0.82);
+  map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : 0.82);
+  map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : 0.82);
+  // 어두운 지형: 능선이 달빛처럼 보이게 음영을 밝게
+  map.setPaintProperty('hillshade', 'hillshade-highlight-color', DARK ? (terrain ? '#8FA3B8' : '#2B3642') : '#FFFFFF');
+  map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrain ? (DARK ? 1 : 0.85) : 0.42);
   if (!first) {
     const t = is3d ? { pitch: MOBILE ? 40 : bar ? 55 : 52, bearing: map.getBearing() || -12 } : { pitch: 0, bearing: 0 };
     map.easeTo({ ...t, duration: 900 });
@@ -1075,6 +1222,8 @@ function bindMapEvents() {
     else openEmd(f.properties.code);
   });
   map.on('dragstart', () => { if (S.layers.rotate) { S.layers.rotate = false; applyView(); } });
+  map.on('moveend', updateBuildings);
+  map.on('zoomend', renderReadme);
 }
 function clearHover() { map.setFilter('hover-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); }
 function rankTxt(sg) {
@@ -1687,9 +1836,10 @@ $('#handle').addEventListener('click', () => {
 /* =========================================================
    시연(드론 투어)
    ========================================================= */
-let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, tourYearT = null;
+let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, tourYearT = null, tourDroneT = null;
+const DRONE = {"decline":{"center":[128.338,36.121],"zoom":14.2,"pitch":72,"bearing":35},"forecast":{"center":[128.412,36.139],"zoom":14.3,"pitch":72,"bearing":-30,"at":9800},"future":{"center":[129.345,36.035],"zoom":14,"pitch":70,"bearing":20},"small":{"center":[128.698,36.352],"zoom":14.4,"pitch":72,"bearing":-20},"mountain":{"center":[129.06,37.02],"zoom":12.4,"pitch":76,"bearing":200},"closed":{"center":[129.224,35.99],"zoom":13.6,"pitch":70,"bearing":60}};
 const TOUR = ['decline', 'forecast', 'future', 'small', 'mountain', 'closed'];
-const TOUR_MS = 11000;
+const TOUR_MS = 16000;
 function startTour() {
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
   if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
@@ -1699,9 +1849,15 @@ function tourStep() {
   clearTimeout(tourTimer);
   const st = STORIES.find((x) => x.id === TOUR[tourIdx]);
   openStory(st.id, false);
-  const cam = storyCam(st);
+  const cam = storyCam(st), dr = DRONE[st.id], step = tourIdx;
   map.flyTo({ ...cam, duration: 3200, essential: true });
-  map.once('moveend', () => { if (touring && pitched()) map.easeTo({ bearing: cam.bearing + 20, duration: TOUR_MS - 3400, easing: (t) => t }); });
+  // 도 전체를 보여 준 뒤 낮게 내려가 건물·깃발 사이를 난다
+  clearTimeout(tourDroneT);
+  if (dr && pitched()) tourDroneT = setTimeout(() => {
+    if (!touring || tourIdx !== step) return;
+    map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 0.8 : dr.zoom, pitch: dr.pitch, bearing: dr.bearing, duration: 4200, curve: 1.6, essential: true });
+    map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
+  }, dr.at || 5200);
   const h = st.hero();
   $('#tK').textContent = `${tourIdx + 1} / ${TOUR.length} · ${st.g}`;
   $('#tH').textContent = st.q;
@@ -1713,11 +1869,11 @@ function tourStep() {
   bar();
   clearTimeout(tourYearT);
   if (st.ind === 'change' || st.ind === 'smallShare') { setYear(st.ind === 'change' ? 1 : 0, false); tourYearT = setTimeout(() => touring && setYear(4, true), 3600); }
-  if (st.play) { setFutureYear(0, false); let k = 0; const adv = () => { if (!touring || S.story !== st) return; k++; if (k > 10) return; setFutureYear(k); tourYearT = setTimeout(adv, 700); }; tourYearT = setTimeout(adv, 2600); }
+  if (st.play) { setFutureYear(0, false); let k = 0; const adv = () => { if (!touring || S.story !== st) return; k++; if (k > 10) return; setFutureYear(k); tourYearT = setTimeout(adv, 620); }; tourYearT = setTimeout(adv, 2600); }
   tourTimer = setTimeout(() => { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }, TOUR_MS);
 }
 function stopTour() {
-  touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); cancelAnimationFrame(tourRaf); map.stop();
+  touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
   document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
 }
 
@@ -1742,6 +1898,7 @@ function renderAbout() {
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
   <li>5년 뒤 예측(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 예측에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
   <li>통폐합 시뮬레이션: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
+  <li>건물 3D: OpenStreetMap 건물(OpenMapTiles)을 세우고, 건물이 속한 읍면동의 지표로 칠했습니다. 시골은 OpenStreetMap 건물 자료가 적어 빈 곳이 있습니다.</li>
   <li>해발 고도: AWS Terrain Tiles(z12) 지형 값. 지형 보기에서는 산 높이를 실제의 2.8배로 키워 보여 줍니다.</li>
   <li>인구감소지역: 안동·영주·영천·상주·문경·의성·청송·영양·영덕·청도·고령·성주·봉화·울진·울릉(15곳), 관심지역: 경주·김천.</li></ul>
   <h4>한계</h4><ul>
@@ -1816,6 +1973,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'tStop') { stopTour(); return; }
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }
   if (t.id === 'tPrev') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); return; }
+  if (t.id === 'btnTheme') { setTheme(!DARK); return; }
   if (t.id === 'btnAbout') { renderAbout(); $('#about').classList.add('on'); return; }
 });
 $('#about').addEventListener('click', (e) => { if (e.target.id === 'about') $('#about').classList.remove('on'); });
