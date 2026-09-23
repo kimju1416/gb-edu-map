@@ -284,6 +284,9 @@ body.menu-open .legend{visibility:hidden}
 
 .lbl{pointer-events:none;transition:opacity .15s linear;text-align:center;font-weight:700;font-size:12.5px;color:var(--tx);line-height:1.25;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff}
 .lbl span{display:block;font-size:12px;font-weight:600;color:#3A3F3B}
+body.sat .lbl.box{background:rgba(12,16,20,.62);border-color:rgba(255,255,255,.25);color:#fff}
+body.sat .lbl.box span{color:#E6ECF0}
+body.sat .lbl{color:#fff;text-shadow:0 0 4px #000,0 0 8px #000}
 .lbl.box{background:rgba(255,255,255,.9);border:1px solid var(--line-2);border-radius:6px;padding:2px 6px;text-shadow:none}
 .lbl.hide-v span{display:none}
 
@@ -557,9 +560,11 @@ body.dark .dv nav button:hover{background:rgba(255,255,255,.06)}
 
 <div class="ctl-r" id="ctlR">
   <h4>보기</h4>
+  <button class="gyro" id="btnSat" aria-pressed="true" title="위성 사진 바탕"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 7L9 3 5 7l4 4M17 11l4 4-4 4-4-4M8 12l4 4M16 8l-4-4M9 21a6 6 0 01-6-6"/></svg><span>위성</span></button>
   <button class="gyro" id="btnGyro" aria-pressed="false" title="휴대폰을 기울이면 지도가 따라 돕니다"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M3 8c-1.3 2.5-1.3 5.5 0 8M21 8c1.3 2.5 1.3 5.5 0 8"/></svg><span>기울여 보기</span></button>
   <div class="three" id="viewSeg"><button data-v="bar" aria-pressed="true" title="시군·읍면이 지표값만큼 솟아오릅니다">값 입체</button><button data-v="3d" aria-pressed="false" title="실제 산 지형 위에 학교를 세웁니다">지형</button><button data-v="2d" aria-pressed="false">평면</button></div>
   <h4>겹쳐 보기</h4>
+  <button class="tg" data-l="sat" aria-pressed="true"><span class="bx"></span>위성 사진 바탕 <small class="muted">브이월드</small></button>
   <button class="tg" data-l="schools" aria-pressed="true"><span class="bx"></span>학교 위치 <small class="muted" id="schHint"></small></button>
   <div class="kleg"><span><i style="background:var(--k-e)"></i>초</span><span><i style="background:var(--k-m)"></i>중</span><span><i style="background:var(--k-h)"></i>고</span><span><i style="background:var(--k-s)"></i>특수</span></div>
   <button class="tg" data-l="closed" aria-pressed="false"><span class="bx"></span>폐교 재산</button>
@@ -641,7 +646,7 @@ let D = {};            // 자료
 let map;               // 지도
 const S = {            // 화면 상태
   ind: 'change', level: 'sigun', kind: 'all', yi: 4, fy: 4,
-  view: 'bar', layers: { schools: true, closed: false, bj: false, rotate: false },
+  view: 'bar', sat: (() => { try { return localStorage.getItem('gbSat') !== '0'; } catch (e) { return true; } })(), layers: { schools: true, closed: false, bj: false, rotate: false },
   tab: 'q', story: null, school: null, sigun: null, emd: null, filter: null,
 };
 
@@ -875,14 +880,34 @@ function themeBase() {
   if (map.getLayer('sch-glow')) map.setPaintProperty('sch-glow', 'circle-opacity', dk ? 0.55 : 0.22);
   try { map.setLight({ anchor: 'viewport', color: dk ? '#DDEBFF' : '#FFFFFF', intensity: dk ? 0.5 : 0.42, position: [1.4, 205, 38] }); } catch (e) {}
 }
+// 위성 바탕: 바탕 지도의 면·선은 끄고 지명은 흰 글씨로, 경북 밖은 어둡게
+function applyBase() {
+  const on = S.sat;
+  map.setLayoutProperty('sat', 'visibility', on ? 'visible' : 'none');
+  for (const b of BASE_IDS) {
+    if (!map.getLayer(b.id)) continue;
+    if (b.type === 'symbol') {
+      try { map.setPaintProperty(b.id, 'text-color', on ? '#FFFFFF' : DARK ? '#7F8B96' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-color']) || '#555'); map.setPaintProperty(b.id, 'text-halo-color', on ? 'rgba(0,0,0,.75)' : DARK ? '#0B0F14' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-halo-color']) || '#fff'); } catch (e) {}
+    } else map.setLayoutProperty(b.id, 'visibility', on ? 'none' : 'visible');
+  }
+  map.setPaintProperty('nb-fill', 'fill-color', on ? '#05080B' : DARK ? '#0B0F14' : '#F2F0EA');
+  map.setPaintProperty('nb-fill', 'fill-opacity', on ? 0.45 : DARK ? 0.6 : 0.55);
+  for (const h of ['hillshade', 'hillshade-hi']) if (map.getLayer(h)) map.setPaintProperty(h, 'hillshade-exaggeration', on ? 0 : S.view === '3d' ? (DARK ? 1 : 0.85) : 0.42);
+  if (on && map.getLayer('hillshade')) { map.setLayoutProperty('hillshade', 'visibility', 'none'); map.setLayoutProperty('hillshade-hi', 'visibility', 'none'); }
+  const b = $('#btnSat'); if (b) b.setAttribute('aria-pressed', on);
+  $$('.tg[data-l=sat]').forEach((x) => x.setAttribute('aria-pressed', on));
+  document.body.classList.toggle('sat', on);
+}
 function setTheme(dk) {
   DARK = dk; document.body.classList.toggle('dark', dk);
   try { localStorage.setItem('gbTheme', dk ? 'dark' : 'light'); } catch (e) {}
   for (const k of Object.keys(barPrev)) delete barPrev[k];
-  themeBase(); applyView(true); updateBuildings();
+  themeBase(); applyView(true); updateBuildings(); applyBase();
 }
+let BASE_IDS = [];
 function setupLayers() {
   const layers = map.getStyle().layers;
+  BASE_IDS = layers.map((l) => ({ id: l.id, type: l.type }));
   // 바탕 지도 톤: 따뜻한 미색, 한글 지명, 큰 지명은 우리 라벨과 겹치므로 확대 시에만
   for (const l of layers) {
     if (l.type === 'symbol' && l.layout && l.layout['text-field']) {
@@ -904,6 +929,9 @@ function setupLayers() {
   map.addSource('dem-hs2', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: MOBILE ? 11 : 12 }); // 지형 보기 전용
   map.addLayer({ id: 'hillshade-hi', type: 'hillshade', source: 'dem-hs2', layout: { visibility: 'none' }, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
 
+  // 브이월드 위성 사진(국토교통부): 바탕 지도의 맨 아래
+  map.addSource('sat', { type: 'raster', tiles: [`https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_KEY}/Satellite/{z}/{y}/{x}.jpeg`], tileSize: 256, minzoom: 6, maxzoom: 19, attribution: '위성: 브이월드(국토교통부)' });
+  map.addLayer({ id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'none' }, paint: { 'raster-fade-duration': 0, 'raster-saturation': -0.15, 'raster-contrast': 0.05 } }, layers[1] ? layers[1].id : undefined);
   map.addSource('nb', { type: 'geojson', data: D.nbGeo });
   map.addSource('sigun', { type: 'geojson', data: D.sigunGeo, promoteId: 'sigun' });
   map.addSource('emd', { type: 'geojson', data: D.emdGeo, promoteId: 'code' });
@@ -970,6 +998,7 @@ function setupLayers() {
 
   themeBase();
   bindMapEvents();
+  setTimeout(applyBase, 0);
   applyView(true);
   paint();
   buildLabels();
@@ -1077,7 +1106,10 @@ function paint() {
   map.setLayoutProperty('hak-bar', 'visibility', lv === 'hak' && bar ? 'visible' : 'none');
   map.setPaintProperty('hak-line', 'line-color', DARK ? 'rgba(255,255,255,.4)' : '#FFFFFF');
   if (S.simFlat) for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
-  else if (bar) for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0, BAR_MAXZ, 0.8, 11, 0.8, 13.5, DARK ? 0.1 : 0.3]);
+  if (S.sat) map.setPaintProperty('sigun-line', 'line-color', 'rgba(255,255,255,.85)');
+  else if (map.getLayer('sigun-line')) map.setPaintProperty('sigun-line', 'line-color', DARK ? 'rgba(255,255,255,.35)' : '#FFFFFF');
+  if (S.simFlat) {}
+  else if (bar) for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0, BAR_MAXZ, S.sat ? 0.62 : 0.8, 11, S.sat ? 0.5 : 0.8, 13.5, S.sat ? 0.14 : DARK ? 0.1 : 0.3]);
   else if (S.view !== '3d') for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
@@ -1461,7 +1493,8 @@ function applyView(first) {
   try { if (MOBILE) map.setPixelRatio(terrain ? Math.min(devicePixelRatio, 1.5) : devicePixelRatio); } catch (e) {}
   // 음영: 지형 보기는 선명한 음영(z12), 그 밖은 도 전체를 볼 때만 가벼운 음영(z8)
   map.setLayoutProperty('hillshade-hi', 'visibility', terrain ? 'visible' : 'none');
-  map.setLayoutProperty('hillshade', 'visibility', terrain ? 'none' : 'visible');
+  map.setLayoutProperty('hillshade', 'visibility', terrain || S.sat ? 'none' : 'visible');
+  if (S.sat) map.setLayoutProperty('hillshade-hi', 'visibility', 'none');
   ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-shadow-color', DARK ? '#000000' : terrain ? '#4F4A3E' : '#6E6A5E'));
   if (DARK) { try { map.setSky({ 'sky-color': '#05080C', 'horizon-color': '#15202B', 'fog-color': '#0B0F14', 'sky-horizon-blend': 0.5, 'horizon-fog-blend': 0.6, 'fog-ground-blend': terrain ? 0.5 : 1, 'atmosphere-blend': terrain ? 0.4 : 0 }); } catch (e) {} } else
   try { map.setSky(terrain ? { 'sky-color': '#CFE0EA', 'horizon-color': '#EEF1EE', 'fog-color': '#F2F0EA', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.55, 'atmosphere-blend': 0.5 } : { 'sky-color': '#F2F0EA', 'horizon-color': '#F2F0EA', 'fog-color': '#F2F0EA', 'fog-ground-blend': 1, 'atmosphere-blend': 0 }); } catch (e) {}
@@ -2564,6 +2597,7 @@ function shareUrl() {
   p.set('c', [c.lng.toFixed(4), c.lat.toFixed(4), map.getZoom().toFixed(2), Math.round(map.getPitch()), Math.round(map.getBearing())].join(','));
   if (S.view !== 'bar') p.set('v', S.view);
   if (DARK) p.set('t', 'd');
+  if (!S.sat) p.set('b', 'm');
   if (isFuture() && S.fy !== 4) p.set('fy', FYEARS[S.fy]);
   return location.origin + location.pathname + '#' + p.toString();
 }
@@ -2717,7 +2751,7 @@ function renderAbout() {
   const m = D.stats.meta;
   $('#aboutBox').innerHTML = `<button class="x" data-act="about-x" aria-label="닫기">×</button><h3 id="aboutT">자료와 계산 방법</h3>
   <p>경상북도 초등학교·중학교·고등학교·특수학교(분교장 포함, 폐교 제외) <b>${fmt(D.schools.length)}곳</b>의 공개 통계를 모았습니다. 유치원, 각종학교, 방송통신중·고는 넣지 않았습니다. 군위군은 2023년 대구로 편입돼 5년 모두에서 뺐습니다.</p>
-  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>학교알리미 공시(급식 운영·기간제 교원 비율·동아리 수·학급당 학생): 2026 공시를 학교별로 모은 자료(924곳 연결)</li><li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS) / 건물: 브이월드(국토교통부)</li></ul>
+  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>학교알리미 공시(급식 운영·기간제 교원 비율·동아리 수·학급당 학생): 2026 공시를 학교별로 모은 자료(924곳 연결)</li><li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS) / 건물·위성 사진: 브이월드(국토교통부)</li></ul>
   <h4>숫자 확인</h4><p>변환 뒤 KESS 원자료 엑셀을 다시 더해 연도별 경북 학생·학급·교원 합계와 22개 시군 학생 합계가 지도 자료와 <b>모두 일치</b>하는지 대조했습니다(2022~2026).</p>
   <h4>지표 정의</h4><ul>
   <li>학생 수 증감률: 2022년 4월 1일 대비 선택 연도 4월 1일 재학생 수 변화. 학교 카드에서 이름이 바뀐 학교(22곳)는 옛 이름·같은 도로명 주소로 지난 기록을 이어 붙였습니다(한 주소에 같은 학교급이 둘인 곳은 잇지 않음). 읍면동 증감률은 2022→2026 고정이며 2022년 학교를 위치나 주소로 읍면동에 배정했습니다(배정 못 한 학생 ${fmt(m.s22Lost)}명).</li>
@@ -2764,6 +2798,7 @@ function readHash() {
   if (p.get('fy')) { const y = FYEARS.indexOf(+p.get('fy')); if (y >= 0) S.fy = y; }
   if (['bar', '3d', '2d'].includes(p.get('v'))) S.view = p.get('v');
   if (p.get('t') === 'd') { DARK = true; document.body.classList.add('dark'); }
+  if (p.get('b') === 'm') S.sat = false;
   return p;
 }
 
@@ -2781,6 +2816,7 @@ document.addEventListener('click', (e) => {
   if (d.k) { S.kind = d.k; paint(); applySchoolFilter(); if (S.story || S.tab === 'r') renderPanel(); return; }
   if (d.kind) { S.kind = d.kind; paint(); applySchoolFilter(); return; }
   if (d.v) { const was = S.view; S.view = d.v; applyView(); if (d.v === '3d' && was !== '3d' && S.school === null && !S.story) flyMountain(); return; }
+  if (d.l === 'sat' || t.id === 'btnSat') { S.sat = !S.sat; try { localStorage.setItem('gbSat', S.sat ? '1' : '0'); } catch (e) {} applyBase(); applyView(true); return; }
   if (d.l) { S.layers[d.l] = !S.layers[d.l]; applyView(); applySchoolFilter(); renderLegend(); return; }
   if (d.y !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setYear(+d.y); return; }
   if (d.fy !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setFutureYear(+d.fy); return; }
