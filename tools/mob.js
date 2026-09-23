@@ -4,8 +4,8 @@ const { chromium } = require('playwright-core');
   const errs = [];
   const run = async (name, fn) => {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-    const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(name + ' ' + e.message));
-    await p.goto(process.argv[2] || 'http://localhost:8795/'); await p.waitForFunction(() => document.querySelector('#loading.done'), null, { timeout: 30000 }); await p.waitForTimeout(2500);
+    const p = await ctx.newPage(); p.setDefaultTimeout(90000); p.on('pageerror', (e) => errs.push(name + ' ' + e.message));
+    await p.goto(process.argv[2] || 'http://localhost:8795/'); await p.waitForFunction(() => document.querySelector('#loading.done'), null, { timeout: 90000 }); await p.waitForTimeout(2500);
     await fn(p); await p.screenshot({ path: `../work/m_${name}.png` }); await ctx.close();
   };
   await run('home', async (p) => {});

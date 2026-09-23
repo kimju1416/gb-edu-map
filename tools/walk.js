@@ -5,11 +5,11 @@ const { chromium } = require('playwright-core');
   const errs = [];
   const run = async (name, vp, fn, mobile) => {
     const ctx = await b.newContext({ viewport: vp, deviceScaleFactor: 1, isMobile: !!mobile, hasTouch: !!mobile });
-    const p = await ctx.newPage();
+    const p = await ctx.newPage(); p.setDefaultTimeout(90000);
     p.on('pageerror', (e) => errs.push(name + ' PAGEERROR ' + e.message));
     p.on('console', (m) => { if (m.type() === 'error') errs.push(name + ' console ' + m.text().slice(0, 200)); });
     await p.goto('http://localhost:8795/');
-    await p.waitForFunction(() => document.querySelector('#loading.done'), null, { timeout: 30000 });
+    await p.waitForFunction(() => document.querySelector('#loading.done'), null, { timeout: 90000 });
     await p.waitForTimeout(2500);
     await fn(p);
     await p.screenshot({ path: `../work/w_${name}.png` });
