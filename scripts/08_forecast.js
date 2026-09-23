@@ -48,7 +48,7 @@ function survival(s, grades) {
   return prev ? { v: now / prev, n: prev } : null;
 }
 const sgSurv = {};
-for (const kind of ['초등학교', '중학교']) {
+for (const kind of ['초등학교', '중학교', '고등학교']) {
   const gr = kind === '초등학교' ? 6 : 3;
   for (const sg of Object.keys(stats.sigun)) {
     const xs = schools.filter((s) => s.kind === kind && s.sigun === sg).map((s) => survival(s, gr)).filter(Boolean);
@@ -114,21 +114,41 @@ const rMsg = {}; for (const sg of Object.keys(stats.sigun)) rMsg[sg] = med(rM.fi
 for (const s of mids) {
   const sv = survOf(s, 3), r = clamp(s._r ?? rMsg[s.sigun], 0, 60);
   let g = s.g.slice(0, 3).map((v) => v || 0);
-  const out = [], g1s = [];
+  const out = [], g1s = []; s._mg3 = [];
   PY.forEach((Y, k) => {
     // Y년 중1 = (Y−1)년 초6. 2027년은 2026 실제 초6, 그 뒤는 예측
     const g6prev = s._feed ? sum(s._feed.map((e) => (k === 0 ? e.g[5] || 0 : e._g6[k - 1]))) : null;
     const e1 = s._feed && s._feed.length ? r * s._share * g6prev : (s.g[0] || 0);
     g = [e1, g[0] * sv, g[1] * sv];
-    out.push(Math.round(sum(g))); g1s.push(Math.round(e1));
+    out.push(Math.round(sum(g))); g1s.push(Math.round(e1)); s._mg3.push(g[2]);
   });
   s.pj = { stu: out, g1: g1s, how: s._feed && s._feed.length ? 'zone' : 'flat' };
+}
+
+/* ---------- 고등학교 ----------
+   통학구역이 없어 학구 인구를 쓸 수 없다. Y년 고1 = 2026 실제 고1 × (Y−1년 중3 ÷ 2025년 중3)
+   일반고는 같은 시군 중3, 특성화·특목고(공업·상업·과학·외국어 등)는 경북 전체 중3 흐름을 쓴다 */
+const highs = schools.filter((s) => s.kind === '고등학교' && !s.state);
+const WIDE = (s) => s.sub && s.sub !== '일반고등학교';
+const mg3 = (list, k) => sum(list.map((m) => (k < 0 ? (m.g25 ? m.g25[2] : 0) : k === 0 ? m.g[2] || 0 : m._mg3[k - 1]))); // k: PY 인덱스(−1=2025, 0=2026 실제)
+const midsBySg = {}; for (const m of mids) (midsBySg[m.sigun] ||= []).push(m);
+for (const s of highs) {
+  const pool = WIDE(s) ? mids : midsBySg[s.sigun] || mids;
+  const base = mg3(pool, -1), sv = survOf(s, 3);
+  let g = s.g.slice(0, 3).map((v) => v || 0);
+  const out = [], g1s = [];
+  PY.forEach((Y, k) => {
+    const e1 = base ? (s.g[0] || 0) * (mg3(pool, k) / base) : (s.g[0] || 0);
+    g = [e1, g[0] * sv, g[1] * sv];
+    out.push(Math.round(sum(g))); g1s.push(Math.round(e1));
+  });
+  s.pj = { stu: out, g1: g1s, how: WIDE(s) ? 'gb' : 'sg' };
 }
 
 /* ---------- 결과 정리 ---------- */
 for (const s of schools) {
   for (const k of Object.keys(s)) if (k.startsWith('_')) delete s[k];
-  if (s.pj) {
+  if (s.pj && s.kind !== '고등학교') {
     const below = PY.findIndex((y, i) => s.pj.stu[i] <= 60);
     s.pj.below60 = (s.stu[4] || 0) > 60 && below >= 0 ? PY[below] : null;
   }
@@ -136,16 +156,17 @@ for (const s of schools) {
 const pjSum = (list) => PY.map((_, i) => sum(list.map((s) => (s.pj ? s.pj.stu[i] : 0))));
 const actSum = (list, yi) => sum(list.map((s) => s.stu[yi]));
 for (const sg of Object.keys(stats.sigun)) {
-  const l = schools.filter((s) => s.sigun === sg && s.pj);
+  const l = schools.filter((s) => s.sigun === sg && s.pj && s.kind !== '고등학교');
   // 초·중 학생: 2022~2026 실제(지금 있는 학교 기준) + 2027~2032 예측
   stats.sigun[sg].pj = [...[0, 1, 2, 3, 4].map((yi) => actSum(l, yi)), ...pjSum(l)];
   const a = stats.sigun[sg].pj;
   stats.sigun[sg].pjChg = a[4] ? Math.round((a[9] / a[4] - 1) * 1000) / 10 : null; // 2026→2031
   stats.sigun[sg].pjBelow = l.filter((s) => s.pj.below60 && s.pj.below60 <= 2031).length;
 }
-const all = schools.filter((s) => s.pj);
+const all = schools.filter((s) => s.pj && s.kind !== '고등학교');
 stats.pjTotal = { years: [2022, 2023, 2024, 2025, 2026, ...PY], stu: [...[0, 1, 2, 3, 4].map((yi) => actSum(all, yi)), ...pjSum(all)] };
 stats.pjTotal.elem = pjSum(els); stats.pjTotal.mid = pjSum(mids);
+stats.pjTotal.high = [...[0, 1, 2, 3, 4].map((yi) => actSum(highs, yi)), ...pjSum(highs)]; // 2022~2032, 고등학교(시군 흐름 어림)
 stats.pjTotal.below = all.filter((s) => s.pj.below60 && s.pj.below60 <= 2031).length;
 stats.pjTotal.small2031 = all.filter((s) => s.pj.stu[4] <= 60).length;
 stats.pjTotal.small2026 = all.filter((s) => (s.stu[4] || 0) <= 60).length;
@@ -155,6 +176,7 @@ fs.writeFileSync(path.join(ROOT, 'docs/data/stats.json'), JSON.stringify(stats))
 const T = stats.pjTotal;
 console.log('초·중 합계', T.years.map((y, i) => `${y}:${T.stu[i]}`).join(' '));
 console.log('60명 이하 2026→2031', T.small2026, '→', T.small2031, '· 새로 60명 아래로', T.below);
+console.log('고등 합계', stats.pjTotal.high.join(' '));
 console.log('예측 방법', Object.entries(all.reduce((o, s) => ((o[s.pj.how] = (o[s.pj.how] || 0) + 1), o), {})));
-const ex = ['양서초등학교', '봉화초등학교', '석포초등학교', '포항제철중학교'].map((n) => schools.find((s) => s.name === n)).filter(Boolean);
+const ex = ['양서초등학교', '봉화초등학교', '석포초등학교', '포항제철중학교', '포항고등학교', '경북과학고등학교', '울릉고등학교'].map((n) => schools.find((s) => s.name === n)).filter(Boolean);
 ex.forEach((s) => console.log(s.name, s.stu.join('/'), '→', s.pj.stu.join('/'), '입학', s.pj.g1.join('/')));

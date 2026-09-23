@@ -14,6 +14,17 @@
 <meta name="theme-color" content="#F5F3EE">
 <link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
 <link rel="apple-touch-icon" href="art/apple-touch-180.png">
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+<link rel="preconnect" href="https://api.vworld.kr" crossorigin>
+<link rel="preconnect" href="https://s3.amazonaws.com" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js" as="script">
+<link rel="preload" href="data/stats.json" as="fetch" crossorigin>
+<link rel="preload" href="data/schools.json" as="fetch" crossorigin>
+<link rel="preload" href="data/sigun.geojson" as="fetch" crossorigin>
+<link rel="preload" href="data/mask.geojson" as="fetch" crossorigin>
+<link rel="preload" href="data/closed.json" as="fetch" crossorigin>
+<link rel="preload" href="data/emd.geojson" as="fetch" crossorigin>
+<link rel="preload" href="data/zones_e.geojson" as="fetch" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
@@ -561,6 +572,115 @@ body.dark .dv nav button:hover{background:rgba(255,255,255,.06)}
   .top-r .tbtn{padding:0 10px}
 }
 body.flying .lbl{visibility:hidden!important}
+/* 둘러보기 위 설명판 */
+.ttop{display:none;position:fixed;top:calc(var(--top) + 12px);left:50%;transform:translateX(-50%);z-index:25;width:min(720px,calc(100vw - 32px));background:rgba(255,255,255,.9);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow);padding:10px 14px;font-size:13.5px;line-height:1.5;color:var(--tx);pointer-events:none}
+.ttop.on{display:block}
+.ttop .r1{display:flex;align-items:center;gap:6px;font-size:15.5px}
+.ttop .r1 svg{color:var(--pt);flex:none}
+.ttop .r1 span{font-size:12.5px;color:var(--tx-2);margin-left:2px}
+.ttop .r2{margin-top:3px;color:var(--tx-2)}
+.ttop .r2 b{color:var(--tx)}
+.ttop .nr{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.ttop .nr span{display:inline-flex;align-items:center;gap:4px;color:var(--tx);font-variant-numeric:tabular-nums}
+.ttop .nr span.sm60{color:#B3261E;font-weight:600}
+.ttop .nr i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ttop .r3{margin-top:4px;padding-top:4px;border-top:1px solid var(--line);font-size:12.5px;color:var(--tx-2)}
+body.dark .ttop{background:rgba(16,22,29,.8);border-color:rgba(255,255,255,.12)}
+body.sat .ttop{background:rgba(255,255,255,.92)}
+body.dark.sat .ttop{background:rgba(16,22,29,.84)}
+body.touring .readme{display:none}
+.tour .twhy{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--tx-2);border-top:1px solid var(--line);padding-top:7px}
+@media (max-width:860px){
+  .ttop{top:calc(var(--top) + 8px);width:calc(100vw - 20px);padding:8px 11px;font-size:12.5px;line-height:1.45}
+  .ttop .r1{font-size:14.5px}
+  .ttop .r3{font-size:12px}
+  .tour .twhy{font-size:12.5px;line-height:1.55;margin-top:6px}
+  .tour{max-height:46vh}
+}
+.lbl.dc{opacity:0!important;pointer-events:none}
+.laybtn,.mobonly,.t-m,.dclose{display:none}
+#indSub{display:none}
+.ib{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+/* ---------- 휴대폰 조작부 한 줄(28차) ---------- */
+@media (max-width:860px){
+  .deskonly,.t-txt,#btnTheme{display:none!important}
+  .mobonly{display:inline-block}
+  .t-m{display:inline}
+  #btnTour{gap:5px;padding:0 12px}
+  #btnAbout{width:40px;padding:0;justify-content:center}
+  .top-r{gap:6px}
+  /* 한 줄: [지표 · 단위 · 학교급 ▾] [보기] */
+  .ctl-ind{top:calc(var(--top) + 8px)!important;left:10px;right:10px}
+  .ctl-ind .row{display:flex;gap:8px;align-items:stretch;width:100%}
+  .inddd{flex:1;min-width:0}
+  .inddd>button{width:100%;max-width:none;height:48px;padding:0 12px;justify-content:space-between;border-radius:12px}
+  #indName{font-size:14.5px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  #indSub{display:block;font-size:12px;font-weight:500;color:var(--tx-2);margin-top:1px}
+  .ctl-ind>#kindSeg,.ctl-ind .row>#levelSeg{display:none}
+  .laybtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:56px;flex:none;border:1px solid var(--line-2);border-radius:12px;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow);font-size:11.5px;font-weight:700;color:var(--tx)}
+  body.lay-open .laybtn{background:var(--tx);color:#fff;border-color:var(--tx)}
+  body.dark .laybtn{background:rgba(16,22,29,.8);color:var(--tx);border-color:rgba(255,255,255,.14)}
+  body.dark.lay-open .laybtn{background:var(--pt);color:#06140D}
+  /* 펼침: 단위·학교급·지표를 한 판에 */
+  .inddd .drop{display:none;position:fixed;left:10px;right:10px;top:calc(var(--top) + 62px);max-height:calc(100dvh - var(--top) - 80px);overflow:auto;background:var(--card);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--float);padding:12px;z-index:30;overscroll-behavior:contain}
+  .inddd.open .drop{display:block}
+  .inddd .menu,.inddd.open .menu{display:block;position:static;width:auto;max-height:none;border:0;box-shadow:none;padding:0;background:none}
+  .mset h5{font-size:12.5px;font-weight:700;color:var(--tx-2);margin:2px 2px 6px}
+  .mset h5:not(:first-child){margin-top:14px}
+  .mset .seg{display:flex;width:100%;box-shadow:none;background:var(--bg)!important;backdrop-filter:none}
+  .mset .seg button{flex:1;min-height:40px;font-size:14px;padding:0 6px}
+  .inddd .menu h4{font-size:12.5px;margin-top:14px}
+  .inddd .menu button{font-size:15px;padding:10px 10px}
+  .inddd .menu button small{font-size:12.5px;line-height:1.45}
+  /* 범례: 조작 줄 바로 아래 */
+  .legend{top:calc(var(--top) + 64px)!important;width:190px!important}
+  .legend .t{font-size:12.5px}
+  .legend .mean{font-size:12.5px}
+  /* 보기 판: 보기 단추 아래 떠 있는 판(평소엔 숨김) */
+  body .ctl-r{display:none!important}
+  body.lay-open .ctl-r{display:block!important;position:fixed;top:calc(var(--top) + 62px)!important;bottom:auto!important;right:10px;left:auto;width:250px;max-height:calc(100dvh - var(--top) - 80px);overflow:auto;padding:12px!important;border-radius:14px!important;background:var(--card)!important;box-shadow:var(--float);z-index:30;opacity:1!important;pointer-events:auto!important}
+  body.lay-open .ctl-r h4{display:block;font-size:12.5px;margin:12px 2px 6px}
+  body.lay-open .ctl-r h4:first-child{margin-top:0}
+  body.lay-open .ctl-r .tg{display:flex;font-size:14.5px;min-height:42px}
+  body.lay-open .ctl-r .tg.mobonly{display:flex}
+  body.lay-open .ctl-r .kleg{display:flex}
+  body.lay-open .ctl-r .row2{display:grid}
+  body.lay-open .ctl-r .tbtn{display:flex;height:40px;font-size:14px}
+  body.lay-open .ctl-r #btnSat{display:none}
+  body.lay-open .ctl-r #btnGyro{display:flex;flex-direction:row;justify-content:flex-start;gap:10px;width:100%;padding:0 10px;height:42px;font-size:14.5px;font-weight:600;margin-bottom:6px;border:1px solid var(--line-2);border-radius:10px}
+  body.lay-open .ctl-r .three{display:grid;grid-template-columns:repeat(3,1fr);width:auto;gap:4px}
+  body.lay-open .ctl-r .three button{height:40px;font-size:14px}
+  body.lay-open .legend{visibility:hidden}
+  /* 시군 이름표: 조금 크게(겹치면 작은 곳을 숨김) */
+  .lbl{font-size:12px}
+  .lbl span{font-size:11px}
+  /* 연도 막대: 해마다 값이 있는 지표일 때 지도 아래쪽에 얇게 */
+  body.tl-act .timeline{display:flex;left:10px;right:10px;bottom:calc(44vh + 8px);height:50px;padding:5px 10px 5px 6px;gap:8px;border-radius:14px}
+  body.tl-act.sheet-min .timeline{bottom:160px}
+  body.tl-act.sheet-full .timeline,body.lay-open .timeline,body.menu-open .timeline{opacity:0;pointer-events:none}
+  .timeline .play{width:38px;height:38px}
+  .timeline .tl-info{width:74px}
+  .timeline .tl-info .a{display:none}
+  .timeline .tl-info .b{font-size:14px;margin:0}
+  .timeline .tl-info .c{font-size:11px}
+  .timeline .tl-bars{gap:2px;min-width:0}
+  .timeline .tl-bar b{display:none}
+  .timeline .tl-bar{min-width:0}
+  .timeline .tl-bar span{font-size:10.5px;white-space:nowrap;letter-spacing:-.4px}
+  .timeline .tl-bar.pred span::after{content:none}
+  body.menu-open .ctl-ind{z-index:31}
+  .dclose{display:block;position:sticky;bottom:-12px;margin:12px -12px -12px;width:calc(100% + 24px);height:50px;border:0;border-top:1px solid var(--line);background:var(--card);color:var(--pt);font-size:15px;font-weight:700}
+  .timeline .tl-bar i{max-height:16px}
+  /* 시트 글자: 읽기 쉽게 */
+  .story p{font-size:15.5px;line-height:1.72}
+  .small{font-size:14px}
+  .sm{font-size:13px}
+  .sn{font-size:15.5px}
+  .peek{font-size:14px}
+  .ptab{font-size:15.5px}
+  .pbody{font-size:15px}
+  .sv small{font-size:12.5px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -576,10 +696,10 @@ body.flying .lbl{visibility:hidden!important}
   <div class="kpis" id="kpis"></div>
   <div class="top-r">
     <span class="ref" id="refdate"></span>
-    <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">드론 둘러보기</span></button>
+    <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">드론 </span><span class="t-m">둘러보기</span></button>
     <button class="tbtn themebtn" id="btnShare" aria-label="지금 화면 링크 공유" title="지금 보고 있는 화면 그대로 링크 공유"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     <button class="tbtn themebtn" id="btnTheme" aria-label="어두운 화면으로" title="어두운 관제실 화면 / 밝은 화면"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
-    <button class="tbtn" id="btnAbout">자료·방법</button>
+    <button class="tbtn" id="btnAbout" aria-label="자료·방법"><svg class="mobonly" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.3a2.6 2.6 0 015 .9c0 1.7-2.5 2.2-2.5 3.8M12 17.2v.1"/></svg><span class="deskonly">자료·방법</span></button>
   </div>
 </header>
 
@@ -598,7 +718,8 @@ body.flying .lbl{visibility:hidden!important}
 
 <div class="ctl-ind">
   <div class="row">
-    <div class="inddd" id="inddd"><button id="indBtn" aria-haspopup="true"><span id="indName">지표</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button><div class="menu" id="indMenu"></div></div>
+    <div class="inddd" id="inddd"><button id="indBtn" aria-haspopup="true"><span class="ib"><span id="indName">지표</span><span id="indSub"></span></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button><div class="drop"><div class="mset" id="mset"></div><div class="menu" id="indMenu"></div><button class="dclose" id="dClose">지도 보기</button></div></div>
+    <button class="laybtn" id="btnLay" aria-label="지도 보기 설정" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>보기</span></button>
     <div class="seg" id="levelSeg"><button data-lv="sigun" aria-pressed="true">시군</button><button data-lv="emd" aria-pressed="false">읍면동</button><button data-lv="hak" aria-pressed="false" title="초등학교 통학구역">학구</button></div>
   </div>
   <div class="seg kinds" id="kindSeg"></div>
@@ -616,6 +737,7 @@ body.flying .lbl{visibility:hidden!important}
   <button class="tg" data-l="closed" aria-pressed="false"><span class="bx"></span>폐교 재산</button>
   <button class="tg" data-l="bj" aria-pressed="false"><span class="bx"></span>도서벽지 학교만</button>
   <button class="tg" data-l="rotate" aria-pressed="false"><span class="bx"></span>천천히 돌리기</button>
+  <button class="tg mobonly" id="btnTheme2" aria-pressed="false"><span class="bx"></span>어두운 화면</button>
   <div class="row2"><button class="tbtn" id="btnReset">경북 전체</button><button class="tbtn" id="btnUlleung">울릉도·독도</button></div>
 </div>
 
@@ -632,9 +754,10 @@ body.flying .lbl{visibility:hidden!important}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="simbar" id="simbar"><span id="simbarTxt"></span><button id="simStop">비교 끝내기</button></div>
 
+<div class="ttop" id="ttop" aria-live="polite"></div>
 <div class="tour" id="tour" aria-live="polite">
   <div class="nav"><button id="tPrev">이전</button><button id="tNext">다음</button><button id="tStop">끝내기</button></div>
-  <div class="k" id="tK"></div><h3 id="tH"></h3><p id="tP"></p>
+  <div class="k" id="tK"></div><h3 id="tH"></h3><p id="tP"></p><p class="twhy" id="tWhy"></p>
   <div class="bar"><i id="tBar"></i></div>
 </div>
 
@@ -775,7 +898,7 @@ const pitched = () => S.view !== '2d';
 const FYEARS = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032];
 const isFuture = () => !!IND[S.ind].future;
 const colIdx = () => (isFuture() ? S.fy : S.yi);
-// i: 0~4 실제, 5~10 추정(초·중만, 고·특수는 추정 없음 → null)
+// i: 0~4 실제, 5~10 추정(초·중은 학구 인구, 고는 시군 중3 흐름, 특수는 추정 없음 → null)
 const stuIdx = (s, i) => (i <= 4 ? s.stu[i] : s.pj ? s.pj.stu[i - 5] : null);
 const indUnit = (k = S.ind) => IND[k].unit;
 const fmtInd = (v, k = S.ind) => { const I = IND[k]; if (I.cat) return v; if (v === null || v === undefined) return '–'; return (I.signed ? sgn(v, I.d) : fmt(v, I.d)) + (I.unit === '%' ? '%' : ''); };
@@ -895,7 +1018,7 @@ function initMap() {
     paint(); // 높이 0에서 솟아오르기 시작
     if (!touring && S.school === null) map.easeTo({ ...start0, duration: 3000, easing: (t) => 1 - Math.pow(1 - t, 3) });
   };
-  map.on('style.load', setupLayers);
+  map.on('style.load', () => DATA_READY.then(setupLayers));
   let loadFail = setTimeout(() => { if (!$('#loading').classList.contains('done')) $('#loading').textContent = '배경 지도를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 20000);
   map.once('load', () => { clearTimeout(loadFail); if (MOBILE) setTimeout(() => $$('.maplibregl-ctrl-attrib').forEach((a) => { a.classList.remove('maplibregl-compact-show'); a.removeAttribute('open'); }), 300); });
 }
@@ -1224,7 +1347,7 @@ function placeLabels() {
   if (!map) return;
   let hs = 0; for (const k in curH) hs += curH[k];
   const key = map.getZoom().toFixed(2) + '|' + map.getPitch().toFixed(1) + '|' + hs + '|' + S.view + S.level;
-  if (key === PL_LAST && !placeLabels.force) return; PL_LAST = key;
+  if (key === PL_LAST && !placeLabels.force) return; PL_LAST = key; declutterSoon(); // 움직임이 멎으면 겹침 다시 정리
   const bar = S.view === 'bar' && S.level === 'sigun' && map.getZoom() < BAR_MAXZ;
   const sinP = Math.sin((map.getPitch() * Math.PI) / 180), z = map.getZoom();
   const op = z <= 9.4 ? 1 : z >= 10.6 ? 0 : 1 - (z - 9.4) / 1.2;
@@ -1237,6 +1360,23 @@ function placeLabels() {
     m.setOffset([0, -((curH[sg] * f) / mpp) * sinP]);
   }
 }
+let DC_PRIO = null;
+function declutter() {
+  if (!labelMarkers.length || FLY_HIDDEN) return;
+  DC_PRIO ||= Object.fromEntries(D.sigunNames.map((sg) => [sg, D.schools.filter((x) => x.sigun === sg).reduce((a, x) => a + (x.stu[4] || 0), 0)]));
+  const items = labelMarkers.map((m) => { const el = m.getElement(); el.classList.remove('dc'); return { el, sg: el.dataset.sg }; })
+    .map((x) => ({ ...x, r: x.el.getBoundingClientRect() })).filter((x) => x.r.width)
+    .sort((a, b) => (b.sg === S.sigun) - (a.sg === S.sigun) || DC_PRIO[b.sg] - DC_PRIO[a.sg]);
+  const kept = [], hit = (r) => kept.some((k) => r.left < k.r.right - 3 && r.right > k.r.left + 3 && r.top < k.r.bottom - 2 && r.bottom > k.r.top + 2);
+  for (const it of items) {
+    const d0 = it.el._dy || 0, r0 = { left: it.r.left, right: it.r.right, top: it.r.top - d0, bottom: it.r.bottom - d0 }; // 옮기기 전 자리(DOMRect는 펼치면 값이 빠지므로 새 객체로)
+    let dy = 0;
+    if (hit(r0)) { const h = r0.bottom - r0.top + 2; dy = [-h, h].find((d) => !hit({ ...r0, top: r0.top + d, bottom: r0.bottom + d })); if (dy === undefined) { it.el.classList.add('dc'); dy = 0; } }
+    it.el._dy = dy; it.el.style.marginTop = dy ? dy + 'px' : '';
+    if (!it.el.classList.contains('dc')) kept.push({ r: { left: r0.left, right: r0.right, top: r0.top + dy, bottom: r0.bottom + dy } });
+  }
+}
+let dcT = 0; function declutterSoon() { clearTimeout(dcT); dcT = setTimeout(declutter, 160); }
 function buildLabels() {
   labelMarkers.forEach((m) => m.remove());
   labelMarkers = D.sigunNames.map((sg) => {
@@ -1247,8 +1387,10 @@ function buildLabels() {
   });
   updateLabels();
   map.on('move', placeLabels);
+  map.on('moveend', declutterSoon);
 }
 function updateLabels() {
+  declutterSoon();
   const showV = S.level === 'sigun';
   for (const m of labelMarkers) {
     const el = m.getElement(), sg = el.dataset.sg;
@@ -1455,6 +1597,14 @@ function renderKPIs() {
 }
 
 /* ---------- 지표 메뉴·학교급 ---------- */
+if (MOBILE) {
+  const ms = $('#mset');
+  ms.insertAdjacentHTML('beforeend', '<h5>지역 단위</h5>'); ms.appendChild($('#levelSeg'));
+  ms.insertAdjacentHTML('beforeend', '<h5>학교급</h5>'); ms.appendChild($('#kindSeg'));
+  ms.insertAdjacentHTML('beforeend', '<h5>지도에 칠할 지표</h5>');
+}
+const LV_NAME = { sigun: '시군', emd: '읍면동', hak: '초등학구' };
+function renderIndSub() { const k = kindlessNow() ? '' : ' · ' + (S.kind === 'all' ? '전체 학교' : KIND_SHORT[S.kind]); $('#indSub').textContent = LV_NAME[S.level] + k; }
 function renderIndMenu() {
   $('#indName').textContent = IND[S.ind].label;
   const groups = {};
@@ -1466,13 +1616,14 @@ function renderIndMenu() {
 function renderKinds() {
   const dis = kindlessNow();
   $('#kindSeg').innerHTML = KIND_KEYS.map((k) => `<button data-k="${k}" aria-pressed="${k === S.kind}">${k === 'all' ? '전체 학교' : KIND_SHORT[k]}</button>`).join('');
-  $('#kindSeg').classList.toggle('dim', dis);
+  $('#kindSeg').classList.toggle('dim', dis); renderIndSub();
   $('#kindSeg').title = dis ? (S.level === 'emd' ? '읍면동 값은 전체 학교 기준입니다(지도 위 학교 표시만 거릅니다)' : '이 지표는 학교급 구분이 없습니다(지도 위 학교 표시만 거릅니다)') : '';
 }
 
 /* ---------- 연도 막대 ---------- */
 function renderTimeline() {
   const I = IND[S.ind];
+  document.body.classList.toggle('tl-act', !!(I.future || yearlyNow()));
   if (I.future) return renderFutureTimeline();
   const tk = S.kind === 'all' || kindlessNow() ? 'all' : S.kind;
   const yr = yearlyNow();
@@ -1483,7 +1634,7 @@ function renderTimeline() {
   $('#tlBars').innerHTML = YEARS.map((yr, i) => {
     const on = yr ? i === S.yi : i === 4;
     const lock = !yr || (S.ind === 'change' && i === 0);
-    return `<button class="tl-bar${lock && yr ? ' lock' : ''}" data-y="${i}" aria-pressed="${on}" ${lock ? 'disabled' : ''} title="${yr}년 경북 ${KIND_SHORT[tk] === '전체' ? '' : KIND_SHORT[tk] + ' '}학생 ${fmt(series[i])}명"><b class="num">${fmt(series[i] / 10000, 1)}만</b><i style="height:${Math.round((series[i] / mx) * 34)}px"></i><span>${yr}</span></button>`;
+    return `<button class="tl-bar${lock && yr ? ' lock' : ''}" data-y="${i}" aria-pressed="${on}" ${lock ? 'disabled' : ''} title="${yr}년 경북 ${KIND_SHORT[tk] === '전체' ? '' : KIND_SHORT[tk] + ' '}학생 ${fmt(series[i])}명"><b class="num">${fmt(series[i] / 10000, 1)}만</b><i style="height:${Math.round((series[i] / mx) * 34)}px"></i><span>${MOBILE ? "'" + String(yr).slice(2) : yr}</span></button>`;
   }).join('');
   const ch = pct(series[0], series[y]);
   $('#tlInfo').innerHTML = `<div class="a">${YEARS[y]}년 경북 ${tk === 'all' ? '' : KIND_SHORT[tk] + ' '}학생</div><div class="b num">${fmt(series[y])}명</div><div class="c">${y ? `2022년보다 ${sgn(ch)}%` : "기준 연도"}${yr ? "" : " · 지표는 2026"}</div>`;
@@ -1491,7 +1642,7 @@ function renderTimeline() {
 }
 function renderFutureTimeline() {
   const T = D.stats.pjTotal, mx = Math.max(...T.stu);
-  $('#tlBars').innerHTML = FYEARS.map((yr, i) => `<button class="tl-bar${i > 4 ? ' pred' : ''}" data-fy="${i}" aria-pressed="${i === S.fy}" title="${yr}년 경북 초·중 학생 ${i > 4 ? '(추정) ' : ''}${fmt(T.stu[i])}명"><b class="num">${fmt(T.stu[i] / 10000, 1)}만</b><i style="height:${Math.round((T.stu[i] / mx) * 22)}px"></i><span>${yr}</span></button>`).join('');
+  $('#tlBars').innerHTML = FYEARS.map((yr, i) => `<button class="tl-bar${i > 4 ? ' pred' : ''}" data-fy="${i}" aria-pressed="${i === S.fy}" title="${yr}년 경북 초·중 학생 ${i > 4 ? '(추정) ' : ''}${fmt(T.stu[i])}명"><b class="num">${fmt(T.stu[i] / 10000, 1)}만</b><i style="height:${Math.round((T.stu[i] / mx) * 22)}px"></i><span>${MOBILE ? "'" + String(yr).slice(2) : yr}</span></button>`).join('');
   const ch = pct(T.stu[4], T.stu[S.fy]);
   $('#tlInfo').innerHTML = `<div class="a">${FYEARS[S.fy]}년 경북 초·중 학생${S.fy > 4 ? ' (추정)' : ''}</div><div class="b num">${fmt(T.stu[S.fy])}명</div><div class="c">${S.fy === 4 ? '기준 2026' : `2026년보다 ${sgn(ch)}%`}</div>`;
   $('#play').disabled = false; $('#play').style.opacity = 1;
@@ -1805,9 +1956,10 @@ const STORIES = [
       return `<p>아래 ▶를 누르면 2022년부터 2032년까지 시군 기둥이 줄어드는 모습을 볼 수 있습니다. 2027년부터는 추정입니다.</p>
       <p>지금 학생 60명 이하 학교는 ${fmt(T.small2026)}곳인데, 2031년에는 <b>약 ${fmt(T.small2031)}곳</b>으로 늘어날 것으로 보입니다. 지금은 60명이 넘지만 5년 안에 60명 아래로 내려갈 학교가 <b>${list.length}곳</b>입니다.</p>
       <p>가장 많이 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다. 학교를 누르면 해마다의 추정과 가까운 학교까지 통학 거리 비교를 볼 수 있습니다.</p>
+      ${T.high ? `<p>고등학교는 통학구역이 없어 시군 중3 학생 수 흐름으로 따로 어림했습니다(지도 기둥에는 넣지 않음). 경북 고등학생은 2026년 ${fmt(T.high[4])}명에서 ${T.high[6] > T.high[4] ? `2028년 약 ${fmt(Math.round(T.high[6] / 100) * 100)}명까지 조금 늘었다가 ` : ''}2031년 <b>약 ${fmt(Math.round(T.high[9] / 100) * 100)}명(${sgn(pct(T.high[4], T.high[9]))}%)</b>으로 줄어듭니다. 지금 중학생이 차례로 올라가므로 초·중보다 늦게, 덜 줄어듭니다.</p>` : ''}
       <p>학생 감소 신호가 3개 이상 겹친 초·중은 <b>${D.schools.filter((x) => x.riskN >= 3).length}곳</b>입니다. 지표 <b>「학생 감소 신호 3개 이상」</b>으로 시군별로 볼 수 있습니다. 학교의 앞날을 뜻하는 숫자가 아니라, 학생 수 변화를 살필 곳을 알려 주는 참고 지표입니다.</p>
       <div class="sec-l">5년 안에 60명 아래로 내려갈 학교</div><ul class="slist">${list.map((s) => schoolRow(s).replace('</span></button>', `</span></button>`)).join('')}</ul>`;
-    }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 추정입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했고, 고등·특수학교는 추정하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
+    }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 추정입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했습니다. 고등학교는 시군(특성화·특목고는 경북 전체) 중3 학생 수 흐름으로 따로 어림했고, 특수학교는 추정하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
   { id: 'hak', g: '앞으로 5년', q: '우리 학교 학구에는 앞으로 올 아이가 몇 명일까?', s: '초등학구 535곳의 0~5세·학생 변화 추정', ind: 'hakKids', level: 'hak', chips: ['hakKids', 'hakChg', 'hakDens', 'hakArea'],
     cam: { pitch: 50, bearing: -10 },
     hero: () => { const zs = Object.values(D.hak).filter((z) => z.kids !== null); const few = zs.filter((z) => z.kids < 12).length; return { l: '0~5세가 12명 미만인 초등학구', v: `${few}곳 <small>/ ${zs.length}곳</small>`, d: '학구 안에 지금 사는 0~5세(2026. 8. 주민등록)' }; },
@@ -2253,7 +2405,7 @@ function discHtml(s) {
   <p class="small muted" style="margin:6px 0 0">학교알리미 2026 공시 원자료(참고용, 우열 비교가 아님)</p>`;
 }
 function forecastHtml(s) {
-  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 추정하지 않습니다.</p><div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
+  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">특수학교는 학생 수 추정을 하지 않습니다.</p><div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
   const all = [...s.stu, ...s.pj.stu], lab = FYEARS.map((y) => "'" + String(y).slice(2));
   const c31 = pct(s.stu[4], s.pj.stu[4]);
   const lines = [];
@@ -2264,7 +2416,7 @@ function forecastHtml(s) {
   if (s.pj.kids05 !== undefined) lines.push(`통학구역에 사는 0~5세 아이 약 <b class="num">${fmt(s.pj.kids05)}명</b> (앞으로 6년 동안 입학할 아이들, 사립·다른 학교 진학 포함)`);
   const sim = s.ze !== undefined || s.zm !== undefined;
   return `<div class="sec-l">학생 수 추정 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
-  <p class="small muted">미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}). 자료·방법 참고.</p></div>
+  <p class="small muted">${s.kind === '고등학교' ? `고등학교는 통학구역이 없어, 올해 입학생 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>가 해마다 달라지는 비율을 곱한 어림값입니다${s.pj.how === 'gb' ? '(특성화·특목고는 경북 곳곳에서 오므로)' : ''}. 다른 지역으로 오가는 학생 비율은 올해와 같다고 봤습니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
   ${sim ? `<button class="simbtn" data-sim="${s.i}">가장 가까운 다른 학교까지 통학 거리 비교</button>` : ''}<div id="simOut"></div>
   <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
 }
@@ -2605,7 +2757,7 @@ async function reportHwpx(s, btn) {
     const V = {
       NAME: s.name, SUB: `${s.sigun} ${s.emd || ''} · ${s.kind} · ${s.found}${s.bj ? ' · ' + s.bj : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}`,
       STU: f0(s.stu[4]) + '명', CLS: f0(s.cls[4]), TCH: f0(s.tch[4]) + '명', PC: f1(s.perClass), PT: f1(s.perTeacher), ENT: f0(s.entrants) + '명',
-      FCNOTE: s.pj ? '이미 태어나 지금 통학구역에 사는 아이(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값' : '이 학교급은 추정하지 않음',
+      FCNOTE: !s.pj ? '이 학교급은 추정하지 않음' : s.kind === '고등학교' ? `통학구역이 없어 올해 입학생 수에 ${s.pj.how === 'gb' ? '경북 전체' : s.sigun} 중3 학생 수 변화 비율을 곱한 어림값` : '이미 태어나 지금 통학구역에 사는 아이(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값',
       RISK: r.length ? r.join(' · ') : '통계로 보이는 감소 신호가 없습니다',
       SP: f0(s.sitePer) + '㎡', MPC: f1(m.perClass), MPT: f1(m.perTeacher), MSP: f0(m.sitePer) + '㎡',
       MEAL: d ? d.meal || '-' : '-', TEMP: d && d.temp !== null ? fmt(d.temp, 1) + '%' : '-', CLUB: d && d.club !== null ? fmt(d.club) + '개' : '-',
@@ -2657,7 +2809,7 @@ async function reportHwpx(s, btn) {
 /* ---------- 학생 감소 신호 ----------
    통계·추정에서 확인되는 숫자만 모은다(학교의 앞날을 판단하지 않음) */
 function riskOf(s) {
-  if (s.kind === '특수학교' || s.kind === '고등학교' && !s.pj) {
+  if (s.kind === '특수학교' || s.kind === '고등학교') {
     const out = [];
     if (s.kind === '고등학교') { if ((s.stu[4] || 0) <= 60) out.push('지금 학생 60명 이하'); if (s.entrants === 0) out.push('올해 신입생 0명'); }
     return out;
@@ -2794,6 +2946,51 @@ const TOUR_TEXT = {
     `빌려준 곳 ${D.closed.filter((c) => c.use === '대부').length} · 직접 쓰는 곳 ${D.closed.filter((c) => c.use === '자체활용').length} · <b>비어 있는 곳 ${un}</b>`,
     `2021년 이후 문 닫은 학교 ${rec}곳`]; },
 };
+// 장면마다 왜 봐야 하는지(숫자가 아니라 읽는 법)
+const TOUR_WHY = {
+  decline: '같은 시군 안에서도 동네마다 차이가 큽니다. 드론이 내려가면 건물 색이 그 읍면동의 학생 수 증감률이고, 초록 건물이 학교입니다. 학생이 줄면 학급 수와 교원 배정이 먼저 줄어듭니다.',
+  forecast: '추정은 이미 태어나 지금 통학구역에 사는 아이를 바탕으로 합니다. 2027년부터 기둥이 낮아지는 만큼이 앞으로 줄어들 학생이고, 빨간 테두리 이름표는 5년 안에 60명 아래로 내려갈 것으로 보이는 학교입니다.',
+  future: '0~2세 아이는 4~6년 뒤 초등학교 입학생이 됩니다. 지금 초1~3 또래보다 얼마나 적은지가 몇 년 뒤 입학생이 줄어드는 폭을 미리 보여 줍니다.',
+  small: '학생 60명 이하는 흔히 쓰는 작은학교 기준입니다. 작은학교가 모인 곳은 복식학급, 교원 한 명이 여러 과목을 맡는 일, 공동 교육과정 같은 운영 과제가 함께 생깁니다.',
+  mountain: '산간 학교는 가까운 다른 학교까지 거리가 멀어, 학생이 줄어도 통학 거리를 먼저 살펴야 합니다. 3D 지형으로 보면 골짜기마다 학교가 떨어져 있는 모습이 보입니다.',
+  closed: '문 닫은 학교는 교육청 재산으로 남아 빌려주거나(대부), 교육청이 직접 쓰거나, 비어 있습니다. 비어 있는 곳이 지역 활용을 기다리는 곳입니다.',
+};
+// 지점이 들어가는 읍면동
+function emdAt(lon, lat) {
+  for (const f of D.emdGeo.features) {
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    if (polys.some((p) => inRing([lon, lat], p[0]))) return f.properties.code;
+  }
+  return null;
+}
+const kmBetween = (a, b) => { const x = (b[0] - a[0]) * 111.32 * Math.cos((a[1] * Math.PI) / 180), y = (b[1] - a[1]) * 110.54; return Math.hypot(x, y); };
+// 위 설명판: phase 'all' = 경북 전체를 보는 동안, 'drone' = 낮게 날 때
+function tourTop(st, phase) {
+  const el = $('#ttop'); if (!el) return;
+  renderReadme(); const read = $('#readme').innerHTML;
+  const pin = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  if (phase !== 'drone') {
+    el.innerHTML = `<div class="r1">${pin}<b>경북 22개 시군 전체</b><span>${esc(st.g)} · ${esc(IND[S.ind].label)}</span></div><div class="r3">${read}</div>`;
+    el.classList.add('on'); return;
+  }
+  const dr = DRONE[st.id], at = dr.center; // 드론이 바라보는 곳(휴대폰은 화면 위쪽으로 비켜 둠)
+  const code = emdAt(at[0], at[1]), e = code && D.stats.emd[code];
+  const place = e ? `${esc(e.sigun)} ${esc(e.emd)}` : '경북';
+  const bits = [];
+  if (e) {
+    if (e.students) bits.push(`학생 <b>${fmt(e.students)}명</b>${e.s22 ? ` (2022년 ${fmt(e.s22)}명, <b>${sgn(pct(e.s22, e.students))}%</b>)` : ''}`);
+    if (e.k05 !== undefined) bits.push(`0~5세 ${fmt(e.k05)}명`);
+    if (st.id === 'mountain' && e.alt !== undefined) bits.push(`해발 약 ${fmt(e.alt)}m`);
+    if (st.id === 'closed' && e.closed) bits.push(`폐교 재산 ${e.closed}곳`);
+  }
+  const near = D.schools.filter((x) => !x.state && x.lat).map((x) => [x, kmBetween(at, [x.lon, x.lat])]).filter(([, d]) => d < 4).sort((a, b) => a[1] - b[1]).slice(0, 3)
+    .map(([x]) => {
+      const v = st.id === 'forecast' && x.pj ? `${fmt(x.stu[4])}→${fmt(x.pj.stu[4])}명(2031)` : `${fmt(x.stu[4])}명${x.stu[0] && Math.abs(pct(x.stu[0], x.stu[4])) <= 100 ? ' ' + sgn(pct(x.stu[0], x.stu[4]), 0) + '%' : ''}`;
+      return `<span class="${(x.stu[4] || 0) <= 60 && x.kind !== '특수학교' ? 'sm60' : ''}"><i style="background:${KIND_COLOR[x.kind]}"></i>${esc(shortName(x.name))} ${v}</span>`;
+    });
+  el.innerHTML = `<div class="r1">${pin}<b>${place}</b><span>상공 · ${esc(st.g)}</span></div>${bits.length ? `<div class="r2">이 동네 ${bits.join(' · ')}</div>` : ''}${near.length ? `<div class="r2 nr">가까운 학교 ${near.join('')}</div>` : ''}<div class="r3">${read}</div>`;
+  el.classList.add('on');
+}
 // 둘러보기 시작 때 착륙지 위성 조각과 건물을 한꺼번에 미리 받아 둔다(비행 중 네트워크 기다림 없애기)
 function tourPrefetch() {
   const lon2x = (lon, z) => Math.floor(((lon + 180) / 360) * 2 ** z);
@@ -2838,13 +3035,15 @@ function tourStep() {
   if (dr && pitched()) tourDroneT = setTimeout(() => {
     if (!touring || tourIdx !== step) return;
     map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 1.1 : dr.zoom, pitch: MOBILE ? Math.min(55, dr.pitch) : Math.min(62, dr.pitch) /* 너무 눕히면 먼 곳 조각까지 받아야 해 빈 사각형이 보인다 */, offset: MOBILE ? [0, -Math.round(innerHeight * 0.2)] : [0, 0], bearing: dr.bearing, duration: 4600, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
-    map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ flyLabelsKeep: true, bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
+    map.once('moveend', () => { if (touring && tourIdx === step) tourTop(st, 'drone'); if (touring && tourIdx === step) map.easeTo({ flyLabelsKeep: true, bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
   }, dr.at || 5200);
   const h = st.hero();
   $('#tK').textContent = `${tourIdx + 1} / ${TOUR.length} · ${st.g}`;
   $('#tH').textContent = st.q;
   const tmp = document.createElement('div'); tmp.innerHTML = st.body(); const firstP = tmp.querySelector('p');
   const lines = (TOUR_TEXT[st.id] ? TOUR_TEXT[st.id]() : [firstP ? firstP.textContent : '']).filter(Boolean);
+  $('#tWhy').textContent = TOUR_WHY[st.id] || '';
+  tourTop(st, 'all');
   $('#tP').innerHTML = `<span class="tbig">${h.v.replace(/<[^>]+>/g, '')}</span> <span class="tl">${esc(h.l)}</span><ul class="tlist">${lines.map((x) => '<li>' + x + '</li>').join('')}</ul>`;
   tourT0 = performance.now();
   cancelAnimationFrame(tourRaf);
@@ -2863,7 +3062,7 @@ function stopTour() {
   cancelAnimationFrame(smoothRaf);
   try { if (map.setPrefetchZoomDelta) map.setPrefetchZoomDelta(TOUR_PREFETCH); } catch (e) {}
   touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
-  document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
+  document.body.classList.remove('touring'); $('#tour').classList.remove('on'); $('#ttop').classList.remove('on'); map.resize();
   try { map.setPixelRatio(MOBILE ? Math.min(devicePixelRatio, 2) : devicePixelRatio); } catch (e) {}
   vbUpdate();
 }
@@ -2888,7 +3087,7 @@ function renderAbout() {
   <li>입학생 전망: 행정동별 주민등록 0~2세 ÷ 6~8세 − 1(${esc(m.popMonth)} 말). 전입·전출, 사립·특수학교 진학은 반영하지 않은 단순 비교입니다.</li>
   <li>초등학구 색칠: 학구도안내시스템 초등 통학구역 535곳. 학구 안 0~5세는 읍면동 주민등록 인구를 겹치는 면적 비율로 나눈 값입니다.</li>
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
-  <li>5년 뒤 추정(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
+  <li>5년 뒤 추정(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 고등학교는 통학구역이 없어, 2026년 입학생 수에 같은 시군 중3 학생 수(특성화·특목고는 경북 전체 중3)가 해마다 달라지는 비율을 곱해 입학생을 어림했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
   <li>공시정보 뷰어: 학교알리미 공시 21개 항목(입학생·전출입·체력·교원·방과후·상담·급식·보건·시설 등)을 학교마다 모아 앱 안에서 보여 줍니다. 코드처럼 사람이 읽을 필요 없는 칸은 숨겼습니다.</li>
   <li>통학 거리 비교: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
   <li>건물 3D: 크게 확대하면 브이월드 오픈API(국토교통부 도로명주소건물)에서 화면 둘레 건물만 그때그때 불러와 지상층수 × 3.3m 높이로 세웁니다(저장하지 않음). 색은 건물이 속한 읍면동의 지표, 초록은 이름에 '학교'가 들어간 건물입니다.</li>
@@ -2926,15 +3125,19 @@ function readHash() {
   return p;
 }
 
+function setLay(on) { document.body.classList.toggle('lay-open', on); const b = $('#btnLay'); if (b) b.setAttribute('aria-expanded', on); }
 /* =========================================================
    이벤트 연결
    ========================================================= */
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button, li[data-sg], li[data-emd], li[data-hak], tr[data-sg], tr[data-kind]');
   if (!t || !t.closest('#inddd')) { $('#inddd').classList.remove('open'); document.body.classList.remove('menu-open'); }
+  if (!e.target.closest('#ctlR') && !(t && t.id === 'btnLay')) setLay(false);
+  if (t && t.id === 'dClose') { $('#inddd').classList.remove('open'); document.body.classList.remove('menu-open'); return; }
+  if (t && t.id === 'btnLay') { setLay(!document.body.classList.contains('lay-open')); return; }
   if (!t) return;
   const d = t.dataset;
-  if (t.id === 'indBtn') { $('#inddd').classList.toggle('open'); document.body.classList.toggle('menu-open', $('#inddd').classList.contains('open')); return; }
+  if (t.id === 'indBtn') { setLay(false); $('#inddd').classList.toggle('open'); document.body.classList.toggle('menu-open', $('#inddd').classList.contains('open')); return; }
   if (d.ind) { S.ind = d.ind; if (!IND[S.ind].lv.includes(S.level)) S.level = IND[S.ind].lv[0]; $('#inddd').classList.remove('open'); document.body.classList.remove('menu-open'); paint(); if (S.story) renderStory(); return; }
   if (d.lv && !t.disabled) { if (!IND[S.ind].lv.includes(d.lv)) S.ind = { sigun: 'change', emd: 'k05', hak: 'hakChg' }[d.lv]; S.level = d.lv; map.setFilter('hak-hover', ['==', ['get', 'code'], '']); S.sigun = null; S.emd = null; map.setFilter('sel-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); paint(); renderPanel(); return; }
   if (d.k) { S.kind = d.k; paint(); applySchoolFilter(); if (S.story || S.tab === 'r') renderPanel(); return; }
@@ -2972,7 +3175,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'tStop') { stopTour(); return; }
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }
   if (t.id === 'tPrev') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); return; }
-  if (t.id === 'btnTheme') { setTheme(!DARK); return; }
+  if (t.id === 'btnTheme' || t.id === 'btnTheme2') { setTheme(!DARK); $('#btnTheme2').setAttribute('aria-pressed', DARK); return; }
   if (d.dv !== undefined) { openDV(+d.dv); return; }
   if (d.act === 'dv-x') { closeDV(); return; }
   if (d.act === 'report') { schoolReport(D.schools[S.school]); return; }
@@ -2992,10 +3195,12 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* ---------- 시작 ---------- */
+let DATA_READY = null;
 (async () => {
-  try { await load(); } catch (e) { $('#loading').textContent = '자료를 불러오지 못했습니다. 새로고침해 주세요.'; return; }
+  DATA_READY = load();
   const p = readHash();
   initMap();
+  try { await DATA_READY; } catch (e) { $('#loading').textContent = '자료를 불러오지 못했습니다. 새로고침해 주세요.'; return; }
   // 지도 레이어가 준비되면(setupLayers 끝) 한 번 실행 — 'load' 이벤트 순서에 기대지 않는다
   routeInitial = () => {
     if (p.get('s') || p.get('sg') || p.get('q')) S.introPending = false;
