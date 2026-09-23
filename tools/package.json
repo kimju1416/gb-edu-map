@@ -13,6 +13,7 @@
   "dependencies": {
     "mapshaper": "^0.7.66",
     "playwright-core": "^1.63.0",
+    "pngjs": "^7.0.0",
     "xlsx": "^0.18.5"
   }
 }

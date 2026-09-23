@@ -37,6 +37,9 @@ python scripts/01_kess_extract.py
 bash scripts/00_boundaries.sh
 node scripts/02_build.js
 node scripts/03_geocode_fallback.js && node scripts/02_build.js
+node scripts/05_zones.js   # 학구 경계(키 없음) → raw/zones_*.geojson, mapshaper로 docs/data에 단순화
+node scripts/06_population.js   # 행정동 연령별 인구·학구 연결
+node scripts/07_elevation.js   # 학교 해발 고도
 python scripts/04_verify.py   # 한 곳이라도 다르면 실패로 끝남
 ```
 

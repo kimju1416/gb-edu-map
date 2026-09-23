@@ -194,15 +194,32 @@ body.menu-open .legend{visibility:hidden}
 .tg .bx{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line-2);flex:none;display:grid;place-items:center}
 .tg[aria-pressed=true] .bx{background:var(--pt);border-color:var(--pt)}
 .tg[aria-pressed=true] .bx::after{content:"";width:8px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#F1EFE9;border-radius:9px;padding:3px}
-.two button{border:0;background:none;padding:7px 0;border-radius:7px;font-size:13px;font-weight:600;color:var(--tx-2)}
-.two button[aria-pressed=true]{background:var(--card);color:var(--tx);box-shadow:var(--shadow)}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;background:#F1EFE9;border-radius:9px;padding:3px}
+.three button{border:0;background:none;padding:7px 0;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--tx-2)}
+.three button[aria-pressed=true]{background:var(--card);color:var(--tx);box-shadow:var(--shadow)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.row2 .tbtn{margin-top:0;padding:0 6px;font-size:12.5px}
+.tg small{font-weight:400;font-size:11.5px}
+.readme{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--top) + 102px);z-index:4;background:rgba(255,255,255,.94);border:1px solid var(--line-2);border-radius:999px;padding:7px 14px;font-size:13px;box-shadow:var(--shadow);max-width:min(620px,calc(100vw - 700px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.readme b{color:var(--pt)}
+.glance{border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin-bottom:6px}
+.glance h3{margin:0;padding:14px 16px 4px;font-size:16px;letter-spacing:-.01em}
+.glance .why{padding:0 16px 12px;font-size:13px;line-height:1.6;color:var(--tx-2);margin:0}
+.gl-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.gl-grid button{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);text-align:left;padding:12px 14px;min-height:96px}
+.gl-grid button:nth-child(2n){border-right:0}.gl-grid button:nth-last-child(-n+2){border-bottom:0}
+.gl-grid button:hover{background:#F7F5F0}
+.gl-grid b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;color:#8A3E14}
+.gl-grid b.g{color:var(--pt)}
+.gl-grid span{display:block;font-size:12.5px;line-height:1.45;color:var(--tx);margin-top:3px}
+.gl-grid em{display:block;font-style:normal;font-size:12px;color:var(--pt);margin-top:5px;font-weight:600}
+.zone-box{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--pt-line);background:var(--pt-soft);border-radius:var(--r1);padding:9px 12px;font-size:13.5px;margin-top:12px}
+.zone-box b{font-weight:700}
 .ctl-r .tbtn{width:100%;justify-content:center;margin-top:8px}
 .kleg{display:flex;flex-wrap:wrap;gap:4px 10px;padding:2px 6px 4px;font-size:12px;color:var(--tx-2)}
 .kleg span{display:inline-flex;align-items:center;gap:5px}
 .kleg i{width:9px;height:9px;border-radius:50%;display:inline-block}
 
-.legend{position:fixed;left:420px;bottom:110px;z-index:5;background:rgba(255,255,255,.95);border:1px solid var(--line-2);border-radius:var(--r2);padding:10px 12px;box-shadow:var(--shadow);width:310px}
+.legend{position:fixed;left:420px;bottom:94px;z-index:5;background:rgba(255,255,255,.95);border:1px solid var(--line-2);border-radius:var(--r2);padding:10px 12px;box-shadow:var(--shadow);width:310px}
 .legend .t{font-size:12.5px;font-weight:600;margin-bottom:6px}
 .legend .t small{font-weight:500;color:var(--tx-3);margin-left:4px}
 .lg-bar{display:flex;gap:2px}
@@ -216,7 +233,7 @@ body.menu-open .legend{visibility:hidden}
 .lg-cat i{width:12px;height:12px;border-radius:3px}
 .legend .foot{font-size:12px;color:var(--tx-3);margin-top:6px;line-height:1.4}
 
-.timeline{position:fixed;left:420px;right:12px;bottom:12px;z-index:5;height:86px;background:rgba(255,255,255,.96);border:1px solid var(--line-2);border-radius:var(--r2);box-shadow:var(--shadow);display:flex;align-items:stretch;gap:12px;padding:10px 14px}
+.timeline{position:fixed;left:420px;right:12px;bottom:12px;z-index:5;height:70px;background:rgba(255,255,255,.96);border:1px solid var(--line-2);border-radius:var(--r2);box-shadow:var(--shadow);display:flex;align-items:stretch;gap:12px;padding:10px 14px}
 .play{width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);background:var(--card);align-self:center;display:grid;place-items:center;flex:none}
 .play:hover{border-color:var(--pt);color:var(--pt)}
 .tl-info{width:190px;flex:none;display:flex;flex-direction:column;justify-content:center}
@@ -225,7 +242,7 @@ body.menu-open .legend{visibility:hidden}
 .tl-info .c{font-size:12px;color:var(--tx-3);margin-top:1px}
 .tl-bars{flex:1;display:flex;align-items:flex-end;gap:8px;min-width:0}
 .tl-bar{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;height:100%;padding:0;gap:4px}
-.tl-bar i{display:block;background:#D8D3C6;border-radius:4px 4px 0 0;transition:height .35s ease,background .2s}
+.tl-bar i{display:block;max-height:22px;background:#D8D3C6;border-radius:4px 4px 0 0;transition:height .35s ease,background .2s}
 .tl-bar span{font-size:12px;color:var(--tx-2);text-align:center}
 .tl-bar b{font-size:12px;font-weight:600;color:var(--tx-2);text-align:center}
 .tl-bar[aria-pressed=true] i{background:var(--pt)}
@@ -276,7 +293,7 @@ body.touring #map{left:0}
 .loading.done{opacity:0;pointer-events:none}
 
 .maplibregl-ctrl-attrib{font-size:10.5px}
-.maplibregl-ctrl-bottom-right{bottom:104px}
+.maplibregl-ctrl-bottom-right{bottom:88px}
 
 /* ---------- 모바일 ---------- */
 @media (max-width:860px){
@@ -308,8 +325,11 @@ body.touring #map{left:0}
   .ctl-ind{left:10px;right:10px;top:calc(var(--top) + 8px)}
   .ctl-r{top:auto;bottom:calc(44vh + 10px);right:10px;width:auto;padding:6px;display:flex;flex-direction:column;gap:4px}
   .ctl-r h4,.ctl-r .tg,.ctl-r .kleg,.ctl-r .tbtn{display:none}
-  .ctl-r .two{grid-template-columns:1fr;width:52px}
-  .ctl-r .two button{font-size:12px;padding:6px 0}
+  .ctl-r .three{grid-template-columns:1fr;width:58px}
+  .ctl-r .three button{font-size:12px;padding:6px 0;height:36px}
+  .ctl-r .row2{display:none}
+  .readme{display:none}
+  .gl-grid b{font-size:20px}
   .legend{left:10px;top:calc(var(--top) + 94px);bottom:auto;width:200px;padding:7px 9px}
   .legend .t small{display:block;margin:1px 0 0}
   .legend .foot{display:none}
@@ -368,17 +388,18 @@ body.touring #map{left:0}
 
 <div class="ctl-r" id="ctlR">
   <h4>보기</h4>
-  <div class="two" id="viewSeg"><button data-v="3d" aria-pressed="true">입체</button><button data-v="2d" aria-pressed="false">평면</button></div>
+  <div class="three" id="viewSeg"><button data-v="bar" aria-pressed="true" title="시군·읍면이 지표값만큼 솟아오릅니다">값 입체</button><button data-v="3d" aria-pressed="false" title="실제 산 지형 위에 학교를 세웁니다">지형</button><button data-v="2d" aria-pressed="false">평면</button></div>
   <h4>겹쳐 보기</h4>
-  <button class="tg" data-l="schools" aria-pressed="true"><span class="bx"></span>학교 (학생 수만큼 높이)</button>
+  <button class="tg" data-l="schools" aria-pressed="true"><span class="bx"></span>학교 위치 <small class="muted" id="schHint"></small></button>
   <div class="kleg"><span><i style="background:var(--k-e)"></i>초</span><span><i style="background:var(--k-m)"></i>중</span><span><i style="background:var(--k-h)"></i>고</span><span><i style="background:var(--k-s)"></i>특수</span></div>
   <button class="tg" data-l="closed" aria-pressed="false"><span class="bx"></span>폐교 재산</button>
   <button class="tg" data-l="bj" aria-pressed="false"><span class="bx"></span>도서벽지 학교만</button>
   <button class="tg" data-l="rotate" aria-pressed="false"><span class="bx"></span>천천히 돌리기</button>
-  <button class="tbtn" id="btnReset">경북 전체 보기</button>
+  <div class="row2"><button class="tbtn" id="btnReset">경북 전체</button><button class="tbtn" id="btnUlleung">울릉도·독도</button></div>
 </div>
 
 <div class="legend" id="legend"></div>
+<div class="readme" id="readme" aria-live="polite"></div>
 
 <div class="timeline" id="timeline">
   <button class="play" id="play" aria-label="2022년부터 재생"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
@@ -417,7 +438,8 @@ const RAMP = {
 };
 const NODATA = '#ECEAE4';
 const NONE = ['==', ['get', 'i'], -999];
-const COL_MAXZ = 10.2; // 이보다 확대하면 기둥 대신 점과 학교 이름
+const COL_MAXZ = 10.2;
+const BAR_MAXZ = 9.6; // 값 입체 기둥이 보이는 최대 배율 // 이보다 확대하면 기둥 대신 점과 학교 이름
 const ALLF = ['>=', ['get', 'i'], 0];
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -431,48 +453,61 @@ let D = {};            // 자료
 let map;               // 지도
 const S = {            // 화면 상태
   ind: 'change', level: 'sigun', kind: 'all', yi: 4,
-  view: MOBILE ? '2d' : '3d', layers: { schools: true, closed: false, bj: false, rotate: false },
+  view: MOBILE ? '2d' : 'bar', layers: { schools: true, closed: false, bj: false, rotate: false },
   tab: 'q', story: null, school: null, sigun: null, emd: null, filter: null,
 };
 
 /* ---------- 지표 정의 ---------- */
 const kindRows = (sg) => (sg[S.kind] || sg.all);
 const IND = {
-  students: { g: '학생 분포', label: '학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun', 'emd'], d: 0,
+  students: { g: '학생 분포', hi: '학생이 많은 곳', label: '학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun', 'emd'], d: 0,
     sigun: (s, y) => kindRows(s)[y].students, emd: (e) => e.students, desc: '초·중·고·특수학교 재학생 수' },
-  change: { g: '학생 분포', label: '학생 수 증감률', unit: '%', ramp: 'warm', invert: true, yearly: true, lv: ['sigun', 'emd'], d: 1, signed: true,
+  change: { g: '학생 분포', hi: '학생이 많이 줄어든 곳', label: '학생 수 증감률', unit: '%', ramp: 'warm', invert: true, yearly: true, lv: ['sigun', 'emd'], d: 1, signed: true,
     sigun: (s, y) => pct(kindRows(s)[0].students, kindRows(s)[y].students), emd: (e) => (e.s22 ? pct(e.s22, e.students) : null),
     desc: '2022년 대비 선택 연도의 재학생 수 변화', yearFrom: 1 },
-  perClass: { g: '교육여건', label: '학급당 학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 1,
+  perClass: { g: '교육여건', hi: '학급당 학생이 많은 곳', label: '학급당 학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 1,
     sigun: (s, y) => kindRows(s)[y].perClass, desc: '학생 수 ÷ 편성 학급 수' },
-  perTeacher: { g: '교육여건', label: '교원 1인당 학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 1,
+  perTeacher: { g: '교육여건', hi: '교원 1명이 맡는 학생이 많은 곳', label: '교원 1인당 학생 수', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 1,
     sigun: (s, y) => kindRows(s)[y].perTeacher, desc: '학생 수 ÷ 교원 수(정규+기간제)' },
-  sitePer: { g: '교육여건', label: '학생 1인당 교지 면적', unit: '㎡', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
+  sitePer: { g: '교육여건', hi: '1인당 부지가 넓은 곳', label: '학생 1인당 교지 면적', unit: '㎡', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
     sigun: (s, y) => kindRows(s)[y].sitePer, desc: '학교 부지 면적 ÷ 학생 수' },
-  smallShare: { g: '작은학교', label: '소규모학교 비율', unit: '%', ramp: 'warm', yearly: true, lv: ['sigun'], d: 1,
+  smallShare: { g: '작은학교', hi: '작은학교 비율이 높은 곳', label: '소규모학교 비율', unit: '%', ramp: 'warm', yearly: true, lv: ['sigun'], d: 1,
     sigun: (s, y) => kindRows(s)[y].smallShare, desc: '학생 60명 이하 학교(분교 포함, 특수학교 제외)의 비율' },
-  small: { g: '작은학교', label: '소규모학교 수', unit: '곳', ramp: 'warm', yearly: true, lv: ['sigun'], d: 0,
+  small: { g: '작은학교', hi: '작은학교가 많은 곳', label: '소규모학교 수', unit: '곳', ramp: 'warm', yearly: true, lv: ['sigun'], d: 0,
     sigun: (s, y) => kindRows(s)[y].small, desc: '학생 60명 이하 학교(분교 포함)' },
-  zero: { g: '작은학교', label: '신입생 0명 학교', unit: '곳', ramp: 'warm', yearly: true, lv: ['sigun'], d: 0,
+  zero: { g: '작은학교', hi: '신입생 없는 학교가 많은 곳', label: '신입생 0명 학교', unit: '곳', ramp: 'warm', yearly: true, lv: ['sigun'], d: 0,
     sigun: (s, y) => kindRows(s)[y].zero, desc: '그해 입학자가 한 명도 없는 초·중·고' },
-  ruralShare: { g: '작은학교', label: '면·도서벽지 지역 학교 비율', unit: '%', ramp: 'warm', yearly: true, lv: ['sigun'], d: 1,
+  ruralShare: { g: '작은학교', hi: '면·벽지 학교 비율이 높은 곳', label: '면·도서벽지 지역 학교 비율', unit: '%', ramp: 'warm', yearly: true, lv: ['sigun'], d: 1,
     sigun: (s, y) => kindRows(s)[y].ruralShare, desc: 'KESS 지역규모가 「면지역」 또는 「특수지역(도서벽지)」인 학교 비율' },
-  spStu: { g: '특수교육', label: '특수교육 대상 학생', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
+  spStu: { g: '특수교육', hi: '특수교육 학생이 많은 곳', label: '특수교육 대상 학생', unit: '명', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
     sigun: (s, y) => kindRows(s)[y].spStu, desc: '일반학교 특수학급 학생 + 특수학교 학생' },
-  spClass: { g: '특수교육', label: '특수학급 수', unit: '학급', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
+  spClass: { g: '특수교육', hi: '특수학급이 많은 곳', label: '특수학급 수', unit: '학급', ramp: 'green', yearly: true, lv: ['sigun'], d: 0,
     sigun: (s, y) => kindRows(s)[y].spClass, desc: '일반학교에 설치된 특수학급' },
-  bj: { g: '도서벽지', label: '도서벽지 지정 학교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0,
+  bj: { g: '도서벽지', hi: '도서벽지 학교가 많은 곳', label: '도서벽지 지정 학교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0,
     sigun: (s) => s.bj, desc: '「도서·벽지 교육진흥법 시행규칙」 별표(2026.3.1. 시행)에 오른 학교 중 운영 중인 곳', kindless: true },
-  closed: { g: '폐교', label: '폐교 재산', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun', 'emd'], d: 0,
+  closed: { g: '폐교', hi: '폐교 재산이 많은 곳', label: '폐교 재산', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun', 'emd'], d: 0,
     sigun: (s) => s.closed, emd: (e) => e.closed, desc: '교육청이 보유한 폐교 재산(매각된 곳 제외)', kindless: true },
-  closedUnused: { g: '폐교', label: '미활용 폐교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0,
+  closedUnused: { g: '폐교', hi: '비어 있는 폐교가 많은 곳', label: '미활용 폐교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0,
     sigun: (s) => s.closedUnused, desc: '대부·자체활용 없이 비어 있는 폐교 재산', kindless: true },
-  nearE: { g: '통학 거리', label: '가까운 초등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearE: { g: '통학 거리', hi: '초등학교가 먼 곳', label: '가까운 초등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearE, desc: '읍면동 대표점에서 가장 가까운 초등학교까지 직선거리', kindless: true },
-  nearM: { g: '통학 거리', label: '가까운 중학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearM: { g: '통학 거리', hi: '중학교가 먼 곳', label: '가까운 중학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearM, desc: '읍면동 대표점에서 가장 가까운 중학교까지 직선거리', kindless: true },
-  nearH: { g: '통학 거리', label: '가까운 고등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearH: { g: '통학 거리', hi: '고등학교가 먼 곳', label: '가까운 고등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearH, desc: '읍면동 대표점에서 가장 가까운 고등학교까지 직선거리', kindless: true },
+  cohort: { g: '미래 학생', label: '입학생 전망', unit: '%', ramp: 'warm', invert: true, yearly: false, lv: ['sigun', 'emd'], d: 1, signed: true, kindless: true,
+    sigun: (s) => s.cohort, emd: (e) => e.cohort, hi: '앞으로 입학생이 많이 줄 곳',
+    desc: '0~2세 인구 ÷ 지금 초1~3 또래(6~8세) − 1. −30%면 몇 년 뒤 초등 입학생이 지금보다 약 30% 적다는 뜻(주민등록 기준, 6~8세 30명 미만 읍면동은 비움)' },
+  k05: { g: '미래 학생', label: '0~5세 아이 수', unit: '명', ramp: 'green', yearly: false, lv: ['sigun', 'emd'], d: 0, kindless: true,
+    sigun: (s) => s.k05, emd: (e) => e.k05, hi: '앞으로 학교에 올 아이가 많은 곳', desc: '주민등록 0~5세 인구 — 앞으로 6년 안에 초등학교에 들어올 아이들' },
+  kidShare: { g: '미래 학생', label: '0~14세 인구 비율', unit: '%', ramp: 'green', yearly: false, lv: ['sigun', 'emd'], d: 1, kindless: true,
+    sigun: (s) => s.kidShare, emd: (e) => e.kidShare, hi: '아이 비율이 높은 곳', desc: '전체 주민 가운데 0~14세 비율' },
+  high: { g: '지형', label: '해발 300m 넘는 학교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
+    sigun: (s) => s.high, hi: '높은 산골 학교가 많은 곳', desc: '학교 위치의 해발 고도(지형 타일) 300m 이상인 학교 수' },
+  altMed: { g: '지형', label: '학교 해발 고도(중앙값)', unit: 'm', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
+    sigun: (s) => s.altMed, hi: '학교가 높은 곳에 있는 곳', desc: '시군 안 학교들의 해발 고도 가운데값' },
+  alt: { g: '지형', label: '읍면동 해발 고도', unit: 'm', ramp: 'warm', yearly: false, lv: ['emd'], d: 0, kindless: true,
+    emd: (e) => e.alt, hi: '높은 곳', desc: '읍면동 대표점의 해발 고도' },
   decline: { g: '지역 여건', label: '인구감소지역 지정', unit: '', cat: true, yearly: false, lv: ['sigun'],
     sigun: (s) => s.decline || '해당 없음', desc: '행정안전부 인구감소지역(2021)·인구감소관심지역(2025) 지정', kindless: true,
     colors: { 인구감소지역: '#CD7C45', 인구감소관심지역: '#F0D5B8', '해당 없음': '#E9F2EB' } },
@@ -481,6 +516,7 @@ const IND = {
 const yearlyNow = (k = S.ind) => IND[k].yearly && S.level === 'sigun';
 const kindlessNow = (k = S.ind) => IND[k].kindless || S.level === 'emd';
 const yearOf = () => (yearlyNow() ? S.yi : 4);
+const pitched = () => S.view !== '2d';
 const indUnit = (k = S.ind) => IND[k].unit;
 const fmtInd = (v, k = S.ind) => { const I = IND[k]; if (I.cat) return v; if (v === null || v === undefined) return '–'; return (I.signed ? sgn(v, I.d) : fmt(v, I.d)) + (I.unit === '%' ? '%' : ''); };
 const fmtIndU = (v, k = S.ind) => { const I = IND[k]; if (I.cat || v === null || v === undefined) return fmtInd(v, k); return fmtInd(v, k) + (I.unit && I.unit !== '%' ? I.unit : ''); };
@@ -555,19 +591,19 @@ function computeHome() {
   const pad = MOBILE ? { top: 70, bottom: Math.round(innerHeight * 0.12) + 118, left: 12, right: 12 } : { top: 70, bottom: 110, left: 30, right: 250 };
   const c3 = map.cameraForBounds(GB_BOUNDS, { padding: pad, pitch: 52, bearing: -12 });
   const c2 = map.cameraForBounds(GB_BOUNDS, { padding: pad });
-  if (c3) HOME = { center: c3.center, zoom: c3.zoom + 0.42, pitch: 52, bearing: -12 };
+  if (c3) HOME = { center: c3.center, zoom: c3.zoom + 0.3, pitch: 52, bearing: -12 };
   if (c2) HOME2D = { center: c2.center, zoom: c2.zoom, pitch: 0, bearing: 0 };
 }
 
 function initMap() {
-  const start = S.view === '3d' ? HOME : HOME2D;
+  const start = pitched() ? HOME : HOME2D;
   map = new maplibregl.Map({
     container: 'map', style: STYLE, ...start, minZoom: 6, maxZoom: 15.5, maxPitch: 75,
     maxBounds: [[124.8, 33.4], [133.2, 39.3]], attributionControl: { compact: true }, fadeDuration: 0,
     locale: { 'NavigationControl.ZoomIn': '확대', 'NavigationControl.ZoomOut': '축소', 'NavigationControl.ResetBearing': '북쪽 보기' },
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-  computeHome(); map.jumpTo(S.view === '3d' ? HOME : HOME2D);
+  computeHome(); map.jumpTo(pitched() ? HOME : HOME2D);
   map.on('style.load', setupLayers);
   let loadFail = setTimeout(() => { if (!$('#loading').classList.contains('done')) $('#loading').textContent = '배경 지도를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 20000);
   map.once('load', () => { clearTimeout(loadFail); if (MOBILE) $$('.maplibregl-ctrl-attrib').forEach((a) => a.classList.remove('maplibregl-compact-show')); });
@@ -579,7 +615,7 @@ function setupLayers() {
   for (const l of layers) {
     if (l.type === 'symbol' && l.layout && l.layout['text-field']) {
       try { map.setLayoutProperty(l.id, 'text-field', ['coalesce', ['get', 'name:ko'], ['get', 'name']]); } catch (e) {}
-      if (/place|label_city|label_town|label_state|label_country/.test(l.id)) map.setLayerZoomRange(l.id, 9.2, 24);
+      if (/place|label_city|label_town|label_state|label_country/.test(l.id)) map.setLayerZoomRange(l.id, 10.3, 24);
       if (/poi|housenumber/.test(l.id)) map.setLayoutProperty(l.id, 'visibility', 'none');
       if (/shield|highway-name|road_label|transportation_name/.test(l.id)) { try { map.setPaintProperty(l.id, 'text-opacity', 0.45); map.setPaintProperty(l.id, 'icon-opacity', 0.45); } catch (e) {} }
     }
@@ -602,6 +638,12 @@ function setupLayers() {
   map.addLayer({ id: 'emd-fill', type: 'fill', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'emd-line', type: 'line', source: 'emd', paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.3, 11, 1.2], 'line-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'sigun-line', type: 'line', source: 'sigun', paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 1.6, 11, 3] } }, firstSymbol);
+  // 값 입체: 시군·읍면이 지표값만큼 솟는다(높이·색 = 같은 값)
+  map.addLayer({ id: 'sigun-bar', type: 'fill-extrusion', source: 'sigun', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
+  map.addLayer({ id: 'emd-bar', type: 'fill-extrusion', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
+  map.addSource('zone', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#23704A', 'fill-opacity': 0.14 } });
+  map.addLayer({ id: 'zone-line', type: 'line', source: 'zone', paint: { 'line-color': '#23704A', 'line-width': 2.5, 'line-dasharray': [2, 1] } });
   map.addLayer({ id: 'hover-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2.2 } });
   map.addLayer({ id: 'emd-hover', type: 'line', source: 'emd', filter: ['==', ['get', 'code'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 1.8 } });
   map.addLayer({ id: 'sel-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#23704A', 'line-width': 3 } });
@@ -630,7 +672,9 @@ function setupLayers() {
   buildLabels();
   applySchoolFilter();
   $('#loading').classList.add('done');
+  layersReady = true; if (routeInitial) routeInitial();
 }
+let layersReady = false, routeInitial = null;
 
 /* 학교 자료 → 지도 도형 */
 function schoolPoints() {
@@ -639,9 +683,9 @@ function schoolPoints() {
     properties: { i: s.i, k: s.kind, n: shortName(s.name), r: s.stu[y] ? Math.max(2.2, Math.sqrt(s.stu[y]) * 0.3) : 0 } })) };
 }
 const shortName = (n) => n.replace('초등학교', '초').replace('중학교', '중').replace('고등학교', '고').replace(/분교장$/, '분교');
-function colHeight(stu) { return stu ? 260 * Math.sqrt(stu) + 350 : 0; }
+function colHeight(stu) { return stu ? 170 * Math.sqrt(stu) + 250 : 0; }
 function schoolColumns(yF = S.yi, t = 1, yT = S.yi) {
-  const R = 1000;
+  const R = 620;
   return { type: 'FeatureCollection', features: D.schools.map((s) => {
     const hx = colHeight(s.stu[yF]), hy = colHeight(s.stu[yT]);
     const h = hx + (hy - hx) * t;
@@ -657,7 +701,7 @@ function closedPoints() {
 }
 
 /* ---------- 색칠·범례·라벨 ---------- */
-let curVals = {}, curBreaks = [];
+let curVals = {}, curBreaks = [], curH = {};
 function paint() {
   const I = IND[S.ind];
   if (!I.lv.includes(S.level)) S.level = I.lv[0];
@@ -671,15 +715,37 @@ function paint() {
   for (const [k, v] of Object.entries(curVals)) pairs.push(k, colorOf(v, curBreaks, I));
   const expr = pairs.length ? ['match', ['get', lv === 'sigun' ? 'sigun' : 'code'], ...pairs, NODATA] : NODATA;
   map.setPaintProperty(lv + '-fill', 'fill-color', expr);
+  map.setPaintProperty(lv + '-bar', 'fill-extrusion-color', expr);
+  // 높이: 값을 0~1로 펴서(감소 지표는 뒤집어 많이 줄수록 높게) 시군 최대 4만 m, 읍면 2.4만 m
+  const vals = Object.values(curVals).filter((v) => v !== null && isFinite(v));
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const top = lv === 'sigun' ? 26000 : 16000;
+  curH = {};
+  const hp = [];
+  for (const [k, v] of Object.entries(curVals)) {
+    let t = 0;
+    if (I.cat) t = { 인구감소지역: 1, 인구감소관심지역: 0.5 }[v] || 0.05;
+    else if (v !== null && isFinite(v)) t = mx > mn ? (v - mn) / (mx - mn) : 0.5;
+    if (I.invert && !I.cat && v !== null) t = 1 - t;
+    curH[k] = Math.round(1500 + t * top);
+    hp.push(k, curH[k]);
+  }
+  map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['match', ['get', lv === 'sigun' ? 'sigun' : 'code'], ...hp, 0] : 0);
+  const bar = S.view === 'bar';
+  // 값 입체는 시군 전체가 보이는 배율에서만. 크게 확대하면(9.6 이상) 평면 색칠로 바뀌어 학교가 보인다
+  for (const l of ['sigun', 'emd']) { map.setLayerZoomRange(l + '-fill', bar ? BAR_MAXZ : 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ); }
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
+  map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
+  map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
+  renderReadme(); placeLabels();
   map.setPaintProperty('emd-line', 'line-opacity', lv === 'emd' ? 0.9 : 0.45);
   renderLegend(); renderTimeline(); renderKinds(); renderIndMenu(); updateLabels(); renderKPIs(); syncHash();
   if (S.tab === 'r' && !S.sigun) renderPanel();
 }
 function renderLegend() {
   const I = IND[S.ind], y = YEARS[yearOf()];
-  const yTxt = S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : `${y}`;
+  const yTxt = S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : I.g === '미래 학생' ? `${D.stats.meta.popMonth} 주민등록` : `${y}`;
   let h = `<div class="t">${esc(I.label)}<small>${esc(yTxt)} · ${S.level === 'sigun' ? '시군' : '읍면동(전체 학교)'}${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}</small></div>`;
   if (I.cat) {
     h += '<div class="lg-cat">' + Object.entries(I.colors).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k)}</span>`).join('') + '</div>';
@@ -701,6 +767,18 @@ function renderLegend() {
   $('#legend').innerHTML = h;
 }
 let labelMarkers = [];
+// 값 입체에서는 이름표를 기둥 꼭대기 높이만큼 화면 위로 올린다
+function placeLabels() {
+  if (!map) return;
+  const bar = S.view === 'bar' && S.level === 'sigun' && map.getZoom() < BAR_MAXZ;
+  const sinP = Math.sin((map.getPitch() * Math.PI) / 180), z = map.getZoom();
+  for (const m of labelMarkers) {
+    const sg = m.getElement().dataset.sg;
+    if (!bar || !curH[sg]) { m.setOffset([0, 0]); continue; }
+    const mpp = (156543.03 * Math.cos((D.labelPt[sg][1] * Math.PI) / 180)) / Math.pow(2, z);
+    m.setOffset([0, -(curH[sg] / mpp) * sinP]);
+  }
+}
 function buildLabels() {
   labelMarkers.forEach((m) => m.remove());
   labelMarkers = D.sigunNames.map((sg) => {
@@ -710,14 +788,25 @@ function buildLabels() {
     return m;
   });
   updateLabels();
+  map.on('move', placeLabels);
 }
 function updateLabels() {
   const showV = S.level === 'sigun';
   for (const m of labelMarkers) {
     const el = m.getElement(), sg = el.dataset.sg;
     el.innerHTML = `${sg}${showV ? `<span class="num">${esc(fmtInd(curVals[sg]))}</span>` : ''}`;
-    el.classList.toggle('box', S.view === '3d');
+    el.classList.toggle('box', pitched());
   }
+}
+
+/* ---------- 지도 읽는 법(한 줄) ---------- */
+function renderReadme() {
+  const I = IND[S.ind], y = YEARS[yearOf()];
+  const unit = S.level === 'sigun' ? '시군' : '읍면동';
+  const when = S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
+  const how = S.view === 'bar' ? '높이·색' : '색';
+  const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
+  $('#readme').innerHTML = `<b>${how}</b> = ${unit}별 ${esc(I.label)}${when ? ' (' + esc(when) + ')' : ''} · ${S.view === 'bar' ? '높고 ' : ''}진할수록 ${esc(hi.replace('높을수록 ', ''))}${S.view === '3d' ? ' · 산 높이는 실제의 2.8배' + (S.layers.schools ? ' · 기둥 = 학교(높이 = 학생 수)' : '') : ''}`;
 }
 
 /* ---------- 상단 KPI ---------- */
@@ -769,7 +858,7 @@ function renderTimeline() {
     return `<button class="tl-bar${lock && yr ? ' lock' : ''}" data-y="${i}" aria-pressed="${on}" ${lock ? 'disabled' : ''} title="${yr}년 경북 ${KIND_SHORT[tk] === '전체' ? '' : KIND_SHORT[tk] + ' '}학생 ${fmt(series[i])}명"><b class="num">${fmt(series[i] / 10000, 1)}만</b><i style="height:${Math.round((series[i] / mx) * 34)}px"></i><span>${yr}</span></button>`;
   }).join('');
   const ch = pct(series[0], series[y]);
-  $('#tlInfo').innerHTML = `<div class="a">${YEARS[y]}년 경북 ${tk === 'all' ? '' : KIND_SHORT[tk] + ' '}학생</div><div class="b num">${fmt(series[y])}명</div><div class="c">${y ? `2022년보다 ${sgn(ch)}%` : '기준 연도'}${yr ? (S.ind === 'change' ? ' · 2022는 비교 기준' : '') : ' · 이 지표는 2026 기준'}</div>`;
+  $('#tlInfo').innerHTML = `<div class="a">${YEARS[y]}년 경북 ${tk === 'all' ? '' : KIND_SHORT[tk] + ' '}학생</div><div class="b num">${fmt(series[y])}명</div><div class="c">${y ? `2022년보다 ${sgn(ch)}%` : "기준 연도"}${yr ? "" : " · 지표는 2026"}</div>`;
   $('#play').disabled = !yr; $('#play').style.opacity = yr ? 1 : 0.4;
 }
 let playTimer = null;
@@ -805,23 +894,31 @@ function stopPlay() { clearInterval(playTimer); playTimer = null; $('#play').inn
 
 /* ---------- 보기(입체/평면)·겹쳐 보기 ---------- */
 function applyView(first) {
-  const is3d = S.view === '3d';
+  const terrain = S.view === '3d', bar = S.view === 'bar', is3d = pitched();
   $$('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === S.view));
-  if (is3d) { map.setTerrain({ source: 'dem', exaggeration: 1.7 }); }
-  else map.setTerrain(null);
+  if (terrain) map.setTerrain({ source: 'dem', exaggeration: 2.8 }); else map.setTerrain(null);
+  map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrain ? 0.85 : 0.42);
+  map.setPaintProperty('hillshade', 'hillshade-shadow-color', terrain ? '#4F4A3E' : '#6E6A5E');
+  try { map.setSky(terrain ? { 'sky-color': '#CFE0EA', 'horizon-color': '#EEF1EE', 'fog-color': '#F2F0EA', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.55, 'atmosphere-blend': 0.5 } : { 'sky-color': '#F2F0EA', 'horizon-color': '#F2F0EA', 'fog-color': '#F2F0EA', 'fog-ground-blend': 1, 'atmosphere-blend': 0 }); } catch (e) {}
+  // 값 입체에서는 학교를 크게 확대했을 때만(기둥 위로) 점으로, 지형에서는 기둥, 평면에서는 원
   const sch = S.layers.schools;
-  map.setLayoutProperty('col', 'visibility', is3d && sch ? 'visible' : 'none');
-  map.setLayoutProperty('col-dim', 'visibility', is3d && sch ? 'visible' : 'none');
+  map.setLayoutProperty('col', 'visibility', terrain && sch ? 'visible' : 'none');
+  map.setLayoutProperty('col-dim', 'visibility', terrain && sch ? 'visible' : 'none');
   map.setLayoutProperty('sch-circ', 'visibility', sch ? 'visible' : 'none');
   map.setLayoutProperty('sch-dim', 'visibility', sch ? 'visible' : 'none');
   map.setLayoutProperty('sch-name', 'visibility', sch ? 'visible' : 'none');
-  map.setLayerZoomRange('sch-circ', is3d ? COL_MAXZ : 0, 24);
-  map.setLayerZoomRange('sch-dim', is3d ? COL_MAXZ : 0, 24);
-  map.setLayoutProperty('closed-circ', 'visibility', S.layers.closed ? 'visible' : 'none');
-  map.setPaintProperty('sigun-fill', 'fill-opacity', is3d ? 0.72 : 0.82);
-  map.setPaintProperty('emd-fill', 'fill-opacity', is3d ? 0.72 : 0.82);
+  map.setLayerZoomRange('sch-circ', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
+  map.setLayerZoomRange('sch-dim', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
+  map.setLayoutProperty('closed-circ', 'visibility', S.layers.closed && !bar ? 'visible' : 'none');
+  // 값 입체는 확대하면 기둥을 낮춰 학교 점이 보이게
+  for (const id of ['sigun-bar', 'emd-bar']) map.setPaintProperty(id, 'fill-extrusion-opacity', 0.94);
+  $('#schHint').textContent = terrain ? '기둥 높이 = 학생 수' : bar ? '크게 확대하면 보임' : '원 크기 = 학생 수';
+  if (map.getLayer('sigun-bar')) paint();
+  // 지형에서는 색을 옅게 깔아 산 음영이 비치게
+  map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? 0.42 : 0.82);
+  map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? 0.42 : 0.82);
   if (!first) {
-    const t = is3d ? { pitch: MOBILE ? 38 : 52, bearing: map.getBearing() || -12 } : { pitch: 0, bearing: 0 };
+    const t = is3d ? { pitch: MOBILE ? 40 : bar ? 55 : 52, bearing: map.getBearing() || -12 } : { pitch: 0, bearing: 0 };
     map.easeTo({ ...t, duration: 900 });
   }
   // 단계색으로 답하는 질문(통학 거리·폐교)에서는 기둥을 낮추고 옅게
@@ -867,7 +964,7 @@ function showTip(e, html) { tip.innerHTML = html; tip.style.display = 'block'; c
 function hideTip() { tip.style.display = 'none'; }
 function schoolTipHtml(s) {
   const y = S.yi;
-  return `<b>${esc(s.name)}</b><br><span class="dim">${esc(s.sigun)} ${esc(s.emd || '')} · ${esc(s.kind)}${s.branch ? ' 분교' : ''}${s.bj ? ' · ' + esc(s.bj) : ''}</span><br>${YEARS[y]}년 학생 <b class="num">${fmt(s.stu[y])}</b>명 · 학급 ${fmt(s.cls[y])} · 교원 ${fmt(s.tch[y])}${s.stu[0] && y ? `<br><span class="dim">2022년 ${fmt(s.stu[0])}명 → ${sgn(pct(s.stu[0], s.stu[y]))}%</span>` : ''}`;
+  return `<b>${esc(s.name)}</b><br><span class="dim">${esc(s.sigun)} ${esc(s.emd || '')} · ${esc(s.kind)}${s.branch ? ' 분교' : ''}${s.bj ? ' · ' + esc(s.bj) : ''}</span><br>${YEARS[y]}년 학생 <b class="num">${fmt(s.stu[y])}</b>명 · 학급 ${fmt(s.cls[y])} · 교원 ${fmt(s.tch[y])}${s.stu[0] && y ? `<br><span class="dim">2022년 ${fmt(s.stu[0])}명 → ${sgn(pct(s.stu[0], s.stu[y]))}%</span>` : ''}${s.alt !== null && s.alt !== undefined ? `<br><span class="dim">해발 ${fmt(s.alt)}m</span>` : ''}`;
 }
 function bindMapEvents() {
   const schLayers = ['col', 'sch-circ'];
@@ -880,7 +977,7 @@ function bindMapEvents() {
     if (cf.length) { const c = D.closed[cf[0].properties.i]; map.getCanvas().style.cursor = 'pointer'; showTip(e, `<b>${esc(c.name)}</b> <span class="dim">(폐교)</span><br>${esc(c.use)} · ${c.year ? c.year + '년 폐교' : '폐교 연도 미상'}<br><span class="dim">${esc(c.sigun)} ${esc(c.emd || '')} · 위치는 ${c.approx === 'emd' ? '읍면' : '시군'} 대표점 둘레</span>`); clearHover(); return; }
     hoverSchool = false;
     const lv = S.level;
-    const f = map.queryRenderedFeatures(e.point, { layers: [lv + '-fill'] })[0];
+    const f = map.queryRenderedFeatures(e.point, { layers: [lv + (S.view === 'bar' && map.getZoom() < BAR_MAXZ ? '-bar' : '-fill')] })[0];
     if (!f) { hideTip(); clearHover(); map.getCanvas().style.cursor = ''; return; }
     map.getCanvas().style.cursor = 'pointer';
     if (lv === 'sigun') {
@@ -899,7 +996,7 @@ function bindMapEvents() {
     if (sf.length) { openSchool(sf[0].properties.i, false); return; }
     const cf = S.layers.closed ? map.queryRenderedFeatures([[e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]], { layers: ['closed-circ'] }) : [];
     if (cf.length) { openClosed(cf[0].properties.i); return; }
-    const f = map.queryRenderedFeatures(e.point, { layers: [S.level + '-fill'] })[0];
+    const f = map.queryRenderedFeatures(e.point, { layers: [S.level + (S.view === 'bar' && map.getZoom() < BAR_MAXZ ? '-bar' : '-fill')] })[0];
     if (!f) return;
     if (S.level === 'sigun') openSigun(f.properties.sigun);
     else openEmd(f.properties.code);
@@ -928,17 +1025,23 @@ function padding() {
 }
 function flySigun(sg) {
   const f = D.sigunGeo.features.find((x) => x.properties.sigun === sg);
-  if (sg === '울릉군') { map.flyTo({ center: [130.87, 37.5], zoom: 10.6, pitch: S.view === '3d' ? 55 : 0, duration: 1600 }); return; }
+  if (sg === '울릉군') { map.flyTo({ center: [130.87, 37.5], zoom: 10.6, pitch: pitched() ? 55 : 0, duration: 1600 }); return; }
   const cam = map.cameraForBounds(bboxOf(f.geometry), { padding: padding() });
-  map.flyTo({ ...cam, pitch: S.view === '3d' ? 55 : 0, bearing: S.view === '3d' ? map.getBearing() : 0, duration: 1500 });
+  map.flyTo({ ...cam, pitch: pitched() ? 55 : 0, bearing: pitched() ? map.getBearing() : 0, duration: 1500 });
 }
 function storyCam(st) {
-  const is3d = S.view === '3d';
+  const is3d = pitched();
   const pitch = is3d ? (MOBILE ? Math.min(38, st.cam.pitch) : st.cam.pitch) : 0, bearing = is3d ? st.cam.bearing : 0;
   const c = map.cameraForBounds(st.cam.b || GB_BOUNDS, { padding: padding(), pitch, bearing });
-  return { center: c.center, zoom: c.zoom + (is3d ? (touring ? 1.0 : 0.6) : 0.1), pitch, bearing };
+  return { center: c.center, zoom: c.zoom + (is3d ? (st.cam.dz ?? (touring ? 1.0 : 0.6)) : 0.1), pitch, bearing };
 }
-function goHome() { map.flyTo({ ...(S.view === '3d' ? HOME : HOME2D), duration: 1400 }); }
+// 봉화·영양·청송 산간: 소백·태백 줄기 사이 골짜기의 작은학교
+const MOUNTAIN_B = [[128.72, 36.5], [129.3, 37.08]];
+function flyMountain(dur = 2600) {
+  const c = map.cameraForBounds(MOUNTAIN_B, { padding: padding(), pitch: 66, bearing: 28 });
+  map.flyTo({ center: c.center, zoom: c.zoom + 0.55, pitch: 66, bearing: 28, duration: dur, essential: true });
+}
+function goHome() { map.flyTo({ ...(pitched() ? HOME : HOME2D), duration: 1400 }); }
 
 /* =========================================================
    패널
@@ -980,6 +1083,16 @@ const STORIES = [
       return `<p>4년 사이 경북 학생이 <b>${fmt(T()[0].students - T()[4].students)}명</b> 줄었습니다. 22개 시군 가운데 학생이 늘어난 곳은 ${up.length ? `<b>${esc(up.join(', '))}</b>` : '<b>한 곳도 없습니다</b>'}.</p>
       <p>가장 많이 줄어든 곳은 ${t.map(([sg, v]) => `<b>${sg}(${sgn(v)}%)</b>`).join(', ')}입니다. 인구감소지역 15곳을 합치면 <b>${sgn(dAvg)}%</b>, 나머지 7곳은 <b>${sgn(nAvg)}%</b>로 감소 속도가 달랐습니다.</p>`;
     }, note: '같은 기간의 재학생 수 변화입니다. 미래 인구 예측이나 정책 효과를 뜻하지 않습니다.', rank: 'change' },
+  { id: 'future', g: '지역소멸과 작은학교', q: '몇 년 뒤 초등 입학생은 얼마나 줄어들까?', s: '0~2세와 지금 초1~3 또래 비교', ind: 'cohort', chips: ['cohort', 'k05', 'kidShare'],
+    cam: { pitch: 55, bearing: -10 },
+    hero: () => { const p = D.stats.popTotal; return { l: '경북 0~2세 ÷ 6~8세 (주민등록)', v: `${sgn(p.cohort)}%`, d: `0~2세 ${fmt(p.a0)}명 · 6~8세 ${fmt(p.a6)}명 · ${D.stats.meta.popMonth} 기준` }; },
+    body: () => {
+      const p = D.stats.popTotal;
+      const t = topN((s) => s.cohort, 3, true), up = D.sigunNames.filter((sg) => SG()[sg].cohort > 0);
+      return `<p>지금 초등 1~3학년 또래(6~8세)는 ${fmt(p.a6)}명인데, 0~2세는 ${fmt(p.a0)}명입니다. 이 아이들이 입학하는 몇 년 뒤에는 초등 입학생이 지금보다 <b>약 ${Math.round(-p.cohort)}%</b> 적을 수 있습니다.</p>
+      <p>가장 크게 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다.${up.length ? ` 반대로 ${esc(up.join(', '))}은 아이가 조금 늘었습니다.` : ''}</p>
+      <p class="muted small">읍면동으로 바꾸면 우리 학교 주변 동네의 아이 수를 볼 수 있습니다.</p>`;
+    }, note: '주민등록 인구 기준 단순 비교입니다. 전입·전출, 사립·특수학교 진학, 조기·유예 입학은 반영하지 않았습니다.', rank: 'cohort' },
   { id: 'small', g: '지역소멸과 작은학교', q: '학생 60명 이하 작은학교는 어디에 몰려 있나?', s: '소규모학교 비율과 위치', ind: 'smallShare', chips: ['smallShare', 'small', 'ruralShare'],
     filter: { label: '60명 이하 학교', fn: (s) => s.stu[S.yi] !== null && s.stu[S.yi] <= 60 && s.kind !== '특수학교' },
     cam: { pitch: 58, bearing: 10, b: [[127.85, 35.9], [129.6, 37.15]] },
@@ -1014,6 +1127,18 @@ const STORIES = [
       return `<p>읍면동 가운데 가장 가까운 중학교까지 거리가 먼 곳은 ${e.slice(0, 3).map((x) => `<b>${x.sigun} ${x.emd}(${fmt(x.nearM, 1)}km)</b>`).join(', ')}입니다.</p>
       <p>고등학교는 더 멉니다. 가장 가까운 고등학교까지 <b>15km 이상</b>인 읍면동이 <b>${h}곳</b>입니다. 입체 보기로 바꾸면 산줄기가 이 거리를 더 길게 만든다는 것을 볼 수 있습니다.</p>`;
     }, note: '직선거리입니다. 실제 도로 거리는 산간 지역일수록 더 깁니다. 휴교 학교는 뺐습니다.', rankEmd: 'nearM' },
+  { id: 'mountain', view: '3d', g: '통학과 학교 접근성', q: '산골 학교는 얼마나 작을까?', s: '해발 고도와 학교 규모 · 지형 보기', ind: 'high', chips: ['high', 'altMed', 'nearM'],
+    filter: { label: '해발 300m 이상 학교', fn: (s) => s.alt !== null && s.alt >= 300 },
+    cam: { pitch: 66, bearing: 28, b: MOUNTAIN_B, dz: 0.55 },
+    hero: () => { const h = D.schools.filter((s) => s.alt !== null && s.alt >= 300); return { l: '해발 300m 넘는 곳의 학교', v: `${h.length}곳 <small>학생 중앙값 ${fmt(median(h.map((s) => s.stu[4])))}명</small>`, d: `경북 전체 학교 중앙값 ${fmt(median(D.schools.map((s) => s.stu[4])))}명` }; },
+    body: () => {
+      const h = D.schools.filter((s) => s.alt !== null && s.alt >= 300).sort((a, b) => b.alt - a.alt);
+      const bySg = {}; h.forEach((s) => (bySg[s.sigun] = (bySg[s.sigun] || 0) + 1));
+      const lo = D.schools.filter((s) => s.alt !== null && s.alt < 100);
+      return `<p>지도를 기울이면 산줄기 사이 골짜기마다 작은 기둥(학교)이 흩어져 있습니다. 해발 300m 넘는 곳의 학교 ${h.length}곳은 ${Object.entries(bySg).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${esc(k)} ${v}곳`).join(', ')}에 있습니다.</p>
+      <p>이 학교들의 학생 수 중앙값은 <b>${fmt(median(h.map((s) => s.stu[4])))}명</b>으로, 해발 100m 아래 학교(${fmt(median(lo.map((s) => s.stu[4])))}명)의 몇 분의 일입니다. 가장 높은 곳은 <b>${esc(h[0].name)}(해발 ${h[0].alt}m, ${fmt(h[0].stu[4])}명)</b>입니다.</p>
+      <ul class="slist">${h.map(schoolRow).join('')}</ul>`;
+    }, note: '해발 고도는 학교 좌표의 지형 타일 값(약 30m 격자)입니다. 위치를 읍면 대표점으로 잡은 2곳은 뺐습니다.', rank: 'high' },
   { id: 'bj', g: '통학과 학교 접근성', q: '도서벽지 학교는 어디에 있고 얼마나 작은가?', s: '법정 도서·벽지 지정 학교', ind: 'bj', chips: ['bj', 'ruralShare'],
     filter: { label: '도서벽지 학교', fn: (s) => !!s.bj },
     cam: { pitch: 50, bearing: 8, b: [[128.05, 36.25], [130.95, 37.58]] },
@@ -1061,7 +1186,17 @@ const STORIES = [
 function renderQList() {
   const groups = {};
   STORIES.forEach((s, i) => (groups[s.g] ||= []).push([s, i]));
-  pbody.innerHTML = `<div class="intro" id="intro"><img src="art/hero.jpg" alt="" onerror="this.parentNode.style.display='none'"><p>경북 초·중·고·특수학교 <b>${fmt(D.schools.length)}곳</b>의 5년 통계를 한 지도에 모았습니다. 질문을 고르면 지도가 그 답을 보여줍니다.</p></div>` +
+  const t0 = T()[0], t4 = T()[4], p = D.stats.popTotal;
+  const up = D.sigunNames.filter((sg) => SG()[sg].all[4].students > SG()[sg].all[0].students).length;
+  const far = Object.values(D.stats.emd).filter((e) => e.nearM >= 10).length;
+  pbody.innerHTML = `<section class="glance" aria-label="한눈에 보기"><h3>경북 학교, 지금 무슨 일이 일어나고 있나</h3>
+  <p class="why">경북 초·중·고·특수학교 ${fmt(D.schools.length)}곳의 5년 공식 통계와 주민등록 인구를 한 지도에 모았습니다. 학교를 옮기거나, 지역 교육 여건을 설명하거나, 우리 학교의 몇 년 뒤를 가늠할 때 쓰세요.</p>
+  <div class="gl-grid">
+    <button data-story="decline"><b class="num">${sgn(pct(t0.students, t4.students))}%</b><span>4년 새 학생 ${fmt(t0.students - t4.students)}명 감소. 22개 시군 중 ${up ? up + '곳만 증가' : '늘어난 곳 없음'}</span><em>어디가 많이 줄었나 →</em></button>
+    <button data-story="future"><b class="num">${sgn(p.cohort)}%</b><span>0~2세가 지금 초1~3 또래보다 이만큼 적음. 입학생은 더 줄어듭니다</span><em>몇 년 뒤 우리 동네는 →</em></button>
+    <button data-story="small"><b class="num">${fmt(t4.small)}곳</b><span>학생 60명 이하 학교. 경북 학교 ${fmt(t4.smallShare, 0)}%, 신입생 0명 학교 ${fmt(t4.zero)}곳</span><em>작은학교는 어디에 →</em></button>
+    <button data-story="mountain"><b class="num g">${D.schools.filter((x) => x.alt !== null && x.alt >= 300).length}곳</b><span>해발 300m 넘는 산골 학교. 학생 중앙값 ${fmt(median(D.schools.filter((x) => x.alt !== null && x.alt >= 300).map((x) => x.stu[4])))}명 · 중학교 10km 넘는 읍면동 ${far}곳</span><em>지형으로 보기 →</em></button>
+  </div></section>` +
     Object.entries(groups).map(([g, arr]) => `<div class="qgroup">${esc(g)}</div>` + arr.map(([s, i]) =>
       `<button class="qrow" data-story="${s.id}"><span class="qn">${i + 1}</span><span><div class="qt">${esc(s.q)}</div><div class="qs">${esc(s.s)}</div></span></button>`).join('')).join('') +
     `<p class="small muted" style="margin-top:20px;line-height:1.6">지도 위 막대(기둥)는 학교 하나입니다. 높이는 학생 수, 색은 학교급입니다. 아래 연도 막대를 누르거나 ▶를 누르면 2022년부터 기둥이 줄어드는 모습을 볼 수 있습니다.</p>`;
@@ -1074,6 +1209,7 @@ function openStory(id, fly = true) {
   if (IND[S.ind].yearly) S.yi = 4;
   S.layers.closed = st.layer === 'closed';
   S.layers.bj = false;
+  if (!MOBILE) S.view = st.view || (S.view === '3d' ? 'bar' : S.view);
   setFilter(st.filter || null);
   applyView(true); paint();
   map.getSource('sch-col').setData(schoolColumns(S.yi, 1, S.yi));
@@ -1204,7 +1340,7 @@ function openEmd(code) {
   map.setFilter('emd-hover', ['==', ['get', 'code'], code]);
   const f = D.emdGeo.features.find((x) => x.properties.code === code);
   const cam = map.cameraForBounds(bboxOf(f.geometry), { padding: padding(), maxZoom: 12 });
-  map.flyTo({ ...cam, pitch: S.view === '3d' ? 58 : 0, bearing: S.view === '3d' ? map.getBearing() : 0, duration: 1400 });
+  map.flyTo({ ...cam, pitch: pitched() ? 58 : 0, bearing: pitched() ? map.getBearing() : 0, duration: 1400 });
   openSheet(); renderPanel(); pbody.scrollTop = 0;
 }
 function renderEmd() {
@@ -1238,12 +1374,24 @@ function renderClosed() {
 }
 
 /* ---------- 학교 카드 ---------- */
-function selectSchool(i) { if (map && map.getLayer('sch-sel')) map.setFilter('sch-sel', ['==', ['get', 'i'], i]); }
+function selectSchool(i) { if (map && map.getLayer('sch-sel')) map.setFilter('sch-sel', ['==', ['get', 'i'], i]); if (i < 0) showZone(null); }
+const zoneCache = {};
+async function showZone(s) {
+  const src = map && map.getSource('zone'); if (!src) return;
+  const empty = { type: 'FeatureCollection', features: [] };
+  if (!s || (s.ze === undefined && s.zm === undefined)) { src.setData(empty); return; }
+  const lv = s.ze !== undefined ? 'e' : 'm', idx = s.ze !== undefined ? s.ze : s.zm;
+  try {
+    zoneCache[lv] ||= await fetch(`data/zones_${lv}.geojson`).then((r) => r.json());
+    if (S.school !== s.i) return;
+    src.setData({ type: 'FeatureCollection', features: [zoneCache[lv].features[idx]] });
+  } catch (e) { src.setData(empty); }
+}
 function openSchool(i, fly = true) {
-  S.school = i; S.closedSel = null; selectSchool(i);
+  S.school = i; S.closedSel = null; selectSchool(i); showZone(D.schools[i]);
   if (S.tab === 's') setFilter(null);
   const s = D.schools[i];
-  if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 12), pitch: S.view === '3d' ? 50 : 0, bearing: map.getBearing(), duration: 1500, padding: MOBILE ? { bottom: innerHeight * 0.45 } : { right: 240 } });
+  if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 12), pitch: pitched() ? 50 : 0, bearing: map.getBearing(), duration: 1500, padding: MOBILE ? { bottom: innerHeight * 0.45 } : { right: 240 } });
   openSheet(); renderPanel(); pbody.scrollTop = 0; syncHash();
   loadNeis(s);
 }
@@ -1272,6 +1420,7 @@ function renderSchool() {
     <div><div class="l">2026 입학</div><div class="v num">${fmt(s.entrants)}<small>명</small></div></div>
   </div>
   ${geoNote}
+  ${s.ze !== undefined || s.zm !== undefined ? `<div class="zone-box"><span>통학구역 <b>${esc((s.zen || s.zmn || '').replace(/통학구역|학교군|중학구$/g, (m) => m))}</b><br><span class="muted small">면적 ${fmt(s.zea ?? s.zma, 1)}㎢ · 지도에 점선으로 표시</span></span></div>` : ''}
   <div class="sec-l">학생 수 2022~2026</div>${barsSvg(s.stu, YEARS.map(String), { color: KIND_COLOR[s.kind], unit: '명' })}
   ${nGr ? `<div class="sec-l">학년별 학생 (2026)</div>${barsSvg(s.g.slice(0, nGr), s.g.slice(0, nGr).map((_, i) => i + 1 + '학년'), { color: KIND_COLOR[s.kind], h: 70, unit: '명' })}` : ''}
   <div class="sec-l">경북 ${esc(KIND_SHORT[s.kind])} 중앙값과 비교 <span style="font-weight:400">(세로선 = 중앙값)</span></div>
@@ -1281,6 +1430,7 @@ function renderSchool() {
   <dt>전입·전출</dt><dd>전입 ${fmt(s.moveIn)} · 전출 ${fmt(s.moveOut)} (지난 학년도)</dd>
   ${s.kind !== '특수학교' && (s.spClass || 0) > 0 ? `<dt>특수학급</dt><dd>${s.spClass}학급 · ${fmt(s.spStu)}명</dd>` : ''}
   <dt>교실</dt><dd>일반 ${fmt(s.rooms[0])} · 교과 ${fmt(s.rooms[1])} · 특별 ${fmt(s.rooms[2])}</dd>
+  ${s.alt !== null && s.alt !== undefined ? `<dt>해발 고도</dt><dd>${fmt(s.alt)}m</dd>` : ''}
   <dt>교지</dt><dd>${fmt(s.site)}㎡ (1인당 ${fmt(s.sitePer)}㎡)</dd>
   ${s.near ? `<dt>가까운 ${esc(KIND_SHORT[s.kind])}</dt><dd><button class="back" style="margin:0" data-schname="${esc(s.nearName)}" data-schsg="${esc(s.nearSg || '')}">${esc(s.nearName)}</button> · 직선 ${fmt(s.near, 1)}km</dd>` : ''}
   <dt>주소</dt><dd>${esc(s.addr)}</dd><dt>전화</dt><dd>${s.tel ? `<a href="tel:${esc(s.tel)}">${esc(s.tel)}</a>` : '–'}</dd>
@@ -1334,11 +1484,11 @@ $('#handle').addEventListener('click', () => {
    시연(드론 투어)
    ========================================================= */
 let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, tourYearT = null;
-const TOUR = ['decline', 'small', 'distance', 'bj', 'closed', 'special'];
+const TOUR = ['decline', 'future', 'small', 'mountain', 'bj', 'closed'];
 const TOUR_MS = 11000;
 function startTour() {
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
-  if (S.view !== '3d' && !MOBILE) { S.view = '3d'; applyView(); }
+  if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
   map.resize(); tourIdx = 0; tourStep();
 }
 function tourStep() {
@@ -1347,7 +1497,7 @@ function tourStep() {
   openStory(st.id, false);
   const cam = storyCam(st);
   map.flyTo({ ...cam, duration: 3200, essential: true });
-  map.once('moveend', () => { if (touring && S.view === '3d') map.easeTo({ bearing: cam.bearing + 20, duration: TOUR_MS - 3400, easing: (t) => t }); });
+  map.once('moveend', () => { if (touring && pitched()) map.easeTo({ bearing: cam.bearing + 20, duration: TOUR_MS - 3400, easing: (t) => t }); });
   const h = st.hero();
   $('#tK').textContent = `${tourIdx + 1} / ${TOUR.length} · ${st.g}`;
   $('#tH').textContent = st.q;
@@ -1383,6 +1533,9 @@ function renderAbout() {
   <li>특수교육 대상 학생: 일반학교 특수학급 학생 + 특수학교 재학생. 특수학급 수에는 특수학교 학급을 넣지 않았습니다.</li>
   <li>통학 거리: 읍면동 대표점에서 가장 가까운 학교까지 직선거리(휴교 제외). 도로 거리가 아닙니다.</li>
   <li>도서벽지: 법령 별표의 경북 학교 ${m.bjTotal}곳 중 운영 중인 ${D.schools.filter((s) => s.bj).length}곳. 별표에 있으나 이미 폐교된 곳: ${m.bjClosed.map((b) => esc(b.name)).join(', ')}. 경북교육청 인사 가산점 급지표와는 다릅니다.</li>
+  <li>입학생 전망: 행정동별 주민등록 0~2세 ÷ 6~8세 − 1(${esc(m.popMonth)} 말). 전입·전출, 사립·특수학교 진학은 반영하지 않은 단순 비교입니다.</li>
+  <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
+  <li>해발 고도: AWS Terrain Tiles(z12) 지형 값. 지형 보기에서는 산 높이를 실제의 2.8배로 키워 보여 줍니다.</li>
   <li>인구감소지역: 안동·영주·영천·상주·문경·의성·청송·영양·영덕·청도·고령·성주·봉화·울진·울릉(15곳), 관심지역: 경주·김천.</li></ul>
   <h4>한계</h4><ul>
   <li>폐교 재산은 표준데이터에 좌표가 없어 읍면 대표점 둘레에 놓았습니다. 구미·성주 교육지원청 자료는 표준데이터에 없습니다.</li>
@@ -1425,7 +1578,7 @@ document.addEventListener('click', (e) => {
   if (d.lv && !t.disabled) { S.level = d.lv; S.sigun = null; S.emd = null; map.setFilter('sel-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); paint(); renderPanel(); return; }
   if (d.k) { S.kind = d.k; paint(); applySchoolFilter(); if (S.story || S.tab === 'r') renderPanel(); return; }
   if (d.kind) { S.kind = d.kind; paint(); applySchoolFilter(); return; }
-  if (d.v) { S.view = d.v; applyView(); return; }
+  if (d.v) { const was = S.view; S.view = d.v; applyView(); if (d.v === '3d' && was !== '3d' && S.school === null && !S.story) flyMountain(); return; }
   if (d.l) { S.layers[d.l] = !S.layers[d.l]; applyView(); applySchoolFilter(); renderLegend(); return; }
   if (d.y !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setYear(+d.y); return; }
   if (d.tab) { setTab(d.tab); return; }
@@ -1447,6 +1600,7 @@ document.addEventListener('click', (e) => {
   if (d.act === 'about-x') { $('#about').classList.remove('on'); return; }
   if (t.id === 'play') { togglePlay(); return; }
   if (t.id === 'btnReset') { goHome(); return; }
+  if (t.id === 'btnUlleung') { map.flyTo({ center: [131.2, 37.42], zoom: 9.4, pitch: pitched() ? 50 : 0, bearing: 0, duration: 1800 }); return; }
   if (t.id === 'home') { stopTour(); setTab('q'); S.ind = 'change'; S.level = 'sigun'; S.kind = 'all'; S.yi = 4; setFilter(null); S.layers.closed = false; S.layers.bj = false; applyView(true); paint(); map.getSource('sch-col').setData(schoolColumns()); map.getSource('sch-pt').setData(schoolPoints()); goHome(); return; }
   if (t.id === 'btnTour') { touring ? stopTour() : startTour(); return; }
   if (t.id === 'tStop') { stopTour(); return; }
@@ -1467,12 +1621,14 @@ document.addEventListener('keydown', (e) => {
   try { await load(); } catch (e) { $('#loading').textContent = '자료를 불러오지 못했습니다. 새로고침해 주세요.'; return; }
   const p = readHash();
   initMap();
-  map.once('load', () => {
+  // 지도 레이어가 준비되면(setupLayers 끝) 한 번 실행 — 'load' 이벤트 순서에 기대지 않는다
+  routeInitial = () => {
     if (p.get('s')) { const s = D.schools.find((x) => x.id === p.get('s') || x.name === p.get('s')); if (s) { setTab('s'); openSchool(s.i); } }
     else if (p.get('sg') && D.stats.sigun[p.get('sg')]) openSigun(p.get('sg'));
     else if (p.get('q')) openStory(p.get('q'));
     else renderPanel();
-  });
+  };
+  if (layersReady) routeInitial();
   if (MOBILE) { $('#panel').classList.add('min'); document.body.classList.add('sheet-min'); }
 })();
 </script>
