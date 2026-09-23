@@ -12,7 +12,8 @@
 <meta property="og:url" content="https://kimju1416.github.io/gb-edu-map/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F5F3EE">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323704A'/%3E%3Cpath d='M5 24l7-10 5 6 4-5 6 9z' fill='%23F5F3EE'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
+<link rel="apple-touch-icon" href="art/apple-touch-180.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
@@ -426,6 +427,12 @@ body.dark .risk .lvl{background:rgba(255,255,255,.08)}
 body.dark .toast{background:#E9EEF2;color:#0B0F14}
 /* ---------- 휴대폰 다듬기 ---------- */
 .peek{display:none}
+.gyro{display:none}
+@media (max-width:860px){
+  .gyro{display:flex;flex-direction:column;align-items:center;gap:2px;width:58px;border:0;background:none;padding:6px 0;border-radius:8px;font-size:10.5px;font-weight:700;color:var(--tx-2)}
+  .gyro[aria-pressed=true]{background:var(--pt);color:#fff}
+  body.dark .gyro[aria-pressed=true]{color:#06140D}
+}
 @media (max-width:860px){
   .ctl-ind{gap:6px}
   .ctl-ind .row{flex-wrap:nowrap}
@@ -445,6 +452,9 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
   .maplibregl-ctrl-bottom-right{bottom:auto!important;top:calc(var(--top) + 100px)}
   .maplibregl-ctrl-attrib:not(:hover) .maplibregl-ctrl-attrib-inner{display:none}
   .maplibregl-ctrl-attrib{font-size:9px!important;opacity:.8;max-width:58vw!important;min-height:24px;min-width:24px}
+  .lbl{font-size:10.5px;white-space:nowrap}
+  .lbl span{display:inline;font-size:10px}
+  .lbl.box{padding:1px 4px;border-radius:5px}
   .peek{display:block;padding:2px 16px 8px;font-size:13px;color:var(--tx-2);line-height:1.45}
   .peek b{color:var(--tx);font-weight:700}
   .peek em{font-style:normal;color:#8A3E14;font-weight:700}
@@ -464,7 +474,7 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
 
 <header class="top">
   <button class="brand" id="home" aria-label="처음 화면으로">
-    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#23704A"/><path d="M5 24l7-10 5 6 4-5 6 9z" fill="#F5F3EE"/><rect x="19" y="7" width="3" height="8" rx="1" fill="#CF7F4A"/></svg>
+    <img src="art/logo-96.png" width="28" height="28" alt="" style="border-radius:7px;display:block">
     경북교육지도
   </button>
   <div class="kpis" id="kpis"></div>
@@ -500,6 +510,7 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
 
 <div class="ctl-r" id="ctlR">
   <h4>보기</h4>
+  <button class="gyro" id="btnGyro" aria-pressed="false" title="휴대폰을 기울이면 지도가 따라 돕니다"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M3 8c-1.3 2.5-1.3 5.5 0 8M21 8c1.3 2.5 1.3 5.5 0 8"/></svg><span>기울여 보기</span></button>
   <div class="three" id="viewSeg"><button data-v="bar" aria-pressed="true" title="시군·읍면이 지표값만큼 솟아오릅니다">값 입체</button><button data-v="3d" aria-pressed="false" title="실제 산 지형 위에 학교를 세웁니다">지형</button><button data-v="2d" aria-pressed="false">평면</button></div>
   <h4>겹쳐 보기</h4>
   <button class="tg" data-l="schools" aria-pressed="true"><span class="bx"></span>학교 위치 <small class="muted" id="schHint"></small></button>
@@ -581,7 +592,7 @@ let D = {};            // 자료
 let map;               // 지도
 const S = {            // 화면 상태
   ind: 'change', level: 'sigun', kind: 'all', yi: 4, fy: 4,
-  view: MOBILE ? '2d' : 'bar', layers: { schools: true, closed: false, bj: false, rotate: false },
+  view: 'bar', layers: { schools: true, closed: false, bj: false, rotate: false },
   tab: 'q', story: null, school: null, sigun: null, emd: null, filter: null,
 };
 
@@ -758,7 +769,7 @@ function computeHome() {
   const pad = MOBILE ? { top: 150, bottom: 150, left: 12, right: 64 } : { top: 70, bottom: 110, left: 30, right: 250 };
   const c3 = map.cameraForBounds(GB_BOUNDS, { padding: pad, pitch: 52, bearing: -12 });
   const c2 = map.cameraForBounds(GB_BOUNDS, { padding: pad });
-  if (c3) HOME = { center: c3.center, zoom: c3.zoom + 0.3, pitch: 52, bearing: -12 };
+  if (c3) HOME = { center: c3.center, zoom: c3.zoom + (MOBILE ? 0.15 : 0.3), pitch: MOBILE ? 44 : 52, bearing: -12 };
   if (c2) HOME2D = { center: c2.center, zoom: c2.zoom, pitch: 0, bearing: 0 };
 }
 
@@ -770,7 +781,11 @@ function initMap() {
     locale: { 'NavigationControl.ZoomIn': '확대', 'NavigationControl.ZoomOut': '축소', 'NavigationControl.ResetBearing': '북쪽 보기' },
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
-  computeHome(); map.jumpTo(pitched() ? HOME : HOME2D);
+  computeHome();
+  const start0 = pitched() ? HOME : HOME2D;
+  const intro = !location.hash.includes('c=') && !matchMedia('(prefers-reduced-motion:reduce)').matches;
+  map.jumpTo(intro ? { ...start0, zoom: start0.zoom - 1.1, pitch: 0, bearing: start0.bearing - 50 } : start0);
+  if (intro) map.once('idle', () => { if (!touring && S.school === null) map.easeTo({ ...start0, duration: 2600, easing: (t) => 1 - Math.pow(1 - t, 3) }); });
   map.on('style.load', setupLayers);
   let loadFail = setTimeout(() => { if (!$('#loading').classList.contains('done')) $('#loading').textContent = '배경 지도를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 20000);
   map.once('load', () => { clearTimeout(loadFail); if (MOBILE) setTimeout(() => $$('.maplibregl-ctrl-attrib').forEach((a) => { a.classList.remove('maplibregl-compact-show'); a.removeAttribute('open'); }), 300); });
@@ -793,7 +808,7 @@ function themeBase() {
   }
   if (map.getLayer('nb-fill')) { map.setPaintProperty('nb-fill', 'fill-color', dk ? '#0B0F14' : '#F2F0EA'); map.setPaintProperty('nb-fill', 'fill-opacity', dk ? 0.6 : 0.55); map.setPaintProperty('nb-line', 'line-color', dk ? '#2A323B' : '#C9C3B5'); }
   if (map.getLayer('sigun-line')) { map.setPaintProperty('sigun-line', 'line-color', dk ? 'rgba(255,255,255,.35)' : '#FFFFFF'); map.setPaintProperty('emd-line', 'line-color', dk ? 'rgba(255,255,255,.14)' : '#FFFFFF'); }
-  if (map.getLayer('hillshade')) { map.setPaintProperty('hillshade', 'hillshade-highlight-color', dk ? '#2B3642' : '#FFFFFF'); map.setPaintProperty('hillshade', 'hillshade-accent-color', dk ? '#05080B' : '#7F7A6C'); }
+  if (map.getLayer('hillshade')) { ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-highlight-color', dk ? '#2B3642' : '#FFFFFF')); ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-accent-color', dk ? '#05080B' : '#7F7A6C')); }
   if (map.getLayer('sch-name')) {
     makePills();
     map.setPaintProperty('sch-name', 'text-color', dk ? '#EEF2F5' : '#1F2A24');
@@ -828,8 +843,10 @@ function setupLayers() {
   const waterId = layers.find((l) => /^water/.test(l.id) && l.type === 'fill')?.id;
 
   map.addSource('dem', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 12, attribution: '지형: Mapzen/AWS Terrain Tiles' });
-  map.addSource('dem-hs', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 12 });
-  map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem-hs', paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
+  map.addSource('dem-hs', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 8 }); // 음영은 z10 조각까지만(새 조각마다 그림판을 만들어 비행이 끊기므로)
+  map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem-hs', maxzoom: 9.5, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
+  map.addSource('dem-hs2', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 12 }); // 지형 보기 전용
+  map.addLayer({ id: 'hillshade-hi', type: 'hillshade', source: 'dem-hs2', layout: { visibility: 'none' }, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
 
   map.addSource('nb', { type: 'geojson', data: D.nbGeo });
   map.addSource('sigun', { type: 'geojson', data: D.sigunGeo, promoteId: 'sigun' });
@@ -1087,7 +1104,8 @@ function updateLabels() {
   const showV = S.level === 'sigun';
   for (const m of labelMarkers) {
     const el = m.getElement(), sg = el.dataset.sg;
-    el.innerHTML = `${sg}${showV ? `<span class="num">${esc(fmtInd(curVals[sg]))}</span>` : ''}`;
+    // 휴대폰: 한 줄로 짧게(시·군 떼고)
+    el.innerHTML = MOBILE ? `${sg.replace(/[시군]$/, '')}${showV ? ` <span class="num">${esc(fmtInd(curVals[sg]))}</span>` : ''}` : `${sg}${showV ? `<span class="num">${esc(fmtInd(curVals[sg]))}</span>` : ''}`;
     el.classList.toggle('box', pitched());
   }
 }
@@ -1370,7 +1388,10 @@ function applyView(first) {
   const terrain = S.view === '3d', bar = S.view === 'bar', is3d = pitched();
   $$('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === S.view));
   if (terrain) map.setTerrain({ source: 'dem', exaggeration: 2.8 }); else map.setTerrain(null);
-  map.setPaintProperty('hillshade', 'hillshade-shadow-color', DARK ? '#000000' : terrain ? '#4F4A3E' : '#6E6A5E');
+  // 음영: 지형 보기는 선명한 음영(z12), 그 밖은 도 전체를 볼 때만 가벼운 음영(z8)
+  map.setLayoutProperty('hillshade-hi', 'visibility', terrain ? 'visible' : 'none');
+  map.setLayoutProperty('hillshade', 'visibility', terrain ? 'none' : 'visible');
+  ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-shadow-color', DARK ? '#000000' : terrain ? '#4F4A3E' : '#6E6A5E'));
   if (DARK) { try { map.setSky({ 'sky-color': '#05080C', 'horizon-color': '#15202B', 'fog-color': '#0B0F14', 'sky-horizon-blend': 0.5, 'horizon-fog-blend': 0.6, 'fog-ground-blend': terrain ? 0.5 : 1, 'atmosphere-blend': terrain ? 0.4 : 0 }); } catch (e) {} } else
   try { map.setSky(terrain ? { 'sky-color': '#CFE0EA', 'horizon-color': '#EEF1EE', 'fog-color': '#F2F0EA', 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.55, 'atmosphere-blend': 0.5 } : { 'sky-color': '#F2F0EA', 'horizon-color': '#F2F0EA', 'fog-color': '#F2F0EA', 'fog-ground-blend': 1, 'atmosphere-blend': 0 }); } catch (e) {}
   // 값 입체에서는 학교를 크게 확대했을 때만(기둥 위로) 점으로, 지형에서는 기둥, 평면에서는 원
@@ -1394,8 +1415,8 @@ function applyView(first) {
   map.setPaintProperty('hak-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   // 어두운 지형: 능선이 달빛처럼 보이게 음영을 밝게
-  map.setPaintProperty('hillshade', 'hillshade-highlight-color', DARK ? (terrain ? '#8FA3B8' : '#2B3642') : '#FFFFFF');
-  map.setPaintProperty('hillshade', 'hillshade-exaggeration', terrain ? (DARK ? 1 : 0.85) : 0.42);
+  ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-highlight-color', DARK ? (terrain ? '#8FA3B8' : '#2B3642') : '#FFFFFF'));
+  ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-exaggeration', terrain ? (DARK ? 1 : 0.85) : 0.42));
   if (!first) {
     const t = is3d ? { pitch: MOBILE ? 40 : bar ? 55 : 52, bearing: map.getBearing() || -12 } : { pitch: 0, bearing: 0 };
     map.easeTo({ ...t, duration: 900 });
@@ -1487,7 +1508,7 @@ function bindMapEvents() {
     else if (S.level === 'hak') { const z = D.hak[f.properties.code]; if (z.sch.length) openSchool([...z.sch].sort((a, b) => (b.stu[4] || 0) - (a.stu[4] || 0))[0].i); }
     else openEmd(f.properties.code);
   });
-  map.on('dragstart', () => { if (S.layers.rotate) { S.layers.rotate = false; applyView(); } });
+  map.on('dragstart', () => { if (S.layers.rotate) { S.layers.rotate = false; applyView(); } GY.base = null; });
   map.on('moveend', updateBuildings);
   map.on('moveend', vbUpdate);
   map.on('zoomend', renderReadme);
@@ -1721,6 +1742,7 @@ function renderQList() {
     `<p class="small muted" style="margin-top:20px;line-height:1.6">지도 위 막대(기둥)는 학교 하나입니다. 높이는 학생 수, 색은 학교급입니다. 아래 연도 막대를 누르거나 ▶를 누르면 2022년부터 기둥이 줄어드는 모습을 볼 수 있습니다.</p>`;
 }
 function openStory(id, fly = true) {
+  if (MOBILE && !touring) buzz();
   const st = STORIES.find((s) => s.id === id); if (!st) return;
   S.tab = 'q'; S.story = st; S.school = null; S.sigun = null; S.emd = null; S.closedSel = null;
   $$('.ptab').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === 'q'));
@@ -1917,12 +1939,25 @@ async function showZone(s) {
   } catch (e) { src.setData(empty); }
 }
 function openSchool(i, fly = true) {
+  if (MOBILE) buzz();
   S.school = i; S.closedSel = null; selectSchool(i); showZone(D.schools[i]);
   if (S.tab === 's') setFilter(null);
   const s = D.schools[i];
   if (fly) map.flyTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 12), pitch: pitched() ? 50 : 0, bearing: map.getBearing(), duration: 1500, padding: MOBILE ? { bottom: innerHeight * 0.45 } : { right: 240 } });
   openSheet(); renderPanel(); pbody.scrollTop = 0; syncHash();
   loadNeis(s);
+}
+function discHtml(s) {
+  if (!s.disc) return '';
+  const d = s.disc, peers = D.schools.filter((x) => x.kind === s.kind && x.sigun === s.sigun && x.disc);
+  const med2 = (k) => median(peers.map((x) => x.disc[k]));
+  const row = (l, v, m, u) => `<dt>${l}</dt><dd>${v === null || v === undefined ? '–' : '<b class="num">' + esc(fmt(v, u === '%' ? 1 : 0)) + '</b>' + u}${m !== null && v !== null && v !== undefined ? ` <span class="muted small">(${esc(s.sigun)} ${esc(KIND_SHORT[s.kind])} 중앙값 ${fmt(m, u === '%' ? 1 : 0)}${u})</span>` : ''}</dd>`;
+  return `<div class="sec-l">학교알리미 공시 (2026)</div><dl class="kv">
+  <dt>급식 운영</dt><dd>${esc(d.meal || '–')}</dd>
+  ${row('기간제 교원', d.temp, med2('temp'), '%')}
+  ${row('동아리', d.club, med2('club'), '개')}
+  ${row('학급당 학생', d.perClass, med2('perClass'), '명')}</dl>
+  <p class="small muted" style="margin:6px 0 0">학교알리미 공시 원자료(참고용, 우열 비교가 아님). 더 많은 공시 항목은 <a href="https://www.schoolinfo.go.kr/" target="_blank" rel="noopener" style="color:var(--pt)">학교알리미</a>에서 학교 이름으로 찾아보세요.</p>`;
 }
 function forecastHtml(s) {
   if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">${s.kind === '고등학교' ? '고등학교는 통학구역이 없어' : '특수학교는'} 추정하지 않습니다.</p><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button>`;
@@ -1972,6 +2007,7 @@ function renderSchool() {
   ${nGr ? `<div class="sec-l">학년별 학생 (2026)</div>${barsSvg(s.g.slice(0, nGr), s.g.slice(0, nGr).map((_, i) => i + 1 + '학년'), { color: KIND_COLOR[s.kind], h: 70, unit: '명' })}` : ''}
   <div class="sec-l">경북 ${esc(KIND_SHORT[s.kind])} 중앙값과 비교 <span style="font-weight:400">(세로선 = 중앙값)</span></div>
   ${cmpRow('학급당 학생', s.perClass, m.perClass, '명')}${cmpRow('교원 1인당', s.perTeacher, m.perTeacher, '명')}${cmpRow('1인당 교지', s.sitePer, m.sitePer, '㎡', 0)}${cmpRow('학생 수', s.stu[4], m.stu, '명', 0)}
+  ${discHtml(s)}
   <div class="sec-l">학교 정보</div>
   <dl class="kv"><dt>개교</dt><dd>${opened}</dd><dt>교원 구성</dt><dd>정규 ${fmt(s.tReg)} · 기간제 ${fmt(s.tTmp)} · 직원 ${fmt(s.staff)}</dd>
   <dt>전입·전출</dt><dd>전입 ${fmt(s.moveIn)} · 전출 ${fmt(s.moveOut)} (지난 학년도)</dd>
@@ -2151,7 +2187,7 @@ function shareUrl() {
   const c = map.getCenter();
   const p = new URLSearchParams(location.hash.slice(1));
   p.set('c', [c.lng.toFixed(4), c.lat.toFixed(4), map.getZoom().toFixed(2), Math.round(map.getPitch()), Math.round(map.getBearing())].join(','));
-  if (S.view !== (MOBILE ? '2d' : 'bar')) p.set('v', S.view);
+  if (S.view !== 'bar') p.set('v', S.view);
   if (DARK) p.set('t', 'd');
   if (isFuture() && S.fy !== 4) p.set('fy', FYEARS[S.fy]);
   return location.origin + location.pathname + '#' + p.toString();
@@ -2164,6 +2200,34 @@ async function share(title) {
   try { await navigator.clipboard.writeText(url); toast('링크를 복사했습니다. 카톡이나 메신저에 붙여 넣으세요.'); }
   catch (e) { prompt('이 주소를 복사하세요', url); }
 }
+
+/* ---------- 기울여 보기: 휴대폰 방향으로 방위·기울기 ---------- */
+const GY = { on: false, base: null, raf: 0, tgt: null };
+function gyroHandler(e) {
+  if (e.beta === null) return;
+  if (!GY.base) GY.base = { b: e.beta, g: e.gamma, bearing: map.getBearing() };
+  GY.tgt = { bearing: GY.base.bearing + (e.gamma - GY.base.g) * 1.6, pitch: Math.max(0, Math.min(72, 45 + (e.beta - GY.base.b) * 1.1)) };
+}
+function gyroLoop() {
+  if (!GY.on) return;
+  if (GY.tgt && !map.isMoving()) {
+    const b = map.getBearing(), p = map.getPitch();
+    map.jumpTo({ bearing: b + (GY.tgt.bearing - b) * 0.15, pitch: p + (GY.tgt.pitch - p) * 0.15 });
+  }
+  GY.raf = requestAnimationFrame(gyroLoop);
+}
+async function toggleGyro() {
+  if (GY.on) { GY.on = false; window.removeEventListener('deviceorientation', gyroHandler); cancelAnimationFrame(GY.raf); $('#btnGyro').setAttribute('aria-pressed', 'false'); return; }
+  try { if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) { const r = await DeviceOrientationEvent.requestPermission(); if (r !== 'granted') { toast('움직임 사용을 허용해야 합니다.'); return; } } } catch (e) {}
+  if (typeof DeviceOrientationEvent === 'undefined') { toast('이 기기는 기울기 센서를 지원하지 않습니다.'); return; }
+  if (S.view === '2d') { S.view = 'bar'; applyView(); }
+  GY.on = true; GY.base = null; GY.tgt = null;
+  window.addEventListener('deviceorientation', gyroHandler);
+  $('#btnGyro').setAttribute('aria-pressed', 'true'); buzz();
+  toast('휴대폰을 좌우·앞뒤로 기울여 보세요');
+  gyroLoop();
+}
+const buzz = (ms = 12) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
 /* ---------- 모바일 시트 ---------- */
 function openSheet() { if (!MOBILE) return; const p = $('#panel'); p.classList.remove('min'); document.body.classList.remove('sheet-min'); }
@@ -2247,7 +2311,7 @@ function renderAbout() {
   const m = D.stats.meta;
   $('#aboutBox').innerHTML = `<button class="x" data-act="about-x" aria-label="닫기">×</button><h3 id="aboutT">자료와 계산 방법</h3>
   <p>경상북도 초등학교·중학교·고등학교·특수학교(분교장 포함, 폐교 제외) <b>${fmt(D.schools.length)}곳</b>의 공개 통계를 모았습니다. 유치원, 각종학교, 방송통신중·고는 넣지 않았습니다. 군위군은 2023년 대구로 편입돼 5년 모두에서 뺐습니다.</p>
-  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS) / 건물: 브이월드(국토교통부)</li></ul>
+  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>학교알리미 공시(급식 운영·기간제 교원 비율·동아리 수·학급당 학생): 2026 공시를 학교별로 모은 자료(924곳 연결)</li><li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS) / 건물: 브이월드(국토교통부)</li></ul>
   <h4>숫자 확인</h4><p>변환 뒤 KESS 원자료 엑셀을 다시 더해 연도별 경북 학생·학급·교원 합계와 22개 시군 학생 합계가 지도 자료와 <b>모두 일치</b>하는지 대조했습니다(2022~2026).</p>
   <h4>지표 정의</h4><ul>
   <li>학생 수 증감률: 2022년 4월 1일 대비 선택 연도 4월 1일 재학생 수 변화. 학교 카드에서 이름이 바뀐 학교(22곳)는 옛 이름·같은 도로명 주소로 지난 기록을 이어 붙였습니다(한 주소에 같은 학교급이 둘인 곳은 잇지 않음). 읍면동 증감률은 2022→2026 고정이며 2022년 학교를 위치나 주소로 읍면동에 배정했습니다(배정 못 한 학생 ${fmt(m.s22Lost)}명).</li>
@@ -2342,6 +2406,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'tNext') { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); return; }
   if (t.id === 'tPrev') { tourIdx = (tourIdx - 1 + TOUR.length) % TOUR.length; tourStep(); return; }
   if (t.id === 'btnTheme') { setTheme(!DARK); return; }
+  if (t.id === 'btnGyro') { toggleGyro(); return; }
   if (t.id === 'btnShare' || d.act === 'share') { share(); return; }
   if (t.id === 'btnAbout') { renderAbout(); $('#about').classList.add('on'); return; }
 });
