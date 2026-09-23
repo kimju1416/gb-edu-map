@@ -560,6 +560,7 @@ body.dark .dv nav button:hover{background:rgba(255,255,255,.06)}
   .peek span{display:none}
   .top-r .tbtn{padding:0 10px}
 }
+body.flying .lbl{visibility:hidden!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -934,7 +935,8 @@ function applyBase() {
     if (!map.getLayer(b.id)) continue;
     if (b.type === 'symbol') {
       try { map.setPaintProperty(b.id, 'text-color', on ? '#FFFFFF' : DARK ? '#7F8B96' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-color']) || '#555'); map.setPaintProperty(b.id, 'text-halo-color', on ? 'rgba(0,0,0,.75)' : DARK ? '#0B0F14' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-halo-color']) || '#fff'); } catch (e) {}
-    } else map.setLayoutProperty(b.id, 'visibility', on ? 'none' : 'visible');
+    } else if (b.type === 'background') { map.setLayoutProperty(b.id, 'visibility', 'visible'); map.setPaintProperty(b.id, 'background-color', on ? '#26332A' : DARK ? '#0B0F14' : '#F2F0EA'); } // 위성 조각이 오기 전 빈자리를 숲 빛깔로
+    else map.setLayoutProperty(b.id, 'visibility', on ? 'none' : 'visible');
   }
   map.setPaintProperty('nb-fill', 'fill-color', on ? '#05080B' : DARK ? '#0B0F14' : '#F2F0EA');
   map.setPaintProperty('nb-fill', 'fill-opacity', on ? 0.45 : DARK ? 0.6 : 0.55);
@@ -1258,12 +1260,21 @@ function updateLabels() {
    화면 가운데 둘레의 1km(0.01°) 칸을 가까운 순서로 최대 12칸, 칸마다 최대 3쪽(3,000채)까지 JSONP로 받는다 */
 const VB = { cells: new Map(), loading: new Set(), seq: 0, timer: 0 };
 const CELL = 0.01;
+// 동시에 4개까지만(한꺼번에 수십 개를 보내면 늦게 온 응답이 시간 초과 뒤 도착해 오류가 난다)
+const VBQ = { run: 0, wait: [] };
 function vbJsonp(url) {
+  if (VBQ.run >= 4) return new Promise((r) => VBQ.wait.push(r)).then(() => vbJsonp(url));
+  VBQ.run++;
+  const done = () => { VBQ.run--; const n = VBQ.wait.shift(); if (n) n(); };
+  return vbJsonp1(url).finally(done);
+}
+function vbJsonp1(url) {
   return new Promise((ok, no) => {
     const cb = 'vb' + (++VB.seq) + '_' + Date.now();
     const sc = document.createElement('script');
-    const t = setTimeout(() => { cleanup(); no(new Error('시간 초과')); }, 15000);
-    const cleanup = () => { clearTimeout(t); delete window[cb]; sc.remove(); };
+    const t = setTimeout(() => { cleanup(); no(new Error('시간 초과')); }, 25000);
+    // 늦게 도착한 응답이 오류를 내지 않도록 빈 함수를 남겨 둔다
+    const cleanup = () => { clearTimeout(t); window[cb] = () => {}; sc.remove(); };
     window[cb] = (j) => { cleanup(); ok(j); };
     sc.onerror = () => { cleanup(); no(new Error('불러오기 실패')); };
     if (/^(localhost|127.)/.test(location.hostname)) sc.referrerPolicy = 'no-referrer'; // 로컬 시험용(등록 주소가 아니라 막히므로)
@@ -2745,13 +2756,37 @@ const TOUR_TEXT = {
     `빌려준 곳 ${D.closed.filter((c) => c.use === '대부').length} · 직접 쓰는 곳 ${D.closed.filter((c) => c.use === '자체활용').length} · <b>비어 있는 곳 ${un}</b>`,
     `2021년 이후 문 닫은 학교 ${rec}곳`]; },
 };
+// 둘러보기 시작 때 착륙지 위성 조각과 건물을 한꺼번에 미리 받아 둔다(비행 중 네트워크 기다림 없애기)
+function tourPrefetch() {
+  const lon2x = (lon, z) => Math.floor(((lon + 180) / 360) * 2 ** z);
+  const lat2y = (lat, z) => Math.floor(((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * 2 ** z);
+  for (const id of TOUR) {
+    const dr = DRONE[id]; if (!dr) continue;
+    const zc = Math.round(MOBILE ? dr.zoom - 1.1 : dr.zoom);
+    for (const z of [zc - 1, zc]) { const x0 = lon2x(dr.center[0], z), y0 = lat2y(dr.center[1], z), r = z === zc ? 2 : 1;
+      for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) { const im = new Image(); im.src = `https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_KEY}/Satellite/${z}/${y0 + dy}/${x0 + dx}.jpeg`; } }
+    vbPrefetch(dr.center, MOBILE ? 6 : 9);
+  }
+}
 function startTour() {
+  rememberVis(); if (S.sat) tourPrefetch();
+  map.on('movestart', tourMoveStart); map.on('moveend', tourMoveEnd);
   try { if (map.setPrefetchZoomDelta) { TOUR_PREFETCH = map.getPrefetchZoomDelta ? map.getPrefetchZoomDelta() : 4; map.setPrefetchZoomDelta(0); } } catch (e) {}
   try { if (devicePixelRatio > 1.25) map.setPixelRatio(1.25); } catch (e) {}
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
   if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
   map.resize(); tourIdx = 0; tourStep();
 }
+// 비행 중 글자 숨기기: 글자 겹침 계산(심볼 배치)이 카메라가 움직이는 매 화면 다시 돌아 끊김의 큰 몫을 차지한다
+let FLY_HIDDEN = false;
+function flyLabels(hide) {
+  if (hide === FLY_HIDDEN || !map) return; FLY_HIDDEN = hide;
+  for (const l of map.getStyle().layers) if (l.type === 'symbol') { try { map.setPaintProperty(l.id, 'text-opacity', hide ? 0 : 1); map.setPaintProperty(l.id, 'icon-opacity', hide ? 0 : 1); } catch (e) {} }
+  for (const l of map.getStyle().layers) if (l.type === 'symbol') { try { map.setLayoutProperty(l.id, 'visibility', hide ? 'none' : (FLY_VIS[l.id] || 'visible')); } catch (e) {} }
+  document.body.classList.toggle('flying', hide);
+}
+const FLY_VIS = {};
+function rememberVis() { for (const l of map.getStyle().layers) if (l.type === 'symbol') FLY_VIS[l.id] = map.getLayoutProperty(l.id, 'visibility') || 'visible'; }
 function tourStep() {
   clearTimeout(tourTimer);
   const st = STORIES.find((x) => x.id === TOUR[tourIdx]);
@@ -2764,7 +2799,7 @@ function tourStep() {
   if (dr && pitched()) tourDroneT = setTimeout(() => {
     if (!touring || tourIdx !== step) return;
     map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 1.1 : dr.zoom, pitch: MOBILE ? Math.min(55, dr.pitch) : dr.pitch, offset: MOBILE ? [0, -Math.round(innerHeight * 0.2)] : [0, 0], bearing: dr.bearing, duration: 4600, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
-    map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
+    map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ flyLabelsKeep: true, bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
   }, dr.at || 5200);
   const h = st.hero();
   $('#tK').textContent = `${tourIdx + 1} / ${TOUR.length} · ${st.g}`;
@@ -2782,7 +2817,10 @@ function tourStep() {
   tourTimer = setTimeout(() => { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }, TOUR_MS);
 }
 let TOUR_PREFETCH = 4;
+function tourMoveStart(e) { if (touring && !(e && e.flyLabelsKeep)) flyLabels(true); }
+function tourMoveEnd() { if (touring) setTimeout(() => { if (touring && !map.isMoving()) flyLabels(false); }, 80); }
 function stopTour() {
+  map.off('movestart', tourMoveStart); map.off('moveend', tourMoveEnd); flyLabels(false);
   try { if (map.setPrefetchZoomDelta) map.setPrefetchZoomDelta(TOUR_PREFETCH); } catch (e) {}
   touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
   document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
