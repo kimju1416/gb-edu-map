@@ -407,6 +407,37 @@ body.dark .maplibregl-ctrl-attrib{background:rgba(11,15,20,.7);color:#8894A0}
 body.dark .maplibregl-ctrl-attrib a{color:#A7B2BC}
 body.dark svg.chart text{fill:#A7B2BC}
 body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
+/* ---------- 휴대폰 다듬기 ---------- */
+.peek{display:none}
+@media (max-width:860px){
+  .ctl-ind{gap:6px}
+  .ctl-ind .row{flex-wrap:nowrap}
+  .inddd>button{height:38px;font-size:13px;max-width:52vw;overflow:hidden;white-space:nowrap}
+  #indName{overflow:hidden;text-overflow:ellipsis}
+  .seg button{min-height:34px;padding:0 10px;font-size:12.5px}
+  .seg.kinds{max-width:100%}
+  .legend{top:auto!important;bottom:calc(44vh + 10px);left:10px;width:188px!important;padding:7px 9px}
+  .legend .lg-lab,.legend .foot{display:none}
+  .legend .t{font-size:12px;margin-bottom:4px}
+  .legend .lg-rng{font-size:11px}
+  body.sheet-min .legend{bottom:132px}
+  body.sheet-full .legend{opacity:0;pointer-events:none}
+  .ctl-r{bottom:calc(44vh + 10px)}
+  body:not(.sheet-min) .ctl-r{bottom:auto;top:calc(var(--top) + 150px)}
+  body.sheet-min .ctl-r{bottom:132px}
+  .maplibregl-ctrl-bottom-right{bottom:auto!important;top:calc(var(--top) + 100px)}
+  .maplibregl-ctrl-attrib:not(:hover) .maplibregl-ctrl-attrib-inner{display:none}
+  .maplibregl-ctrl-attrib{font-size:9px!important;opacity:.8;max-width:58vw!important;min-height:24px;min-width:24px}
+  .peek{display:block;padding:2px 16px 8px;font-size:13px;color:var(--tx-2);line-height:1.45}
+  .peek b{color:var(--tx);font-weight:700}
+  .peek em{font-style:normal;color:#8A3E14;font-weight:700}
+  .panel:not(.min) .peek{display:none}
+  .panel.min{height:132px}
+  .sheet-handle{touch-action:none}
+  .ptabs{touch-action:pan-x}
+  .glance h3{font-size:15px}
+  .glance .why{font-size:12.5px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -430,6 +461,7 @@ body.dark .cmp .track::before{background:rgba(255,255,255,.14)}
 
 <aside class="panel" id="panel">
   <button class="sheet-handle" id="handle" aria-label="패널 크기 바꾸기"></button>
+  <div class="peek" id="peek"></div>
   <div class="ptabs" role="tablist">
     <button class="ptab" role="tab" data-tab="q" aria-selected="true">교육문제</button>
     <button class="ptab" role="tab" data-tab="s" aria-selected="false">학교 찾기</button>
@@ -676,7 +708,7 @@ const GB_BOUNDS = [[127.8, 35.57], [129.6, 37.16]];
 let HOME = { center: [128.75, 36.3], zoom: 7.6, pitch: 52, bearing: -12 };
 let HOME2D = { center: [128.75, 36.35], zoom: 7.6, pitch: 0, bearing: 0 };
 function computeHome() {
-  const pad = MOBILE ? { top: 70, bottom: Math.round(innerHeight * 0.12) + 118, left: 12, right: 12 } : { top: 70, bottom: 110, left: 30, right: 250 };
+  const pad = MOBILE ? { top: 150, bottom: 150, left: 12, right: 64 } : { top: 70, bottom: 110, left: 30, right: 250 };
   const c3 = map.cameraForBounds(GB_BOUNDS, { padding: pad, pitch: 52, bearing: -12 });
   const c2 = map.cameraForBounds(GB_BOUNDS, { padding: pad });
   if (c3) HOME = { center: c3.center, zoom: c3.zoom + 0.3, pitch: 52, bearing: -12 };
@@ -694,7 +726,7 @@ function initMap() {
   computeHome(); map.jumpTo(pitched() ? HOME : HOME2D);
   map.on('style.load', setupLayers);
   let loadFail = setTimeout(() => { if (!$('#loading').classList.contains('done')) $('#loading').textContent = '배경 지도를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 20000);
-  map.once('load', () => { clearTimeout(loadFail); if (MOBILE) $$('.maplibregl-ctrl-attrib').forEach((a) => a.classList.remove('maplibregl-compact-show')); });
+  map.once('load', () => { clearTimeout(loadFail); if (MOBILE) setTimeout(() => $$('.maplibregl-ctrl-attrib').forEach((a) => { a.classList.remove('maplibregl-compact-show'); a.removeAttribute('open'); }), 300); });
 }
 
 const BASE_ORIG = {};
@@ -800,7 +832,7 @@ function setupLayers() {
   map.addLayer({ id: 'sch-name', type: 'symbol', source: 'sch-pt', minzoom: 11, filter: ['>', ['get', 'r'], 0], layout: {
     'icon-image': ['match', ['get', 'st'], 'drop', 'pill-drop', 'pill'], 'icon-text-fit': 'both', 'icon-text-fit-padding': [2, 4, 2, 4], 'icon-anchor': 'bottom', 'text-anchor': 'bottom',
     'text-field': ['format', '● ', { 'text-color': kindColor }, ['get', 'n'], {}, '  ', {}, ['get', 'cnt'], { 'font-scale': 0.86, 'text-color': ['match', ['get', 'st'], 'drop', '#C8321A', DARK ? '#A7B2BC' : '#6B736D'] }],
-    'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11.5, 15, 13], 'text-offset': [0, -0.95], 'text-max-width': 30,
+    'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 11, MOBILE ? 10.5 : 11.5, 15, MOBILE ? 12 : 13], 'text-offset': [0, -0.95], 'text-max-width': 30,
     'symbol-sort-key': ['-', 0, ['get', 'r']], 'text-padding': 6, 'icon-padding': 2 },
     paint: { 'text-color': DARK ? '#EEF2F5' : '#1F2A24', 'text-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 11.4, 1], 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 11.4, 1] } });
   map.addLayer({ id: 'closed-flag', type: 'symbol', source: 'closed', minzoom: 11, layout: { visibility: 'none', 'icon-image': 'pill-closed', 'icon-text-fit': 'both', 'icon-text-fit-padding': [2, 4, 2, 4], 'icon-anchor': 'bottom', 'text-anchor': 'bottom', 'text-offset': [0, -0.95], 'text-field': ['concat', '폐교 · ', ['get', 'n'], ' · ', ['get', 'use']], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-padding': 6 }, paint: { 'text-color': DARK ? '#A7B2BC' : '#5E594E' } });
@@ -1053,7 +1085,7 @@ function vbUpdate() {
       const d = Math.hypot((ix + 0.5) * CELL - c.lng, (iy + 0.5) * CELL - c.lat);
       cells.push([d, ix, iy]);
     }
-    cells.sort((a, b2) => a[0] - b2[0]).slice(0, 12).forEach(([, ix, iy]) => vbCell(ix, iy));
+    cells.sort((a, b2) => a[0] - b2[0]).slice(0, MOBILE ? 6 : 12).forEach(([, ix, iy]) => vbCell(ix, iy));
   }, 250);
 }
 // 건물 색: 속한 읍면동의 지표(또는 가까운 학교까지 거리)
@@ -1152,7 +1184,12 @@ function renderReadme() {
 }
 
 /* ---------- 상단 KPI ---------- */
+function renderPeek() {
+  const t = D.stats.total.all, T = D.stats.pjTotal;
+  $('#peek').innerHTML = `경북 학생 <b>${fmt(t[4].students)}명</b> · 4년 새 <em>${sgn(pct(t[0].students, t[4].students))}%</em> · 2031년 <em>${sgn(pct(T.stu[4], T.stu[9]))}%</em> 예측 <span style="float:right">위로 밀어 보기 ↑</span>`;
+}
 function renderKPIs() {
+  if (MOBILE) renderPeek();
   const tk = S.kind === 'all' || IND[S.ind].kindless ? 'all' : S.kind;
   const t = D.stats.total[tk], y = 4, kp = tk === 'all' ? '' : KIND_SHORT[tk] + ' ';
   const a = t[0], b = t[y];
@@ -1366,6 +1403,7 @@ function bindMapEvents() {
     if (sf.length) { openSchool(sf[0].properties.i, false); return; }
     const cf = S.layers.closed ? map.queryRenderedFeatures([[e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]], { layers: ['closed-circ'] }) : [];
     if (cf.length) { openClosed(cf[0].properties.i); return; }
+    if (map.getZoom() >= VB_MINZ - 0.3) { const vf = map.queryRenderedFeatures(e.point, { layers: ['vbld'] })[0]; if (vf) { const p = vf.properties; if (MOBILE) { showTip(e, `${p.nm ? '<b>' + esc(p.nm) + '</b><br>' : ''}지상 ${p.fl}층${p.sch ? ' · 학교 건물' : ''}`); setTimeout(hideTip, 2500); } return; } }
     const f = map.queryRenderedFeatures(e.point, { layers: [S.level + (S.view === 'bar' && map.getZoom() < BAR_MAXZ ? '-bar' : '-fill')] })[0];
     if (!f) return;
     if (S.level === 'sigun') openSigun(f.properties.sigun);
@@ -1975,6 +2013,22 @@ function stopSim() {
 
 /* ---------- 모바일 시트 ---------- */
 function openSheet() { if (!MOBILE) return; const p = $('#panel'); p.classList.remove('min'); document.body.classList.remove('sheet-min'); }
+// 손가락으로 밀기: 위로 → 한 단계 크게, 아래로 → 한 단계 작게
+(() => {
+  let y0 = null;
+  const zones = ['#handle', '.ptabs', '#peek'];
+  const setState = (dir) => {
+    const p = $('#panel'), st = p.classList.contains('full') ? 2 : p.classList.contains('min') ? 0 : 1;
+    const n = Math.max(0, Math.min(2, st + dir));
+    p.classList.toggle('full', n === 2); p.classList.toggle('min', n === 0);
+    document.body.classList.toggle('sheet-min', n === 0); document.body.classList.toggle('sheet-full', n === 2);
+  };
+  zones.forEach((z) => { const el = $(z); if (!el) return;
+    el.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; }, { passive: true });
+    el.addEventListener('touchend', (e) => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; y0 = null; if (Math.abs(dy) > 28) { setState(dy < 0 ? 1 : -1); e.preventDefault(); } }, { passive: false });
+  });
+  $('#peek').addEventListener('click', () => setState(1));
+})();
 $('#handle').addEventListener('click', () => {
   const p = $('#panel');
   if (p.classList.contains('full')) { p.classList.remove('full'); p.classList.add('min'); }
