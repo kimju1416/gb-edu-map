@@ -36,7 +36,7 @@ const { chromium } = require('playwright-core');
   await run('sim', D, async (p) => { await p.click('[data-tab=s]'); await p.fill('#sq', '봉화초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(3000); await p.click('[data-sim]'); await p.waitForTimeout(6000); await p.click('#simStop'); await p.waitForTimeout(1000); await p.click('[data-act=close]'); await p.waitForTimeout(1000); });
   await run('hak', D, async (p) => { await p.click('[data-lv=hak]'); await p.waitForTimeout(3000); await p.mouse.click(900, 480); await p.waitForTimeout(3000); });
   await run('about', D, async (p) => { await p.click('#btnAbout'); await p.waitForTimeout(800); });
-  await run('tour', D, async (p) => { await p.click('#btnTour'); await p.waitForTimeout(6000); });
+  await run('tour', D, async (p) => { await p.click('#btnTour'); await p.click('[data-act=bp-all]'); await p.waitForTimeout(6000); });
   await run('mobile', { width: 390, height: 844 }, async (p) => { await p.waitForTimeout(1500); }, true);
   await run('mobile_story', { width: 390, height: 844 }, async (p) => { await p.click('#handle'); await p.waitForTimeout(500); await p.click('[data-story=decline]'); await p.waitForTimeout(4000); }, true);
   await run('mobile_school', { width: 390, height: 844 }, async (p) => { await p.click('#handle'); await p.click('[data-tab=s]'); await p.fill('#sq', '울릉초'); await p.waitForTimeout(400); await p.click('[data-sch]'); await p.waitForTimeout(5000); }, true);

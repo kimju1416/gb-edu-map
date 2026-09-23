@@ -14,7 +14,7 @@ const { chromium } = require('playwright-core');
   await run('school', async (p) => { await p.tap('#handle'); await p.tap('[data-tab=s]'); await p.fill('#sq', '형곡초'); await p.waitForTimeout(400); await p.tap('[data-sch]'); await p.waitForTimeout(8000); });
   await run('bar', async (p) => { await p.tap('[data-v=bar]'); await p.waitForTimeout(4000); });
   await run('city', async (p) => { await p.evaluate(() => map.jumpTo({ center: [128.338, 36.121], zoom: 14.3, pitch: 45 })); await p.waitForTimeout(9000); });
-  await run('tour', async (p) => { await p.tap('#btnTour'); await p.waitForTimeout(9000); });
+  await run('tour', async (p) => { await p.tap('#btnTour'); await p.tap('[data-act=bp-all]'); await p.waitForTimeout(9000); });
   console.log(errs.join('\n') || '오류 없음');
   await b.close();
 })();
