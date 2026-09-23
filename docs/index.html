@@ -784,7 +784,7 @@ const fmtIndU = (v, k = S.ind) => { const I = IND[k]; if (I.cat || v === null ||
 /* ---------- 자료 불러오기 ---------- */
 async function load() {
   const get = (f) => fetch('data/' + f).then((r) => { if (!r.ok) throw new Error(f); return r.json(); });
-  const [stats, schools, closed, sigun, emd, nb, hak] = await Promise.all(['stats.json', 'schools.json', 'closed.json', 'sigun.geojson', 'emd.geojson', 'neighbors.geojson', 'zones_e.geojson'].map(get));
+  const [stats, schools, closed, sigun, emd, nb, hak] = await Promise.all(['stats.json', 'schools.json', 'closed.json', 'sigun.geojson', 'emd.geojson', 'mask.geojson', 'zones_e.geojson'].map(get));
   D = { stats, schools, closed, sigunGeo: sigun, emdGeo: emd, nbGeo: nb, hakGeo: hak };
   // 초등학구: 학구마다 학교·학생·0~5세·면적
   D.hak = {};
@@ -876,6 +876,7 @@ function computeHome() {
 function initMap() {
   const start = pitched() ? HOME : HOME2D;
   map = new maplibregl.Map({
+    maxTileCacheSize: 600,
     pixelRatio: MOBILE ? Math.min(devicePixelRatio || 1, 2) : devicePixelRatio,
     container: 'map', style: STYLE, ...start, minZoom: 6, maxZoom: 15.5, maxPitch: 75,
     maxBounds: [[124.8, 33.4], [133.2, 39.3]], attributionControl: { compact: true }, fadeDuration: 0,
@@ -978,11 +979,12 @@ function setupLayers() {
   map.addLayer({ id: 'hillshade-hi', type: 'hillshade', source: 'dem-hs2', layout: { visibility: 'none' }, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
 
   // 브이월드 위성 사진(국토교통부): 바탕 지도의 맨 아래
-  map.addSource('sat', { type: 'raster', tiles: [`https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_KEY}/Satellite/{z}/{y}/{x}.jpeg`], tileSize: 256, minzoom: 6, maxzoom: 19, attribution: '위성: 브이월드(국토교통부)' });
-  map.addLayer({ id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'none' }, paint: { 'raster-fade-duration': 0, 'raster-saturation': -0.15, 'raster-contrast': 0.05 } }, layers[1] ? layers[1].id : undefined);
-  map.addSource('nb', { type: 'geojson', data: D.nbGeo });
-  map.addSource('sigun', { type: 'geojson', data: D.sigunGeo, promoteId: 'sigun' });
-  map.addSource('emd', { type: 'geojson', data: D.emdGeo, promoteId: 'code' });
+  map.addSource('sat', { type: 'raster', tiles: [`https://api.vworld.kr/req/wmts/1.0.0/${VWORLD_KEY}/Satellite/{z}/{y}/{x}.jpeg`], tileSize: 256, minzoom: 6, maxzoom: 17, attribution: '위성: 브이월드(국토교통부)' });
+  map.addLayer({ id: 'sat', type: 'raster', source: 'sat', layout: { visibility: 'none' }, paint: { 'raster-fade-duration': 250, 'raster-saturation': -0.15, 'raster-contrast': 0.05 } }, layers[1] ? layers[1].id : undefined);
+  map.addSource('nb', { type: 'geojson', data: D.nbGeo, maxzoom: 9 }); // 경북 밖 전체를 덮는 가림막(경북 모양 구멍)
+  // 면 자료는 높은 확대 단계에서 다시 자르지 않고 늘여 쓴다(비행 중 조각 생성 줄이기)
+  map.addSource('sigun', { type: 'geojson', data: D.sigunGeo, promoteId: 'sigun', maxzoom: 10, tolerance: 0.6 });
+  map.addSource('emd', { type: 'geojson', data: D.emdGeo, promoteId: 'code', maxzoom: 12 });
   map.addLayer({ id: 'nb-fill', type: 'fill', source: 'nb', paint: { 'fill-color': '#F2F0EA', 'fill-opacity': 0.55 } }, firstSymbol);
   map.addLayer({ id: 'nb-line', type: 'line', source: 'nb', paint: { 'line-color': '#C9C3B5', 'line-width': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'sigun-fill', type: 'fill', source: 'sigun', paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
@@ -991,7 +993,7 @@ function setupLayers() {
   map.addLayer({ id: 'sigun-line', type: 'line', source: 'sigun', paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 1.6, 11, 3] } }, firstSymbol);
   // 값 입체: 시군·읍면이 지표값만큼 솟는다(높이·색 = 같은 값)
   map.addLayer({ id: 'sigun-bar', type: 'fill-extrusion', source: 'sigun', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
-  map.addSource('hak', { type: 'geojson', data: D.hakGeo, promoteId: 'code' });
+  map.addSource('hak', { type: 'geojson', data: D.hakGeo, promoteId: 'code', maxzoom: 12 });
   map.addLayer({ id: 'hak-fill', type: 'fill', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'hak-line', type: 'line', source: 'hak', layout: { visibility: 'none' }, paint: { 'line-color': DARK ? 'rgba(255,255,255,.4)' : '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.6] } }, firstSymbol);
   map.addLayer({ id: 'hak-bar', type: 'fill-extrusion', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
@@ -1494,7 +1496,44 @@ function renderFutureTimeline() {
   $('#tlInfo').innerHTML = `<div class="a">${FYEARS[S.fy]}년 경북 초·중 학생${S.fy > 4 ? ' (추정)' : ''}</div><div class="b num">${fmt(T.stu[S.fy])}명</div><div class="c">${S.fy === 4 ? '기준 2026' : `2026년보다 ${sgn(ch)}%`}</div>`;
   $('#play').disabled = false; $('#play').style.opacity = 1;
 }
+// 해마다의 시군 기둥 높이(고정 눈금)
+function futureHeights(i) {
+  const keep = S.fy; S.fy = i; const v = valuesFor(); S.fy = keep;
+  const mx = Math.max(...D.sigunNames.map((sg) => Math.max(...SG()[sg].pj)));
+  const out = {}; for (const [k, x] of Object.entries(v)) out[k] = Math.round(1500 + ((x || 0) / mx) * 26000);
+  return out;
+}
+// 연도가 바뀔 때 가벼운 것만(색·연도 막대·이름표 숫자)
+function lightFuture(i) {
+  S.fy = i; const I = IND[S.ind];
+  curVals = valuesFor(); curBreaks = breaksOf(Object.values(curVals));
+  const pairs = []; for (const [k, v] of Object.entries(curVals)) pairs.push(k, colorOf(v, curBreaks, I));
+  const expr = ['match', ['get', 'sigun'], ...pairs, NODATA];
+  map.setPaintProperty('sigun-fill', 'fill-color', expr); map.setPaintProperty('sigun-bar', 'fill-extrusion-color', expr);
+  renderTimeline(); updateLabels(); renderReadme();
+}
+let smoothRaf = 0;
+function smoothFuture(from = 0, to = 10, perYear = 700, onEnd) {
+  cancelAnimationFrame(smoothRaf);
+  if (S.level !== 'sigun' || S.view !== 'bar') { S.fy = to; setFutureYear(to, false); onEnd && onEnd(); return; }
+  const H = []; for (let i = 0; i <= 10; i++) H[i] = futureHeights(i);
+  const t0 = performance.now(), dur = Math.abs(to - from) * perYear; let lastI = -1;
+  lightFuture(from);
+  const ease = (x) => x * x * (3 - 2 * x); // 해마다 살짝 머무르며 부드럽게
+  const step = (now) => {
+    const p = Math.max(0, Math.min(1, (now - t0) / dur)), y = from + (to - from) * p;
+    const a = Math.floor(y), b = Math.min(10, a + 1), f = ease(y - a);
+    curH = {};
+    for (const k of Object.keys(H[a])) { const h = Math.round(H[a][k] + (H[b][k] - H[a][k]) * f); curH[k] = h; map.setFeatureState({ source: 'sigun', id: k }, { h }); }
+    const iy = Math.round(y); if (iy !== lastI) { lastI = iy; lightFuture(iy); }
+    placeLabels();
+    if (p < 1) smoothRaf = requestAnimationFrame(step);
+    else { barPrev.sigun = H[to]; S.fy = to; map.getSource('sch-pt').setData(schoolPoints()); if (S.story) renderPanel(); onEnd && onEnd(); }
+  };
+  smoothRaf = requestAnimationFrame(step);
+}
 function setFutureYear(i, animate = true) {
+  cancelAnimationFrame(smoothRaf);
   const from = S.fy; S.fy = i;
   paint();
   animateColumns(from, i, animate);
@@ -1529,16 +1568,15 @@ function animateColumns(from, to, animate) {
 function togglePlay() {
   if (playTimer) { stopPlay(); return; }
   if (isFuture()) {
-    let i = 0; setFutureYear(0);
     $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
-    playTimer = setInterval(() => { i++; if (i > 10) { stopPlay(); return; } setFutureYear(i); }, 1000);
+    playTimer = 1; smoothFuture(0, 10, 800, () => stopPlay());
     return;
   }
   let i = S.ind === 'change' ? 1 : 0; setYear(i);
   $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
   playTimer = setInterval(() => { i++; if (i > 4) { stopPlay(); return; } setYear(i); }, 1300);
 }
-function stopPlay() { clearInterval(playTimer); playTimer = null; $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>'; }
+function stopPlay() { cancelAnimationFrame(smoothRaf); clearInterval(playTimer); playTimer = null; $('#play').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>'; }
 
 /* ---------- 보기(입체/평면)·겹쳐 보기 ---------- */
 function applyView(first) {
@@ -2771,7 +2809,7 @@ function tourPrefetch() {
 function startTour() {
   rememberVis(); if (S.sat) tourPrefetch();
   map.on('movestart', tourMoveStart); map.on('moveend', tourMoveEnd);
-  try { if (map.setPrefetchZoomDelta) { TOUR_PREFETCH = map.getPrefetchZoomDelta ? map.getPrefetchZoomDelta() : 4; map.setPrefetchZoomDelta(0); } } catch (e) {}
+  // 아래 확대 단계 조각을 미리 받아 두어야 새 조각이 오기 전 빈 사각형 대신 흐린 조각이 보인다(미리받기를 끄지 않음)
   try { if (devicePixelRatio > 1.25) map.setPixelRatio(1.25); } catch (e) {}
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
   if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
@@ -2779,15 +2817,16 @@ function startTour() {
 }
 // 비행 중 글자 숨기기: 글자 겹침 계산(심볼 배치)이 카메라가 움직이는 매 화면 다시 돌아 끊김의 큰 몫을 차지한다
 let FLY_HIDDEN = false;
+const KEEP_LABELS = new Set(['sch-name']);
 function flyLabels(hide) {
   if (hide === FLY_HIDDEN || !map) return; FLY_HIDDEN = hide;
-  for (const l of map.getStyle().layers) if (l.type === 'symbol') { try { map.setPaintProperty(l.id, 'text-opacity', hide ? 0 : 1); map.setPaintProperty(l.id, 'icon-opacity', hide ? 0 : 1); } catch (e) {} }
-  for (const l of map.getStyle().layers) if (l.type === 'symbol') { try { map.setLayoutProperty(l.id, 'visibility', hide ? 'none' : (FLY_VIS[l.id] || 'visible')); } catch (e) {} }
+  for (const l of map.getStyle().layers) if (l.type === 'symbol' && !KEEP_LABELS.has(l.id)) { try { map.setLayoutProperty(l.id, 'visibility', hide ? 'none' : (FLY_VIS[l.id] || 'visible')); } catch (e) {} }
   document.body.classList.toggle('flying', hide);
 }
 const FLY_VIS = {};
 function rememberVis() { for (const l of map.getStyle().layers) if (l.type === 'symbol') FLY_VIS[l.id] = map.getLayoutProperty(l.id, 'visibility') || 'visible'; }
 function tourStep() {
+  cancelAnimationFrame(smoothRaf);
   clearTimeout(tourTimer);
   const st = STORIES.find((x) => x.id === TOUR[tourIdx]);
   openStory(st.id, false);
@@ -2798,7 +2837,7 @@ function tourStep() {
   clearTimeout(tourDroneT);
   if (dr && pitched()) tourDroneT = setTimeout(() => {
     if (!touring || tourIdx !== step) return;
-    map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 1.1 : dr.zoom, pitch: MOBILE ? Math.min(55, dr.pitch) : dr.pitch, offset: MOBILE ? [0, -Math.round(innerHeight * 0.2)] : [0, 0], bearing: dr.bearing, duration: 4600, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
+    map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 1.1 : dr.zoom, pitch: MOBILE ? Math.min(55, dr.pitch) : Math.min(62, dr.pitch) /* 너무 눕히면 먼 곳 조각까지 받아야 해 빈 사각형이 보인다 */, offset: MOBILE ? [0, -Math.round(innerHeight * 0.2)] : [0, 0], bearing: dr.bearing, duration: 4600, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
     map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ flyLabelsKeep: true, bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
   }, dr.at || 5200);
   const h = st.hero();
@@ -2813,7 +2852,7 @@ function tourStep() {
   bar();
   clearTimeout(tourYearT);
   if (st.ind === 'change' || st.ind === 'smallShare') { setYear(st.ind === 'change' ? 1 : 0, false); tourYearT = setTimeout(() => touring && setYear(4, true), 3600); }
-  if (st.play) { setFutureYear(0, false); let k = 0; const adv = () => { if (!touring || S.story !== st) return; k++; if (k > 10) return; setFutureYear(k); tourYearT = setTimeout(adv, 620); }; tourYearT = setTimeout(adv, 2600); }
+  if (st.play) { setFutureYear(0, false); tourYearT = setTimeout(() => { if (touring && S.story === st) smoothFuture(0, 10, 620); }, 2600); }
   tourTimer = setTimeout(() => { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }, TOUR_MS);
 }
 let TOUR_PREFETCH = 4;
@@ -2821,6 +2860,7 @@ function tourMoveStart(e) { if (touring && !(e && e.flyLabelsKeep)) flyLabels(tr
 function tourMoveEnd() { if (touring) setTimeout(() => { if (touring && !map.isMoving()) flyLabels(false); }, 80); }
 function stopTour() {
   map.off('movestart', tourMoveStart); map.off('moveend', tourMoveEnd); flyLabels(false);
+  cancelAnimationFrame(smoothRaf);
   try { if (map.setPrefetchZoomDelta) map.setPrefetchZoomDelta(TOUR_PREFETCH); } catch (e) {}
   touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
   document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
