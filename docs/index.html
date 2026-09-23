@@ -249,6 +249,8 @@ body.menu-open .legend{visibility:hidden}
 .lg-lab{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;font-size:12px;color:var(--tx-2);margin-top:4px}
 .lg-lab span{white-space:nowrap;overflow:hidden;text-overflow:clip}
 .lg-rng{font-size:12px;color:var(--tx-2);margin-top:3px}
+.legend .mean{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin:2px 0 7px;color:var(--tx)}
+.legend .mean i{width:14px;height:14px;border-radius:4px;flex:none}
 .lg-cat{display:flex;flex-direction:column;gap:4px;font-size:12.5px}
 .lg-cat span{display:flex;align-items:center;gap:7px}
 .lg-cat i{width:12px;height:12px;border-radius:3px}
@@ -805,10 +807,10 @@ const GB_BOUNDS = [[127.8, 35.57], [129.6, 37.16]];
 let HOME = { center: [128.75, 36.3], zoom: 7.6, pitch: 52, bearing: -12 };
 let HOME2D = { center: [128.75, 36.35], zoom: 7.6, pitch: 0, bearing: 0 };
 function computeHome() {
-  const pad = MOBILE ? { top: 150, bottom: 150, left: 12, right: 64 } : { top: 70, bottom: 110, left: 30, right: 250 };
+  const pad = MOBILE ? { top: 150, bottom: 150, left: 12, right: 64 } : { top: 80, bottom: 130, left: 40, right: 250 };
   const c3 = map.cameraForBounds(GB_BOUNDS, { padding: pad, pitch: 52, bearing: -12 });
   const c2 = map.cameraForBounds(GB_BOUNDS, { padding: pad });
-  if (c3) HOME = { center: c3.center, zoom: c3.zoom + (MOBILE ? 0.15 : 0.3), pitch: MOBILE ? 44 : 52, bearing: -12 };
+  if (c3) HOME = { center: c3.center, zoom: c3.zoom + (MOBILE ? 0.15 : 0.18), pitch: MOBILE ? 44 : 52, bearing: -12 };
   if (c2) HOME2D = { center: c2.center, zoom: c2.zoom, pitch: 0, bearing: 0 };
 }
 
@@ -823,8 +825,15 @@ function initMap() {
   computeHome();
   const start0 = pitched() ? HOME : HOME2D;
   const intro = !location.hash.includes('c=') && !matchMedia('(prefers-reduced-motion:reduce)').matches;
-  map.jumpTo(intro ? { ...start0, zoom: start0.zoom - 1.1, pitch: 0, bearing: start0.bearing - 50 } : start0);
-  if (intro) map.once('idle', () => { if (!touring && S.school === null) map.easeTo({ ...start0, duration: 2600, easing: (t) => 1 - Math.pow(1 - t, 3) }); });
+  // 처음부터 비스듬한 3D 각도에서 시작해, 레이어가 준비되면(지도 조각을 다 기다리지 않음) 기둥이 솟으며 카메라가 돌아 들어온다
+  S.introPending = intro && pitched();
+  map.jumpTo(intro ? { ...start0, zoom: start0.zoom - 0.35, pitch: Math.min(62, start0.pitch + 10), bearing: start0.bearing - 38 } : start0);
+  introStart = () => {
+    if (!S.introPending) return;
+    S.introPending = false;
+    paint(); // 높이 0에서 솟아오르기 시작
+    if (!touring && S.school === null) map.easeTo({ ...start0, duration: 3000, easing: (t) => 1 - Math.pow(1 - t, 3) });
+  };
   map.on('style.load', setupLayers);
   let loadFail = setTimeout(() => { if (!$('#loading').classList.contains('done')) $('#loading').textContent = '배경 지도를 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.'; }, 20000);
   map.once('load', () => { clearTimeout(loadFail); if (MOBILE) setTimeout(() => $$('.maplibregl-ctrl-attrib').forEach((a) => { a.classList.remove('maplibregl-compact-show'); a.removeAttribute('open'); }), 300); });
@@ -959,8 +968,10 @@ function setupLayers() {
   applySchoolFilter();
   $('#loading').classList.add('done');
   layersReady = true; if (routeInitial) routeInitial();
+  // 첫 그림이 나온 직후 시작(조금 기다려 스타일·경계가 그려지게)
+  map.once('render', () => setTimeout(() => introStart && introStart(), 350));
 }
-let layersReady = false, routeInitial = null;
+let layersReady = false, routeInitial = null, introStart = null;
 
 /* 학교 자료 → 지도 도형 */
 function schoolPoints() {
@@ -1070,7 +1081,9 @@ function paint() {
 function renderLegend() {
   const I = IND[S.ind], y = YEARS[yearOf()];
   const yTxt = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 추정' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 추정' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : I.g === '미래 학생' ? `${D.stats.meta.popMonth} 주민등록` : `${y}`;
+  const meaning = I.cat ? '' : `<div class="mean"><i style="background:${rampOf(I.ramp)[4]}"></i>진할수록 ${esc(I.hi || I.label + '이 큰 곳')}</div>`;
   let h = `<div class="t">${esc(I.label)}<small>${esc(yTxt)} · ${{ sigun: '시군', emd: '읍면동(전체 학교)', hak: '초등학구' }[S.level]}${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}</small></div>`;
+  h += meaning;
   if (I.cat) {
     h += '<div class="lg-cat">' + Object.entries(I.colors).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k)}</span>`).join('') + '</div>';
   } else {
@@ -1107,6 +1120,7 @@ function tweenBars(lv, target) {
     placeLabels();
   };
   // 둘러보기 중이거나 도형이 많으면(학구·읍면동) 한 번에, 아니면 약 30fps 로 부드럽게
+  if (S.introPending) { for (const k of Object.keys(target)) map.setFeatureState({ source: lv, id: k }, { h: 0 }); curH = {}; placeLabels(); return; }
   const quick = S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches || (touring && lv !== 'sigun') || Object.keys(target).length > 60;
   if (quick) { set(1); barPrev[lv] = target; return; }
   const t0 = performance.now(), dur = barPrev[lv] ? 700 : 1400; let last = 0;
@@ -2778,6 +2792,7 @@ document.addEventListener('keydown', (e) => {
   initMap();
   // 지도 레이어가 준비되면(setupLayers 끝) 한 번 실행 — 'load' 이벤트 순서에 기대지 않는다
   routeInitial = () => {
+    if (p.get('s') || p.get('sg') || p.get('q')) S.introPending = false;
     const cam = (p.get('c') || '').split(',').map(Number);
     const hasCam = cam.length === 5 && cam.every(isFinite);
     if (p.get('s')) { const s = D.schools.find((x) => x.id === p.get('s') || x.name === p.get('s')); if (s) { setTab('s'); openSchool(s.i, !hasCam); } }
