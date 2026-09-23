@@ -8,3 +8,5 @@ __pycache__/
 art/.codex-last/
 art/manifest.json
 vworld-key.txt
+art/logo/manifest.json
+art/logo/.codex-last/
