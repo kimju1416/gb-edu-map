@@ -293,6 +293,13 @@ body.menu-open .legend{visibility:hidden}
 .tour .k{font-size:12px;color:#8A4B1E;font-weight:600}
 .tour h3{margin:4px 0 6px;font-size:20px;letter-spacing:-.01em}
 .tour p{margin:0;font-size:14.5px;line-height:1.65;color:var(--tx)}
+.tour .tbig{font-size:22px;font-weight:800;letter-spacing:-.01em;color:#8A3E14}
+body.dark .tour .tbig{color:#FFB074}
+.tour .tl{font-size:13px;color:var(--tx-2);margin-left:4px}
+.tour .tlist{margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.6}
+.tour .tlist li{margin:1px 0}
+.tour .tlist b{color:var(--tx)}
+@media (max-width:860px){.tour .tbig{font-size:18px}.tour .tlist{font-size:13px}}
 .tour .bar{height:3px;background:#ECE9E1;border-radius:2px;margin-top:12px;overflow:hidden}
 .tour .bar i{display:block;height:100%;width:0;background:var(--pt)}
 .tour .nav{position:absolute;top:12px;right:12px;display:flex;gap:6px}
@@ -624,7 +631,8 @@ const ALLF = ['>=', ['get', 'i'], 0];
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fmt = (v, d = 0) => (v === null || v === undefined || !isFinite(v) ? '–' : Number(v).toLocaleString('ko-KR', { maximumFractionDigits: d, minimumFractionDigits: d }));
+const NF = {};
+const fmt = (v, d = 0) => (v === null || v === undefined || !isFinite(v) ? '–' : (NF[d] ||= new Intl.NumberFormat('ko-KR', { maximumFractionDigits: d, minimumFractionDigits: d })).format(Number(v)));
 const pct = (a, b) => (a && b !== null && b !== undefined ? ((b / a - 1) * 100) : null);
 const sgn = (v, d = 1) => (v === null || !isFinite(v) ? '–' : (v > 0 ? '+' : v < 0 ? '−' : '') + fmt(Math.abs(v), d));
 const median = (arr) => { const a = arr.filter((v) => v !== null && isFinite(v)).sort((x, y) => x - y); if (!a.length) return null; const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
@@ -892,7 +900,7 @@ function setupLayers() {
 
   map.addSource('dem', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: MOBILE ? 11 : 12, attribution: '지형: Mapzen/AWS Terrain Tiles' });
   map.addSource('dem-hs', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 8 }); // 음영은 z10 조각까지만(새 조각마다 그림판을 만들어 비행이 끊기므로)
-  map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem-hs', maxzoom: 9.5, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
+  map.addLayer({ id: 'hillshade', type: 'hillshade', source: 'dem-hs', maxzoom: 8.6, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
   map.addSource('dem-hs2', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: MOBILE ? 11 : 12 }); // 지형 보기 전용
   map.addLayer({ id: 'hillshade-hi', type: 'hillshade', source: 'dem-hs2', layout: { visibility: 'none' }, paint: { 'hillshade-exaggeration': 0.42, 'hillshade-shadow-color': '#6E6A5E', 'hillshade-highlight-color': '#FFFFFF', 'hillshade-accent-color': '#7F7A6C', 'hillshade-illumination-direction': 315 } }, waterId);
 
@@ -1129,8 +1137,12 @@ function tweenBars(lv, target) {
 }
 let labelMarkers = [];
 // 값 입체에서는 이름표를 기둥 꼭대기 높이만큼 화면 위로 올린다
+let PL_LAST = '';
 function placeLabels() {
   if (!map) return;
+  let hs = 0; for (const k in curH) hs += curH[k];
+  const key = map.getZoom().toFixed(2) + '|' + map.getPitch().toFixed(1) + '|' + hs + '|' + S.view + S.level;
+  if (key === PL_LAST && !placeLabels.force) return; PL_LAST = key;
   const bar = S.view === 'bar' && S.level === 'sigun' && map.getZoom() < BAR_MAXZ;
   const sinP = Math.sin((map.getPitch() * Math.PI) / 180), z = map.getZoom();
   const op = z <= 9.4 ? 1 : z >= 10.6 ? 0 : 1 - (z - 9.4) / 1.2;
@@ -1409,12 +1421,14 @@ function setYear(i, animate = true) {
   if (S.filter) applySchoolFilter();
   if (S.story) renderPanel();
 }
-let colRaf = 0;
+let colRaf = 0, COLS_DIRTY = false;
 function animateColumns(from, to, animate) {
   const src = map.getSource('sch-col');
   cancelAnimationFrame(colRaf);
   const visible = S.view === '3d' && S.layers.schools;
-  if (!animate || !visible || from === to || matchMedia('(prefers-reduced-motion:reduce)').matches) { src.setData(schoolColumns(to, 1, to)); return; }
+  if (!visible) { COLS_DIRTY = true; return; } // 안 보이는 기둥 925개를 연도마다 다시 만들지 않는다
+  COLS_DIRTY = false;
+  if (!animate || from === to || matchMedia('(prefers-reduced-motion:reduce)').matches) { src.setData(schoolColumns(to, 1, to)); return; }
   const t0 = performance.now(), dur = 650;
   const step = (now) => {
     const t = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - t, 3);
@@ -1439,6 +1453,7 @@ function stopPlay() { clearInterval(playTimer); playTimer = null; $('#play').inn
 
 /* ---------- 보기(입체/평면)·겹쳐 보기 ---------- */
 function applyView(first) {
+  if (S.view === '3d' && COLS_DIRTY && map.getSource('sch-col')) { map.getSource('sch-col').setData(schoolColumns()); COLS_DIRTY = false; }
   const terrain = S.view === '3d', bar = S.view === 'bar', is3d = pitched();
   $$('#viewSeg button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === S.view));
   if (terrain) map.setTerrain({ source: 'dem', exaggeration: MOBILE ? 2 : 2.8 }); else map.setTerrain(null);
@@ -2623,7 +2638,35 @@ let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, 
 const DRONE = {"decline":{"center":[128.338,36.121],"zoom":14.2,"pitch":72,"bearing":35},"forecast":{"center":[128.412,36.139],"zoom":14.3,"pitch":72,"bearing":-30,"at":9800},"future":{"center":[129.345,36.035],"zoom":14,"pitch":70,"bearing":20},"small":{"center":[128.698,36.352],"zoom":14.4,"pitch":72,"bearing":-20},"mountain":{"center":[129.06,37.02],"zoom":12.4,"pitch":76,"bearing":200},"closed":{"center":[129.224,35.99],"zoom":13.6,"pitch":70,"bearing":60}};
 const TOUR = ['decline', 'forecast', 'future', 'small', 'mountain', 'closed'];
 const TOUR_MS = 16000;
+// 둘러보기 장면별 요약(화면 사용법이 아니라 내용만)
+const TOUR_TEXT = {
+  decline: () => { const t = T(), a = topN((s) => pct(s.all[0].students, s.all[4].students), 3, true); return [
+    `4년 사이 학생 <b>${fmt(t[0].students - t[4].students)}명</b> 감소, 22개 시군 모두 줄었습니다`,
+    `가장 많이 준 곳: ${a.map(([sg, v]) => `<b>${esc(sg)} ${sgn(v)}%</b>`).join(' · ')}`,
+    '기둥이 높고 진할수록 학생이 많이 줄어든 시군입니다']; },
+  forecast: () => { const P = D.stats.pjTotal, a = topN((s) => s.pjChg, 3, true); return [
+    `초·중 학생 <b>${fmt(P.stu[4])}명 → 2031년 약 ${fmt(Math.round(P.stu[9] / 100) * 100)}명</b>(추정)`,
+    `60명 이하 학교 ${fmt(P.small2026)}곳 → 약 <b>${fmt(P.small2031)}곳</b>, 새로 60명 아래로 ${fmt(P.below)}곳`,
+    `많이 줄어들 곳: ${a.map(([sg, v]) => `${esc(sg)} ${sgn(v)}%`).join(' · ')}`]; },
+  future: () => { const p = D.stats.popTotal, a = topN((s) => s.cohort, 3, true); return [
+    `0~2세 <b>${fmt(p.a0)}명</b> vs 지금 초1~3 또래 <b>${fmt(p.a6)}명</b>`,
+    `몇 년 뒤 초등 입학생이 지금보다 <b>약 ${Math.round(-p.cohort)}%</b> 적어질 수 있습니다`,
+    `특히 ${a.map(([sg, v]) => `${esc(sg)} ${sgn(v)}%`).join(' · ')}`]; },
+  small: () => { const t = T()[4], tiny = D.schools.filter((x) => x.stu[4] !== null && x.stu[4] <= 10 && x.kind !== '특수학교').length, a = topN((s) => s.all[4].smallShare, 3); return [
+    `학생 60명 이하 학교 <b>${fmt(t.small)}곳</b>, 경북 학교의 ${fmt(t.smallShare, 0)}%`,
+    `10명 이하 학교도 ${tiny}곳, 올해 신입생이 없는 학교 ${fmt(t.zero)}곳`,
+    `비율이 높은 곳: ${a.map(([sg, v]) => `${esc(sg)} ${fmt(v, 0)}%`).join(' · ')}`]; },
+  mountain: () => { const h = D.schools.filter((x) => x.alt !== null && x.alt >= 300), top = [...h].sort((a, b) => b.alt - a.alt)[0]; return [
+    `해발 300m 넘는 곳의 학교 <b>${h.length}곳</b>, 학생 수 중앙값 <b>${fmt(median(h.map((x) => x.stu[4])))}명</b>`,
+    `경북 전체 학교 중앙값은 ${fmt(median(D.schools.map((x) => x.stu[4])))}명입니다`,
+    `가장 높은 학교: ${esc(top.name)}(해발 ${fmt(top.alt)}m, ${fmt(top.stu[4])}명)`]; },
+  closed: () => { const un = D.closed.filter((c) => c.use === '미활용').length, rec = D.closed.filter((c) => c.year >= 2021).length; return [
+    `교육청이 가진 폐교 재산 <b>${D.closed.length}곳</b>`,
+    `빌려준 곳 ${D.closed.filter((c) => c.use === '대부').length} · 직접 쓰는 곳 ${D.closed.filter((c) => c.use === '자체활용').length} · <b>비어 있는 곳 ${un}</b>`,
+    `2021년 이후 문 닫은 학교 ${rec}곳`]; },
+};
 function startTour() {
+  try { if (map.setPrefetchZoomDelta) { TOUR_PREFETCH = map.getPrefetchZoomDelta ? map.getPrefetchZoomDelta() : 4; map.setPrefetchZoomDelta(0); } } catch (e) {}
   try { if (devicePixelRatio > 1.25) map.setPixelRatio(1.25); } catch (e) {}
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
   if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
@@ -2647,7 +2690,8 @@ function tourStep() {
   $('#tK').textContent = `${tourIdx + 1} / ${TOUR.length} · ${st.g}`;
   $('#tH').textContent = st.q;
   const tmp = document.createElement('div'); tmp.innerHTML = st.body(); const firstP = tmp.querySelector('p');
-  $('#tP').innerHTML = `<b>${h.l}: ${h.v.replace(/<[^>]+>/g, '')}</b><br>${firstP ? firstP.innerHTML : ''}`;
+  const lines = (TOUR_TEXT[st.id] ? TOUR_TEXT[st.id]() : [firstP ? firstP.textContent : '']).filter(Boolean);
+  $('#tP').innerHTML = `<span class="tbig">${h.v.replace(/<[^>]+>/g, '')}</span> <span class="tl">${esc(h.l)}</span><ul class="tlist">${lines.map((x) => '<li>' + x + '</li>').join('')}</ul>`;
   tourT0 = performance.now();
   cancelAnimationFrame(tourRaf);
   const bar = () => { const t = Math.min(1, (performance.now() - tourT0) / TOUR_MS); $('#tBar').style.width = t * 100 + '%'; if (touring && t < 1) tourRaf = requestAnimationFrame(bar); };
@@ -2657,7 +2701,9 @@ function tourStep() {
   if (st.play) { setFutureYear(0, false); let k = 0; const adv = () => { if (!touring || S.story !== st) return; k++; if (k > 10) return; setFutureYear(k); tourYearT = setTimeout(adv, 620); }; tourYearT = setTimeout(adv, 2600); }
   tourTimer = setTimeout(() => { tourIdx = (tourIdx + 1) % TOUR.length; tourStep(); }, TOUR_MS);
 }
+let TOUR_PREFETCH = 4;
 function stopTour() {
+  try { if (map.setPrefetchZoomDelta) map.setPrefetchZoomDelta(TOUR_PREFETCH); } catch (e) {}
   touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
   document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
   try { map.setPixelRatio(devicePixelRatio); } catch (e) {}
