@@ -7,3 +7,4 @@ art/*-2048.png
 __pycache__/
 art/.codex-last/
 art/manifest.json
+vworld-key.txt

@@ -511,6 +511,10 @@ if (DARK) document.body.classList.add('dark');
 const rampOf = (name) => (DARK ? RAMP_DARK : RAMP)[name];
 const NONE = ['==', ['get', 'i'], -999];
 const COL_MAXZ = 10.2;
+const VB_MINZ = 13.4; // 이보다 확대하면 브이월드 건물을 불러온다
+// 브이월드 오픈API 개발키(등록 주소 https://kimju1416.github.io 에서만 쓰도록 등록). 도로명주소건물 자료를 화면에 보이는 만큼만 실시간 조회하고 저장하지 않는다
+const VW_DOMAIN = 'https://kimju1416.github.io'; // 키에 등록한 서비스 주소
+const VWORLD_KEY = '430FAF9F-03B2-31D3-B845-BB3391C01233';
 const BAR_MAXZ = 9.6; // 값 입체 기둥이 보이는 최대 배율 // 이보다 확대하면 기둥 대신 점과 학교 이름
 const ALLF = ['>=', ['get', 'i'], 0];
 const $ = (s, el = document) => el.querySelector(s);
@@ -754,7 +758,13 @@ function setupLayers() {
   map.addLayer({ id: 'emd-bar', type: 'fill-extrusion', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
   map.addSource('zone', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   // 건물 3D: 배경 지도(OpenMapTiles)의 건물을 세우고 동네 지표로 칠한다(확대 12.5 이상)
-  map.addLayer({ id: 'bld', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building', minzoom: 12.5, paint: {
+  // 브이월드 건물(실시간): 층수 × 3.3m, 색은 속성 c, 학교 건물은 빛나게
+  map.addSource('vbld', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'vbld', type: 'fill-extrusion', source: 'vbld', minzoom: VB_MINZ - 0.3, paint: {
+    'fill-extrusion-color': ['get', 'c'],
+    'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], VB_MINZ - 0.3, 0, VB_MINZ + 0.4, ['get', 'h']],
+    'fill-extrusion-opacity': 0.95, 'fill-extrusion-vertical-gradient': true } });
+  map.addLayer({ id: 'bld', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building', minzoom: 12.5, layout: { visibility: 'none' }, paint: {
     'fill-extrusion-color': '#E4E0D6', 'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.4, ['coalesce', ['get', 'render_height'], 7]],
     'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#23704A', 'fill-opacity': 0.14 } });
@@ -874,10 +884,10 @@ function paint() {
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
   if (S.simFlat) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
-  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.45 : 0.4]);
+  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
-  renderReadme(); placeLabels(); bldKey = ''; updateBuildings();
+  renderReadme(); placeLabels(); bldKey = ''; updateBuildings(); if (VB.cells.size) vbRender();
   map.setPaintProperty('emd-line', 'line-opacity', lv === 'emd' ? 0.9 : 0.45);
   renderLegend(); renderTimeline(); renderKinds(); renderIndMenu(); updateLabels(); renderKPIs(); syncHash();
   if (S.tab === 'r' && !S.sigun) renderPanel();
@@ -955,6 +965,85 @@ function updateLabels() {
   }
 }
 
+/* ---------- 브이월드 건물(실시간) ----------
+   화면 가운데 둘레의 1km(0.01°) 칸을 가까운 순서로 최대 12칸, 칸마다 최대 3쪽(3,000채)까지 JSONP로 받는다 */
+const VB = { cells: new Map(), loading: new Set(), seq: 0, timer: 0 };
+const CELL = 0.01;
+function vbJsonp(url) {
+  return new Promise((ok, no) => {
+    const cb = 'vb' + (++VB.seq) + '_' + Date.now();
+    const sc = document.createElement('script');
+    const t = setTimeout(() => { cleanup(); no(new Error('시간 초과')); }, 15000);
+    const cleanup = () => { clearTimeout(t); delete window[cb]; sc.remove(); };
+    window[cb] = (j) => { cleanup(); ok(j); };
+    sc.onerror = () => { cleanup(); no(new Error('불러오기 실패')); };
+    if (/^(localhost|127.)/.test(location.hostname)) sc.referrerPolicy = 'no-referrer'; // 로컬 시험용(등록 주소가 아니라 막히므로)
+    sc.src = url + '&callback=' + cb;
+    document.head.appendChild(sc);
+  });
+}
+async function vbCell(ix, iy) {
+  const k = ix + '_' + iy;
+  if (VB.cells.has(k) || VB.loading.has(k)) return;
+  VB.loading.add(k);
+  const x0 = (ix * CELL).toFixed(4), y0 = (iy * CELL).toFixed(4), x1 = ((ix + 1) * CELL).toFixed(4), y1 = ((iy + 1) * CELL).toFixed(4);
+  const feats = [];
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const u = `https://api.vworld.kr/req/data?service=data&request=GetFeature&data=LT_C_SPBD&key=${VWORLD_KEY}&domain=${encodeURIComponent(VW_DOMAIN)}&geomFilter=BOX(${x0},${y0},${x1},${y1})&size=1000&page=${page}&format=json&crs=EPSG:4326&geometry=true&attribute=true&columns=gro_flo_co,buld_nm,bd_mgt_sn`;
+      const j = await vbJsonp(u);
+      const r = j && j.response;
+      if (!r || r.status !== 'OK') break;
+      for (const f of r.result.featureCollection.features) {
+        const p = f.properties || {};
+        const fl = Math.max(1, Math.min(60, +p.gro_flo_co || 1));
+        const c0 = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates[0][0][0] : f.geometry.coordinates[0][0];
+        feats.push({ type: 'Feature', geometry: f.geometry, properties: { h: fl * 3.3, fl, nm: p.buld_nm || '', sch: /학교$|초등학교|중학교|고등학교|분교장/.test(p.buld_nm || '') ? 1 : 0, x: c0[0], y: c0[1] } });
+      }
+      if (+r.page.current >= +r.page.total) break;
+    }
+    VB.cells.set(k, feats);
+  } catch (e) { VB.cells.set(k, []); }
+  VB.loading.delete(k);
+  vbRender();
+}
+function vbUpdate() {
+  clearTimeout(VB.timer);
+  VB.timer = setTimeout(() => {
+    if (!map || map.getZoom() < VB_MINZ - 0.3) return;
+    const c = map.getCenter(), b = map.getBounds();
+    const cells = [];
+    for (let ix = Math.floor(b.getWest() / CELL); ix <= Math.floor(b.getEast() / CELL); ix++) for (let iy = Math.floor(b.getSouth() / CELL); iy <= Math.floor(b.getNorth() / CELL); iy++) {
+      const d = Math.hypot((ix + 0.5) * CELL - c.lng, (iy + 0.5) * CELL - c.lat);
+      cells.push([d, ix, iy]);
+    }
+    cells.sort((a, b2) => a[0] - b2[0]).slice(0, 12).forEach(([, ix, iy]) => vbCell(ix, iy));
+  }, 250);
+}
+// 건물 색: 속한 읍면동의 지표(또는 가까운 학교까지 거리)
+function vbColors() {
+  const k = bldInd(), I = IND[k], dist = /^near[EMH]$/.test(k) && S.ind === k;
+  const ramp = rampOf(dist ? 'warm' : I.ramp);
+  let br = [], sch = [];
+  if (dist) { const kind = { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[k]; sch = D.schools.filter((x) => x.kind === kind && !x.state); }
+  else br = breaksOf(Object.values(D.stats.emd).map((e) => I.emd(e)));
+  const idx = emdIndex(), emdCache = new Map();
+  const emdOf = (x, y) => { const key = (x * 200 | 0) + '_' + (y * 200 | 0); if (emdCache.has(key)) return emdCache.get(key); const e = idx.find((m) => x >= m.b[0][0] && x <= m.b[1][0] && y >= m.b[0][1] && y <= m.b[1][1] && inPoly([x, y], m.polys)); emdCache.set(key, e); return e; };
+  const def = DARK ? '#28303A' : '#D9D4C8';
+  return (p) => {
+    if (p.sch) return DARK ? '#7CF2B8' : '#23704A';
+    if (dist) { let best = 1e9; for (const o of sch) { const d = kmDist([p.x, p.y], [o.lon, o.lat]); if (d < best) best = d; } const t = best < 1.5 ? 0 : best < 3.5 ? 1 : best < 6 ? 2 : best < 10 ? 3 : 4; return ramp[t]; }
+    const e = emdOf(p.x, p.y); if (!e) return def;
+    return colorOf(I.emd(D.stats.emd[e.code]), br, I);
+  };
+}
+function vbRender() {
+  const src = map && map.getSource('vbld'); if (!src) return;
+  const col = vbColors(), out = [];
+  for (const arr of VB.cells.values()) for (const f of arr) { f.properties.c = col(f.properties); out.push(f); }
+  src.setData({ type: 'FeatureCollection', features: out });
+}
+
 /* ---------- 건물 색 ---------- */
 // 건물에 쓸 지표: 읍면동 값이 있으면 그 지표, 미래 지표면 입학생 전망, 그 밖엔 학생 증감률
 function bldInd() {
@@ -999,7 +1088,7 @@ function renderReadme() {
   const when = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 예측' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 예측' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
   const how = S.view === 'bar' ? '높이·색' : '색';
   const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
-  if (map && map.getZoom() >= 11) { const bk = bldInd(); $('#readme').innerHTML = `${/^near/.test(bk) && S.ind === bk ? '<b>건물 색</b> = 가장 가까운 ' + { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[bk] + '까지 거리 · 진할수록 멂 · ' : '<b>바닥 색</b> = ' + esc(IND[S.ind].label) + ' · '}깃발 = 학교(<b style="color:#E8391C">빨강</b> 5년 안에 60명 아래로 · <b style="color:#F28A2E">주황</b> 지금 60명 이하)`; return; }
+  if (map && map.getZoom() >= 11) { const bk = bldInd(), vb = map.getZoom() >= VB_MINZ; $('#readme').innerHTML = `${/^near/.test(bk) && S.ind === bk ? '<b>건물 색</b> = 가장 가까운 ' + { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[bk] + '까지 거리 · 진할수록 멂 · ' : vb ? '<b>건물</b> = 실제 층수 · 색은 그 읍면동의 ' + esc(IND[bk].label) + ' · <b>초록 건물</b> = 학교 · ' : '<b>바닥 색</b> = ' + esc(IND[S.ind].label) + ' · 더 확대하면 실제 건물이 섭니다 · '}깃발 = 학교(<b style="color:#E8391C">빨강</b> 5년 안에 60명 아래로 · <b style="color:#F28A2E">주황</b> 지금 60명 이하)`; return; }
   $('#readme').innerHTML = `<b>${how}</b> = ${unit}별 ${esc(I.label)}${when ? ' (' + esc(when) + ')' : ''} · ${S.view === 'bar' ? '높고 ' : ''}진할수록 ${esc(hi.replace('높을수록 ', ''))}${S.view === '3d' ? ' · 산 높이는 실제의 2.8배' + (S.layers.schools ? ' · 기둥 = 학교(높이 = 학생 수)' : '') : ''}`;
 }
 
@@ -1193,6 +1282,8 @@ function bindMapEvents() {
     if (MOBILE) return;
     const sf = map.queryRenderedFeatures(e.point, { layers: schLayers.filter((l) => map.getLayoutProperty(l, 'visibility') !== 'none') });
     if (sf.length) { hoverSchool = true; map.getCanvas().style.cursor = 'pointer'; showTip(e, schoolTipHtml(D.schools[sf[0].properties.i])); clearHover(); return; }
+    const vf = map.getZoom() >= VB_MINZ - 0.3 ? map.queryRenderedFeatures(e.point, { layers: ['vbld'] }) : [];
+    if (vf.length && !sf.length) { const p = vf[0].properties; map.getCanvas().style.cursor = ''; showTip(e, `${p.nm ? '<b>' + esc(p.nm) + '</b><br>' : ''}지상 ${p.fl}층${p.sch ? ' · 학교 건물' : ''}<br><span class="dim">자료: 브이월드 도로명주소건물</span>`); clearHover(); return; }
     const cf = S.layers.closed ? map.queryRenderedFeatures(e.point, { layers: ['closed-circ'] }) : [];
     if (cf.length) { const c = D.closed[cf[0].properties.i]; map.getCanvas().style.cursor = 'pointer'; showTip(e, `<b>${esc(c.name)}</b> <span class="dim">(폐교)</span><br>${esc(c.use)} · ${c.year ? c.year + '년 폐교' : '폐교 연도 미상'}<br><span class="dim">${esc(c.sigun)} ${esc(c.emd || '')} · 위치는 ${c.approx === 'emd' ? '읍면' : '시군'} 대표점 둘레</span>`); clearHover(); return; }
     hoverSchool = false;
@@ -1223,6 +1314,7 @@ function bindMapEvents() {
   });
   map.on('dragstart', () => { if (S.layers.rotate) { S.layers.rotate = false; applyView(); } });
   map.on('moveend', updateBuildings);
+  map.on('moveend', vbUpdate);
   map.on('zoomend', renderReadme);
 }
 function clearHover() { map.setFilter('hover-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); }
@@ -1884,7 +1976,7 @@ function renderAbout() {
   const m = D.stats.meta;
   $('#aboutBox').innerHTML = `<button class="x" data-act="about-x" aria-label="닫기">×</button><h3 id="aboutT">자료와 계산 방법</h3>
   <p>경상북도 초등학교·중학교·고등학교·특수학교(분교장 포함, 폐교 제외) <b>${fmt(D.schools.length)}곳</b>의 공개 통계를 모았습니다. 유치원, 각종학교, 방송통신중·고는 넣지 않았습니다. 군위군은 2023년 대구로 편입돼 5년 모두에서 뺐습니다.</p>
-  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS)</li></ul>
+  <h4>출처</h4><ul>${m.sources.map((s) => `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a> · ${esc(s.date)}</li>`).join('')}<li>급식·학사일정: 나이스 교육정보 개방 포털 Open API (학교 카드를 열 때 실시간 조회)</li><li>배경 지도: OpenFreeMap · OpenStreetMap 기여자 / 지형: Mapzen Terrain Tiles(AWS) / 건물: 브이월드(국토교통부)</li></ul>
   <h4>숫자 확인</h4><p>변환 뒤 KESS 원자료 엑셀을 다시 더해 연도별 경북 학생·학급·교원 합계와 22개 시군 학생 합계가 지도 자료와 <b>모두 일치</b>하는지 대조했습니다(2022~2026).</p>
   <h4>지표 정의</h4><ul>
   <li>학생 수 증감률: 2022년 4월 1일 대비 선택 연도 4월 1일 재학생 수 변화. 학교 카드에서 이름이 바뀐 학교(22곳)는 옛 이름·같은 도로명 주소로 지난 기록을 이어 붙였습니다(한 주소에 같은 학교급이 둘인 곳은 잇지 않음). 읍면동 증감률은 2022→2026 고정이며 2022년 학교를 위치나 주소로 읍면동에 배정했습니다(배정 못 한 학생 ${fmt(m.s22Lost)}명).</li>
@@ -1898,7 +1990,7 @@ function renderAbout() {
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
   <li>5년 뒤 예측(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 예측에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
   <li>통폐합 시뮬레이션: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
-  <li>건물 3D: OpenStreetMap 건물(OpenMapTiles)을 세우고, 건물이 속한 읍면동의 지표로 칠했습니다. 시골은 OpenStreetMap 건물 자료가 적어 빈 곳이 있습니다.</li>
+  <li>건물 3D: 크게 확대하면 브이월드 오픈API(국토교통부 도로명주소건물)에서 화면 둘레 건물만 그때그때 불러와 지상층수 × 3.3m 높이로 세웁니다(저장하지 않음). 색은 건물이 속한 읍면동의 지표, 초록은 이름에 '학교'가 들어간 건물입니다.</li>
   <li>해발 고도: AWS Terrain Tiles(z12) 지형 값. 지형 보기에서는 산 높이를 실제의 2.8배로 키워 보여 줍니다.</li>
   <li>인구감소지역: 안동·영주·영천·상주·문경·의성·청송·영양·영덕·청도·고령·성주·봉화·울진·울릉(15곳), 관심지역: 경주·김천.</li></ul>
   <h4>한계</h4><ul>
