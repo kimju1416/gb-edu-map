@@ -279,7 +279,7 @@ body.menu-open .legend{visibility:hidden}
 .tip b{font-size:13.5px}
 .tip .dim{color:#BFC7C0}
 
-.lbl{pointer-events:none;text-align:center;font-weight:700;font-size:12.5px;color:var(--tx);line-height:1.25;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff}
+.lbl{pointer-events:none;transition:opacity .15s linear;text-align:center;font-weight:700;font-size:12.5px;color:var(--tx);line-height:1.25;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff}
 .lbl span{display:block;font-size:12px;font-weight:600;color:#3A3F3B}
 .lbl.box{background:rgba(255,255,255,.9);border:1px solid var(--line-2);border-radius:6px;padding:2px 6px;text-shadow:none}
 .lbl.hide-v span{display:none}
@@ -508,6 +508,7 @@ const RAMP_DARK = {
 let DARK = false;
 try { DARK = localStorage.getItem('gbTheme') === 'dark'; } catch (e) {}
 if (DARK) document.body.classList.add('dark');
+const BLD_DARK = { warm: ['#7A4428', '#9C5226', '#C66A2A', '#EE8A3A', '#FFBE7A'], green: ['#246650', '#2B8563', '#35A877', '#55D095', '#A3F5CC'] };
 const rampOf = (name) => (DARK ? RAMP_DARK : RAMP)[name];
 const NONE = ['==', ['get', 'i'], -999];
 const COL_MAXZ = 10.2;
@@ -714,7 +715,13 @@ function themeBase() {
   if (map.getLayer('nb-fill')) { map.setPaintProperty('nb-fill', 'fill-color', dk ? '#0B0F14' : '#F2F0EA'); map.setPaintProperty('nb-fill', 'fill-opacity', dk ? 0.6 : 0.55); map.setPaintProperty('nb-line', 'line-color', dk ? '#2A323B' : '#C9C3B5'); }
   if (map.getLayer('sigun-line')) { map.setPaintProperty('sigun-line', 'line-color', dk ? 'rgba(255,255,255,.35)' : '#FFFFFF'); map.setPaintProperty('emd-line', 'line-color', dk ? 'rgba(255,255,255,.14)' : '#FFFFFF'); }
   if (map.getLayer('hillshade')) { map.setPaintProperty('hillshade', 'hillshade-highlight-color', dk ? '#2B3642' : '#FFFFFF'); map.setPaintProperty('hillshade', 'hillshade-accent-color', dk ? '#05080B' : '#7F7A6C'); }
-  if (map.getLayer('sch-name')) { map.setPaintProperty('sch-name', 'text-color', dk ? '#E9EEF2' : '#1F2A24'); map.setPaintProperty('sch-name', 'text-halo-color', dk ? '#0B0F14' : '#FFFFFF'); }
+  if (map.getLayer('sch-name')) {
+    makePills();
+    map.setPaintProperty('sch-name', 'text-color', dk ? '#EEF2F5' : '#1F2A24');
+    const kc = ['match', ['get', 'k'], '초등학교', KIND_COLOR.초등학교, '중학교', KIND_COLOR.중학교, '고등학교', KIND_COLOR.고등학교, KIND_COLOR.특수학교];
+    map.setLayoutProperty('sch-name', 'text-field', ['format', '● ', { 'text-color': kc }, ['get', 'n'], {}, '  ', {}, ['get', 'cnt'], { 'font-scale': 0.86, 'text-color': ['match', ['get', 'st'], 'drop', dk ? '#FF8A6B' : '#C8321A', dk ? '#A7B2BC' : '#6B736D'] }]);
+    map.setPaintProperty('closed-flag', 'text-color', dk ? '#A7B2BC' : '#5E594E');
+  }
   if (map.getLayer('sch-glow')) map.setPaintProperty('sch-glow', 'circle-opacity', dk ? 0.55 : 0.22);
   try { map.setLight({ anchor: 'viewport', color: dk ? '#DDEBFF' : '#FFFFFF', intensity: dk ? 0.5 : 0.42, position: [1.4, 205, 38] }); } catch (e) {}
 }
@@ -732,7 +739,8 @@ function setupLayers() {
       try { map.setLayoutProperty(l.id, 'text-field', ['coalesce', ['get', 'name:ko'], ['get', 'name']]); } catch (e) {}
       if (/place|label_city|label_town|label_state|label_country/.test(l.id)) map.setLayerZoomRange(l.id, 10.3, 24);
       if (/poi|housenumber/.test(l.id)) map.setLayoutProperty(l.id, 'visibility', 'none');
-      if (/shield|highway-name|road_label|transportation_name/.test(l.id)) { try { map.setPaintProperty(l.id, 'text-opacity', 0.45); map.setPaintProperty(l.id, 'icon-opacity', 0.45); } catch (e) {} }
+      if (/shield/.test(l.id)) map.setLayoutProperty(l.id, 'visibility', 'none'); // 도로 번호 표지는 숨김
+      else if (/highway-name|road_label|transportation_name/.test(l.id)) { try { map.setPaintProperty(l.id, 'text-opacity', 0.45); } catch (e) {} }
     }
     if (l.id === 'background') map.setPaintProperty(l.id, 'background-color', '#F2F0EA');
     if (l.type === 'fill' && /^water/.test(l.id)) map.setPaintProperty(l.id, 'fill-color', '#DCE5E8');
@@ -760,6 +768,8 @@ function setupLayers() {
   // 건물 3D: 배경 지도(OpenMapTiles)의 건물을 세우고 동네 지표로 칠한다(확대 12.5 이상)
   // 브이월드 건물(실시간): 층수 × 3.3m, 색은 속성 c, 학교 건물은 빛나게
   map.addSource('vbld', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addSource('vbld-new', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'vbld-new', type: 'fill-extrusion', source: 'vbld-new', minzoom: VB_MINZ - 0.3, paint: { 'fill-extrusion-color': ['get', 'c'], 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.95, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'vbld', type: 'fill-extrusion', source: 'vbld', minzoom: VB_MINZ - 0.3, paint: {
     'fill-extrusion-color': ['get', 'c'],
     'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], VB_MINZ - 0.3, 0, VB_MINZ + 0.4, ['get', 'h']],
@@ -780,23 +790,25 @@ function setupLayers() {
   const kindColor = ['match', ['get', 'k'], '초등학교', KIND_COLOR.초등학교, '중학교', KIND_COLOR.중학교, '고등학교', KIND_COLOR.고등학교, KIND_COLOR.특수학교];
   map.addLayer({ id: 'sch-dim', type: 'circle', source: 'sch-pt', filter: NONE, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 1.6, 12, 4], 'circle-color': '#8C877B', 'circle-opacity': 0.35, 'circle-pitch-alignment': 'map' } });
   map.addLayer({ id: 'sch-circ', type: 'circle', source: 'sch-pt', filter: ['>', ['get', 'r'], 0], paint: {
-    'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, ['*', ['get', 'r'], 0.55], 9, ['get', 'r'], 13, ['*', ['get', 'r'], 2.2]],
-    'circle-color': kindColor, 'circle-opacity': 0.9, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-width': 1, 'circle-pitch-alignment': 'map' } });
+    'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, ['*', ['get', 'r'], 0.55], 9, ['get', 'r'], 11, 4.5, 15, 6],
+    'circle-color': kindColor, 'circle-opacity': 0.95, 'circle-stroke-color': '#FFFFFF', 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 12, 2], 'circle-pitch-alignment': 'viewport' } });
   map.addLayer({ id: 'col-dim', type: 'fill-extrusion', source: 'sch-col', maxzoom: COL_MAXZ, filter: NONE, paint: { 'fill-extrusion-color': '#9C978A', 'fill-extrusion-height': ['get', 'h'], 'fill-extrusion-opacity': 0.35 } });
   map.addLayer({ id: 'col', type: 'fill-extrusion', source: 'sch-col', maxzoom: COL_MAXZ, filter: ['>', ['get', 'h'], 0], paint: { 'fill-extrusion-color': kindColor, 'fill-extrusion-height': ['get', 'h'], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
-  // 학교 빛(번짐) + 깃발: 확대하면 건물 사이에 학교가 서 있다
-  makeFlags();
-  map.addLayer({ id: 'sch-glow', type: 'circle', source: 'sch-pt', minzoom: 10.4, filter: ['>', ['get', 'r'], 0], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10.4, 10, 15, 34], 'circle-blur': 1, 'circle-color': ['match', ['get', 'st'], 'drop', '#FF4D2E', 'small', '#FF9A3D', ['match', ['get', 'k'], '초등학교', KIND_COLOR.초등학교, '중학교', KIND_COLOR.중학교, '고등학교', KIND_COLOR.고등학교, KIND_COLOR.특수학교]], 'circle-opacity': 0.22, 'circle-pitch-alignment': 'map' } });
-  map.addLayer({ id: 'sch-name', type: 'symbol', source: 'sch-pt', minzoom: 10.4, filter: ['>', ['get', 'r'], 0], layout: {
-    'icon-image': ['match', ['get', 'st'], 'drop', 'flag-drop', 'small', 'flag-small', ['concat', 'flag-', ['get', 'k']]], 'icon-anchor': 'bottom-left', 'icon-offset': [-2, 0], 'icon-size': ['interpolate', ['linear'], ['zoom'], 10.4, 0.55, 14, 0.9], 'icon-allow-overlap': true,
-    'text-field': ['format', ['get', 'n'], {}, '\n', {}, ['get', 'cnt'], { 'font-scale': 0.85 }], 'text-font': ['Noto Sans Regular'], 'text-size': 12.5, 'symbol-sort-key': ['-', 0, ['get', 'r']], 'text-offset': [0.4, -2.9], 'text-anchor': 'bottom-left', 'text-justify': 'left', 'text-optional': true },
-    paint: { 'text-color': '#1F2A24', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.6 } });
-  map.addLayer({ id: 'closed-flag', type: 'symbol', source: 'closed', minzoom: 11, layout: { visibility: 'none', 'icon-image': 'flag-closed', 'icon-anchor': 'bottom-left', 'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 14, 0.8], 'icon-allow-overlap': true, 'text-field': ['concat', ['get', 'n'], '\n(폐교·', ['get', 'use'], ')'], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-offset': [0.4, -2.6], 'text-anchor': 'bottom-left', 'text-optional': true }, paint: { 'text-color': '#6B6558', 'text-halo-color': '#FFFFFF', 'text-halo-width': 1.4 } });
+  // 학교 이름표: 말풍선 하나(학교급 점 · 이름 · 학생 수). 겹치면 큰 학교부터
+  makePills();
+  map.addLayer({ id: 'sch-glow', type: 'circle', source: 'sch-pt', minzoom: 10.4, layout: { visibility: 'none' }, filter: ['>', ['get', 'r'], 0], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10.4, 10, 15, 34], 'circle-blur': 1, 'circle-color': ['match', ['get', 'st'], 'drop', '#FF4D2E', 'small', '#FF9A3D', ['match', ['get', 'k'], '초등학교', KIND_COLOR.초등학교, '중학교', KIND_COLOR.중학교, '고등학교', KIND_COLOR.고등학교, KIND_COLOR.특수학교]], 'circle-opacity': 0.22, 'circle-pitch-alignment': 'map' } });
+  map.addLayer({ id: 'sch-name', type: 'symbol', source: 'sch-pt', minzoom: 11, filter: ['>', ['get', 'r'], 0], layout: {
+    'icon-image': ['match', ['get', 'st'], 'drop', 'pill-drop', 'pill'], 'icon-text-fit': 'both', 'icon-text-fit-padding': [2, 4, 2, 4], 'icon-anchor': 'bottom', 'text-anchor': 'bottom',
+    'text-field': ['format', '● ', { 'text-color': kindColor }, ['get', 'n'], {}, '  ', {}, ['get', 'cnt'], { 'font-scale': 0.86, 'text-color': ['match', ['get', 'st'], 'drop', '#C8321A', DARK ? '#A7B2BC' : '#6B736D'] }],
+    'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11.5, 15, 13], 'text-offset': [0, -0.95], 'text-max-width': 30,
+    'symbol-sort-key': ['-', 0, ['get', 'r']], 'text-padding': 6, 'icon-padding': 2 },
+    paint: { 'text-color': DARK ? '#EEF2F5' : '#1F2A24', 'text-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 11.4, 1], 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 11.4, 1] } });
+  map.addLayer({ id: 'closed-flag', type: 'symbol', source: 'closed', minzoom: 11, layout: { visibility: 'none', 'icon-image': 'pill-closed', 'icon-text-fit': 'both', 'icon-text-fit-padding': [2, 4, 2, 4], 'icon-anchor': 'bottom', 'text-anchor': 'bottom', 'text-offset': [0, -0.95], 'text-field': ['concat', '폐교 · ', ['get', 'n'], ' · ', ['get', 'use']], 'text-font': ['Noto Sans Regular'], 'text-size': 11.5, 'text-padding': 6 }, paint: { 'text-color': DARK ? '#A7B2BC' : '#5E594E' } });
   map.addLayer({ id: 'closed-circ', type: 'circle', source: 'closed', layout: { visibility: 'none' }, paint: {
     'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5.5, 13, 8.5], 'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 6, 1.4, 11, 2.4],
     'circle-color': ['match', ['get', 'use'], '대부', USE_STYLE.대부.fill, '자체활용', USE_STYLE.자체활용.fill, USE_STYLE.미활용.fill],
     'circle-stroke-color': ['match', ['get', 'use'], '대부', USE_STYLE.대부.stroke, '자체활용', USE_STYLE.자체활용.stroke, USE_STYLE.미활용.stroke], 'circle-pitch-alignment': 'map' } });
-  map.addLayer({ id: 'sch-sel', type: 'circle', source: 'sch-pt', filter: ['==', ['get', 'i'], -1], paint: { 'circle-radius': 14, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#23704A', 'circle-stroke-width': 3, 'circle-pitch-alignment': 'map' } });
+  map.addLayer({ id: 'sch-sel', type: 'circle', source: 'sch-pt', filter: ['==', ['get', 'i'], -1], paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#E8391C', 'circle-stroke-width': 2.5, 'circle-pitch-alignment': 'viewport' } });
 
   themeBase();
   bindMapEvents();
@@ -828,6 +840,21 @@ function schoolColumns(yF = colIdx(), t = 1, yT = colIdx()) {
     ring.push(ring[0]);
     return { type: 'Feature', id: s.i, geometry: { type: 'Polygon', coordinates: [ring] }, properties: { i: s.i, k: s.kind, h } };
   }) };
+}
+function makePills() {
+  const draw = (id, fill, stroke) => {
+    const W = 48, H = 34, R = 9, body = 26, c = document.createElement('canvas'); c.width = W * 2; c.height = H * 2;
+    const g = c.getContext('2d'); g.scale(2, 2);
+    g.shadowColor = 'rgba(0,0,0,.18)'; g.shadowBlur = 4; g.shadowOffsetY = 1;
+    g.beginPath(); g.moveTo(R + 1, 1); g.lineTo(W - R - 1, 1); g.quadraticCurveTo(W - 1, 1, W - 1, R + 1); g.lineTo(W - 1, body - R); g.quadraticCurveTo(W - 1, body, W - R - 1, body);
+    g.lineTo(W / 2 + 5, body); g.lineTo(W / 2, H - 2); g.lineTo(W / 2 - 5, body); g.lineTo(R + 1, body); g.quadraticCurveTo(1, body, 1, body - R); g.lineTo(1, R + 1); g.quadraticCurveTo(1, 1, R + 1, 1); g.closePath();
+    g.fillStyle = fill; g.fill(); g.shadowColor = 'transparent'; g.lineWidth = 1.5; g.strokeStyle = stroke; g.stroke();
+    if (map.hasImage(id)) map.removeImage(id);
+    map.addImage(id, g.getImageData(0, 0, W * 2, H * 2), { pixelRatio: 2, stretchX: [[(R + 2) * 2, (W / 2 - 7) * 2], [(W / 2 + 7) * 2, (W - R - 2) * 2]], stretchY: [[(R + 1) * 2, (body - R) * 2]], content: [8 * 2, 4 * 2, (W - 8) * 2, (body - 3) * 2] });
+  };
+  draw('pill', DARK ? 'rgba(18,24,32,.92)' : 'rgba(255,255,255,.96)', DARK ? 'rgba(255,255,255,.22)' : 'rgba(31,42,36,.18)');
+  draw('pill-drop', DARK ? 'rgba(52,20,14,.94)' : '#FFF4F0', '#E8391C');
+  draw('pill-closed', DARK ? 'rgba(30,34,40,.9)' : 'rgba(244,242,236,.95)', DARK ? 'rgba(255,255,255,.18)' : 'rgba(94,89,78,.35)');
 }
 // 깃발 아이콘: 막대 + 삼각 깃 (학교급 색 / 60명 아래로 떨어질 학교 빨강 / 이미 작은학교 주황 / 폐교 회색)
 function makeFlags() {
@@ -880,10 +907,13 @@ function paint() {
   tweenBars(lv, target);
   const bar = S.view === 'bar' && !S.simFlat; // 시뮬레이션 중에는 벽을 눕혀 3D 곡선이 보이게
   // 값 입체는 시군 전체가 보이는 배율에서만. 크게 확대하면(9.6 이상) 평면 색칠로 바뀌어 학교가 보인다
-  for (const l of ['sigun', 'emd']) { map.setLayerZoomRange(l + '-fill', bar ? BAR_MAXZ : 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ); }
+  // 끊기지 않게: 8.8~9.6 사이에서 기둥은 서서히 투명해지고 바닥 색이 서서히 나타난다
+  for (const l of ['sigun', 'emd']) { map.setLayerZoomRange(l + '-fill', 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ + 0.2);
+    map.setPaintProperty(l + '-bar', 'fill-extrusion-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0.94, BAR_MAXZ, 0]); }
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
   if (S.simFlat) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
+  else if (bar) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0, BAR_MAXZ, 0.8, 11, 0.8, 13.5, DARK ? 0.1 : 0.3]);
   else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
@@ -938,11 +968,14 @@ function placeLabels() {
   if (!map) return;
   const bar = S.view === 'bar' && S.level === 'sigun' && map.getZoom() < BAR_MAXZ;
   const sinP = Math.sin((map.getPitch() * Math.PI) / 180), z = map.getZoom();
+  const op = z <= 9.4 ? 1 : z >= 10.6 ? 0 : 1 - (z - 9.4) / 1.2;
+  for (const m of labelMarkers) { const el = m.getElement(); el.style.opacity = op; el.style.visibility = op ? 'visible' : 'hidden'; }
   for (const m of labelMarkers) {
     const sg = m.getElement().dataset.sg;
     if (!bar || !curH[sg]) { m.setOffset([0, 0]); continue; }
     const mpp = (156543.03 * Math.cos((D.labelPt[sg][1] * Math.PI) / 180)) / Math.pow(2, z);
-    m.setOffset([0, -(curH[sg] / mpp) * sinP]);
+    const f = z <= 7.6 ? 1 : z >= BAR_MAXZ ? 0.08 : 1 - ((z - 7.6) / (BAR_MAXZ - 7.6)) * 0.92;
+    m.setOffset([0, -((curH[sg] * f) / mpp) * sinP]);
   }
 }
 function buildLabels() {
@@ -1005,7 +1038,10 @@ async function vbCell(ix, iy) {
     VB.cells.set(k, feats);
   } catch (e) { VB.cells.set(k, []); }
   VB.loading.delete(k);
-  vbRender();
+  // 여러 칸이 한꺼번에 오면 모아서 한 번에 솟게
+  VB.pending = (VB.pending || []).concat(VB.cells.get(k));
+  clearTimeout(VB.flushT);
+  VB.flushT = setTimeout(() => { const p = VB.pending; VB.pending = []; if (p.length) vbRender(p); }, 180);
 }
 function vbUpdate() {
   clearTimeout(VB.timer);
@@ -1031,17 +1067,40 @@ function vbColors() {
   const emdOf = (x, y) => { const key = (x * 200 | 0) + '_' + (y * 200 | 0); if (emdCache.has(key)) return emdCache.get(key); const e = idx.find((m) => x >= m.b[0][0] && x <= m.b[1][0] && y >= m.b[0][1] && y <= m.b[1][1] && inPoly([x, y], m.polys)); emdCache.set(key, e); return e; };
   const def = DARK ? '#28303A' : '#D9D4C8';
   return (p) => {
-    if (p.sch) return DARK ? '#7CF2B8' : '#23704A';
+    if (p.sch) return DARK ? '#5FE3A6' : '#2E8B57';
     if (dist) { let best = 1e9; for (const o of sch) { const d = kmDist([p.x, p.y], [o.lon, o.lat]); if (d < best) best = d; } const t = best < 1.5 ? 0 : best < 3.5 ? 1 : best < 6 ? 2 : best < 10 ? 3 : 4; return ramp[t]; }
     const e = emdOf(p.x, p.y); if (!e) return def;
-    return colorOf(I.emd(D.stats.emd[e.code]), br, I);
+    const c = colorOf(I.emd(D.stats.emd[e.code]), br, I);
+    if (!DARK) return c;
+    // 어두운 화면: 건물은 한 단계 밝은 색으로(배경에 묻히지 않게)
+    const i = RAMP_DARK[I.ramp].indexOf(c);
+    return i < 0 ? c : BLD_DARK[I.ramp][i];
   };
 }
-function vbRender() {
+// 색은 지표·테마가 바뀔 때만 다시 계산(colorKey), 새로 온 칸은 'vbld-new'에서 0.6초 동안 솟은 뒤 합친다
+VB.colorKey = ''; VB.fresh = []; VB.growRaf = 0;
+function vbRender(newFeats) {
   const src = map && map.getSource('vbld'); if (!src) return;
-  const col = vbColors(), out = [];
-  for (const arr of VB.cells.values()) for (const f of arr) { f.properties.c = col(f.properties); out.push(f); }
-  src.setData({ type: 'FeatureCollection', features: out });
+  const key = bldInd() + S.ind + DARK;
+  const recolor = key !== VB.colorKey; VB.colorKey = key;
+  const col = recolor || newFeats ? vbColors() : null;
+  if (newFeats) { for (const f of newFeats) f.properties.c = col(f.properties); VB.fresh.push(...newFeats); }
+  const settled = [];
+  for (const arr of VB.cells.values()) for (const f of arr) { if (VB.fresh.includes(f)) continue; if (recolor) f.properties.c = col(f.properties); settled.push(f); }
+  if (recolor || !newFeats) src.setData({ type: 'FeatureCollection', features: settled });
+  if (!newFeats) return;
+  const nsrc = map.getSource('vbld-new'); nsrc.setData({ type: 'FeatureCollection', features: VB.fresh });
+  cancelAnimationFrame(VB.growRaf);
+  const t0 = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / 600), e = 1 - Math.pow(1 - t, 3);
+    map.setPaintProperty('vbld-new', 'fill-extrusion-height', ['*', ['get', 'h'], e]);
+    if (t < 1) { VB.growRaf = requestAnimationFrame(step); return; }
+    VB.fresh = []; nsrc.setData({ type: 'FeatureCollection', features: [] });
+    const all = []; for (const arr of VB.cells.values()) all.push(...arr);
+    src.setData({ type: 'FeatureCollection', features: all });
+  };
+  VB.growRaf = requestAnimationFrame(step);
 }
 
 /* ---------- 건물 색 ---------- */
@@ -1088,7 +1147,7 @@ function renderReadme() {
   const when = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 예측' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 예측' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
   const how = S.view === 'bar' ? '높이·색' : '색';
   const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
-  if (map && map.getZoom() >= 11) { const bk = bldInd(), vb = map.getZoom() >= VB_MINZ; $('#readme').innerHTML = `${/^near/.test(bk) && S.ind === bk ? '<b>건물 색</b> = 가장 가까운 ' + { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[bk] + '까지 거리 · 진할수록 멂 · ' : vb ? '<b>건물</b> = 실제 층수 · 색은 그 읍면동의 ' + esc(IND[bk].label) + ' · <b>초록 건물</b> = 학교 · ' : '<b>바닥 색</b> = ' + esc(IND[S.ind].label) + ' · 더 확대하면 실제 건물이 섭니다 · '}깃발 = 학교(<b style="color:#E8391C">빨강</b> 5년 안에 60명 아래로 · <b style="color:#F28A2E">주황</b> 지금 60명 이하)`; return; }
+  if (map && map.getZoom() >= 11) { const bk = bldInd(), vb = map.getZoom() >= VB_MINZ; $('#readme').innerHTML = `${/^near/.test(bk) && S.ind === bk ? '<b>건물 색</b> = 가장 가까운 ' + { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[bk] + '까지 거리 · 진할수록 멂 · ' : vb ? '<b>건물</b> = 실제 층수 · 색은 그 읍면동의 ' + esc(IND[bk].label) + ' · <b>초록 건물</b> = 학교 · ' : '<b>바닥 색</b> = ' + esc(IND[S.ind].label) + ' · 더 확대하면 실제 건물이 섭니다 · '}이름표 = 학교(<b style="color:#E8391C">빨간 테두리</b>: 5년 안에 60명 아래로)`; return; }
   $('#readme').innerHTML = `<b>${how}</b> = ${unit}별 ${esc(I.label)}${when ? ' (' + esc(when) + ')' : ''} · ${S.view === 'bar' ? '높고 ' : ''}진할수록 ${esc(hi.replace('높을수록 ', ''))}${S.view === '3d' ? ' · 산 높이는 실제의 2.8배' + (S.layers.schools ? ' · 기둥 = 학교(높이 = 학생 수)' : '') : ''}`;
 }
 
@@ -1215,9 +1274,9 @@ function applyView(first) {
   map.setLayerZoomRange('sch-dim', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
   map.setLayoutProperty('closed-circ', 'visibility', S.layers.closed && !bar ? 'visible' : 'none');
   map.setLayoutProperty('closed-flag', 'visibility', S.layers.closed ? 'visible' : 'none');
-  map.setLayoutProperty('sch-glow', 'visibility', sch ? 'visible' : 'none');
+
   // 값 입체는 확대하면 기둥을 낮춰 학교 점이 보이게
-  for (const id of ['sigun-bar', 'emd-bar']) map.setPaintProperty(id, 'fill-extrusion-opacity', 0.94);
+
   $('#schHint').textContent = terrain ? '기둥 높이 = 학생 수' : bar ? '크게 확대하면 보임' : '원 크기 = 학생 수';
   if (map.getLayer('sigun-bar')) paint();
   // 지형에서는 색을 옅게 깔아 산 음영이 비치게
