@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#F5F3EE">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2323704A'/%3E%3Cpath d='M5 24l7-10 5 6 4-5 6 9z' fill='%23F5F3EE'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
 :root{
   --pt:#23704A; --pt-h:#1B5A3B; --pt-soft:#E6F0E9; --pt-line:#BFD8C6;
@@ -493,7 +493,7 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
 <div class="ctl-ind">
   <div class="row">
     <div class="inddd" id="inddd"><button id="indBtn" aria-haspopup="true"><span id="indName">지표</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button><div class="menu" id="indMenu"></div></div>
-    <div class="seg" id="levelSeg"><button data-lv="sigun" aria-pressed="true">시군</button><button data-lv="emd" aria-pressed="false">읍면동</button></div>
+    <div class="seg" id="levelSeg"><button data-lv="sigun" aria-pressed="true">시군</button><button data-lv="emd" aria-pressed="false">읍면동</button><button data-lv="hak" aria-pressed="false" title="초등학교 통학구역">학구</button></div>
   </div>
   <div class="seg kinds" id="kindSeg"></div>
 </div>
@@ -531,7 +531,7 @@ body.dark .toast{background:#E9EEF2;color:#0B0F14}
 
 <div class="modal" id="about" role="dialog" aria-modal="true" aria-labelledby="aboutT"><div class="box" id="aboutBox"></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script>
 'use strict';
 /* =========================================================
@@ -630,7 +630,15 @@ const IND = {
   pjBelow: { g: '미래 학생', label: '2031년까지 60명 아래로', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
     sigun: (s) => s.pjBelow, hi: '작은학교가 새로 많이 생길 곳', desc: '지금은 60명이 넘지만 2031년까지 60명 이하로 추정되는 초·중' },
   risk: { g: '미래 학생', label: '학생 감소 신호 3개 이상', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0, kindless: true,
-    sigun: (s) => s.risk3, hi: '학생 감소 신호가 겹친 학교가 많은 곳', desc: '60명 이하·신입생 0명·60명 아래로 전망·10명 이하 전망·입학생 0명 전망·학구 0~5세 12명 미만 가운데 3개 이상인 초·중' },
+    sigun: (s) => s.risk3, hi: '학생 감소 신호가 겹친 학교가 많은 곳', desc: '60명 이하·신입생 0명·60명 아래로 추정·5년 새 30% 넘게 감소 추정·10명 이하 추정·입학생 0명 추정·학구 0~5세 12명 미만 가운데 3개 이상인 초·중' },
+  hakKids: { g: '초등학구', label: '학구 안 0~5세 아이', unit: '명', ramp: 'green', yearly: false, lv: ['hak'], d: 0, kindless: true,
+    hak: (z) => z.kids, hi: '앞으로 입학할 아이가 많은 학구', desc: '통학구역 안에 지금 사는 0~5세(2026. 8. 주민등록, 읍면동 인구를 면적 비율로 나눔)' },
+  hakChg: { g: '초등학구', label: '학구 학생 변화(2026→2031 추정)', unit: '%', ramp: 'warm', invert: true, signed: true, yearly: false, lv: ['hak'], d: 1, kindless: true,
+    hak: (z) => z.chg, hi: '학생이 많이 줄어들 학구', desc: '학구 안 초등학교 학생 수 2026 실제 → 2031 추정' },
+  hakArea: { g: '초등학구', label: '학구 면적', unit: '㎢', ramp: 'warm', yearly: false, lv: ['hak'], d: 1, kindless: true,
+    hak: (z) => z.km2, hi: '넓은 학구(통학이 먼 곳)', desc: '초등 통학구역 넓이. 넓을수록 아이들이 먼 곳에서 옵니다' },
+  hakDens: { g: '초등학구', label: '학구 1㎢당 0~5세', unit: '명', ramp: 'green', yearly: false, lv: ['hak'], d: 1, kindless: true,
+    hak: (z) => z.dens, hi: '아이들이 모여 사는 학구', desc: '학구 안 0~5세 ÷ 학구 면적. 낮을수록 아이들이 흩어져 삽니다' },
   cohort: { g: '미래 학생', label: '입학생 전망', unit: '%', ramp: 'warm', invert: true, yearly: false, lv: ['sigun', 'emd'], d: 1, signed: true, kindless: true,
     sigun: (s) => s.cohort, emd: (e) => e.cohort, hi: '앞으로 입학생이 많이 줄 곳',
     desc: '0~2세 인구 ÷ 지금 초1~3 또래(6~8세) − 1. −30%면 몇 년 뒤 초등 입학생이 지금보다 약 30% 적다는 뜻(주민등록 기준, 6~8세 30명 미만 읍면동은 비움)' },
@@ -650,7 +658,7 @@ const IND = {
 };
 // 읍면동 단위 값은 2026 기준(증감률은 2022→2026 고정)이고 학교급 구분이 없다
 const yearlyNow = (k = S.ind) => IND[k].yearly && S.level === 'sigun';
-const kindlessNow = (k = S.ind) => IND[k].kindless || S.level === 'emd';
+const kindlessNow = (k = S.ind) => IND[k].kindless || S.level !== 'sigun';
 const yearOf = () => (yearlyNow() ? S.yi : 4);
 const pitched = () => S.view !== '2d';
 const FYEARS = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032];
@@ -665,8 +673,22 @@ const fmtIndU = (v, k = S.ind) => { const I = IND[k]; if (I.cat || v === null ||
 /* ---------- 자료 불러오기 ---------- */
 async function load() {
   const get = (f) => fetch('data/' + f).then((r) => { if (!r.ok) throw new Error(f); return r.json(); });
-  const [stats, schools, closed, sigun, emd, nb] = await Promise.all(['stats.json', 'schools.json', 'closed.json', 'sigun.geojson', 'emd.geojson', 'neighbors.geojson'].map(get));
-  D = { stats, schools, closed, sigunGeo: sigun, emdGeo: emd, nbGeo: nb };
+  const [stats, schools, closed, sigun, emd, nb, hak] = await Promise.all(['stats.json', 'schools.json', 'closed.json', 'sigun.geojson', 'emd.geojson', 'neighbors.geojson', 'zones_e.geojson'].map(get));
+  D = { stats, schools, closed, sigunGeo: sigun, emdGeo: emd, nbGeo: nb, hakGeo: hak };
+  // 초등학구: 학구마다 학교·학생·0~5세·면적
+  D.hak = {};
+  hak.features.forEach((f, i) => {
+    const code = 'z' + i; f.properties.code = code;
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    const lat = polys[0][0][0][1];
+    const km2 = polys.reduce((a, p) => a + Math.abs(ringArea(p[0])) - p.slice(1).reduce((b, h) => b + Math.abs(ringArea(h)), 0), 0) * 111.32 * 110.54 * Math.cos((lat * Math.PI) / 180);
+    const sch = schools.filter((x) => x.kind === '초등학교' && x.ze === i && !x.state);
+    const sum = (fn) => sch.reduce((a, x) => a + (fn(x) || 0), 0);
+    const kids = sch.some((x) => x.pj && x.pj.kids05 !== undefined) ? sum((x) => x.pj && x.pj.kids05) : null;
+    const s26 = sum((x) => x.stu[4]), s31 = sum((x) => x.pj && x.pj.stu[4]);
+    D.hak[code] = { name: f.properties.name.replace(/통학구역$/, ' 학구'), office: f.properties.office, sch, km2, kids, s26, s31,
+      chg: s26 && sch.every((x) => x.pj) ? (s31 / s26 - 1) * 100 : null, dens: kids !== null && km2 ? kids / km2 : null };
+  });
   D.sigunNames = Object.keys(stats.sigun);
   schools.forEach((s, i) => { s.i = i; });
   // 학생 감소 신호(시군별 3개 이상 학교 수)
@@ -703,6 +725,7 @@ function inRing([x, y], r) { let c = false; for (let i = 0, j = r.length - 1; i 
 function valuesFor(indKey = S.ind, level = S.level, y = yearOf()) {
   const I = IND[indKey], out = {};
   if (level === 'sigun') for (const sg of D.sigunNames) out[sg] = I.sigun ? I.sigun(D.stats.sigun[sg], y) : null;
+  else if (level === 'hak') for (const [code, z] of Object.entries(D.hak)) out[code] = I.hak ? I.hak(z) : null;
   else for (const [code, e] of Object.entries(D.stats.emd)) out[code] = I.emd ? I.emd(e) : null;
   return out;
 }
@@ -819,6 +842,11 @@ function setupLayers() {
   map.addLayer({ id: 'sigun-line', type: 'line', source: 'sigun', paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 1.6, 11, 3] } }, firstSymbol);
   // 값 입체: 시군·읍면이 지표값만큼 솟는다(높이·색 = 같은 값)
   map.addLayer({ id: 'sigun-bar', type: 'fill-extrusion', source: 'sigun', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
+  map.addSource('hak', { type: 'geojson', data: D.hakGeo, promoteId: 'code' });
+  map.addLayer({ id: 'hak-fill', type: 'fill', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
+  map.addLayer({ id: 'hak-line', type: 'line', source: 'hak', layout: { visibility: 'none' }, paint: { 'line-color': DARK ? 'rgba(255,255,255,.4)' : '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.6] } }, firstSymbol);
+  map.addLayer({ id: 'hak-bar', type: 'fill-extrusion', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
+  map.addLayer({ id: 'hak-hover', type: 'line', source: 'hak', filter: ['==', ['get', 'code'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2 } });
   map.addLayer({ id: 'emd-bar', type: 'fill-extrusion', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
   map.addSource('zone', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   // 건물 3D: 배경 지도(OpenMapTiles)의 건물을 세우고 동네 지표로 칠한다(확대 12.5 이상)
@@ -950,7 +978,7 @@ function paint() {
   const vals = Object.values(curVals).filter((v) => v !== null && isFinite(v));
   let mn = Math.min(...vals), mx = Math.max(...vals);
   if (I.fixed) { mn = 0; mx = Math.max(...D.sigunNames.map((sg) => Math.max(...SG()[sg].pj))); } // 모든 해 같은 눈금
-  const top = lv === 'sigun' ? 26000 : 16000;
+  const top = lv === 'sigun' ? 26000 : lv === 'hak' ? 12000 : 16000;
   const target = {};
   const hp = [];
   for (const [k, v] of Object.entries(curVals)) {
@@ -964,24 +992,28 @@ function paint() {
   const bar = S.view === 'bar' && !S.simFlat; // 시뮬레이션 중에는 벽을 눕혀 3D 곡선이 보이게
   // 값 입체는 시군 전체가 보이는 배율에서만. 크게 확대하면(9.6 이상) 평면 색칠로 바뀌어 학교가 보인다
   // 끊기지 않게: 8.8~9.6 사이에서 기둥은 서서히 투명해지고 바닥 색이 서서히 나타난다
-  for (const l of ['sigun', 'emd']) { map.setLayerZoomRange(l + '-fill', 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ + 0.2);
+  for (const l of ['sigun', 'emd', 'hak']) { map.setLayerZoomRange(l + '-fill', 0, 24); map.setLayerZoomRange(l + '-bar', 0, BAR_MAXZ + 0.2);
     map.setPaintProperty(l + '-bar', 'fill-extrusion-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0.94, BAR_MAXZ, 0]); }
   map.setLayoutProperty('sigun-fill', 'visibility', lv === 'sigun' ? 'visible' : 'none');
   map.setLayoutProperty('emd-fill', 'visibility', lv === 'emd' ? 'visible' : 'none');
-  if (S.simFlat) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
-  else if (bar) for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0, BAR_MAXZ, 0.8, 11, 0.8, 13.5, DARK ? 0.1 : 0.3]);
-  else if (S.view !== '3d') for (const l of ['sigun', 'emd']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
+  map.setLayoutProperty('hak-fill', 'visibility', lv === 'hak' ? 'visible' : 'none');
+  map.setLayoutProperty('hak-line', 'visibility', lv === 'hak' ? 'visible' : 'none');
+  map.setLayoutProperty('hak-bar', 'visibility', lv === 'hak' && bar ? 'visible' : 'none');
+  map.setPaintProperty('hak-line', 'line-color', DARK ? 'rgba(255,255,255,.4)' : '#FFFFFF');
+  if (S.simFlat) for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', 0.28);
+  else if (bar) for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 9.25, 0, BAR_MAXZ, 0.8, 11, 0.8, 13.5, DARK ? 0.1 : 0.3]);
+  else if (S.view !== '3d') for (const l of ['sigun', 'emd', 'hak']) map.setPaintProperty(l + '-fill', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setLayoutProperty('sigun-bar', 'visibility', lv === 'sigun' && bar ? 'visible' : 'none');
   map.setLayoutProperty('emd-bar', 'visibility', lv === 'emd' && bar ? 'visible' : 'none');
   renderReadme(); placeLabels(); bldKey = ''; updateBuildings(); if (VB.cells.size) vbRender();
-  map.setPaintProperty('emd-line', 'line-opacity', lv === 'emd' ? 0.9 : 0.45);
+  map.setPaintProperty('emd-line', 'line-opacity', lv === 'emd' ? 0.9 : lv === 'hak' ? 0.12 : 0.45);
   renderLegend(); renderTimeline(); renderKinds(); renderIndMenu(); updateLabels(); renderKPIs(); syncHash();
   if (S.tab === 'r' && !S.sigun) renderPanel();
 }
 function renderLegend() {
   const I = IND[S.ind], y = YEARS[yearOf()];
   const yTxt = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 추정' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 추정' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '2023~2026 자료' : I.g === '미래 학생' ? `${D.stats.meta.popMonth} 주민등록` : `${y}`;
-  let h = `<div class="t">${esc(I.label)}<small>${esc(yTxt)} · ${S.level === 'sigun' ? '시군' : '읍면동(전체 학교)'}${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}</small></div>`;
+  let h = `<div class="t">${esc(I.label)}<small>${esc(yTxt)} · ${{ sigun: '시군', emd: '읍면동(전체 학교)', hak: '초등학구' }[S.level]}${kindlessNow() || S.kind === 'all' ? '' : ' · ' + KIND_SHORT[S.kind]}</small></div>`;
   if (I.cat) {
     h += '<div class="lg-cat">' + Object.entries(I.colors).map(([k, c]) => `<span><i style="background:${c}"></i>${esc(k)}</span>`).join('') + '</div>';
   } else {
@@ -1003,19 +1035,25 @@ function renderLegend() {
 }
 // 값 입체 높이를 이전 값에서 새 값으로 0.7초 동안 옮긴다(처음엔 바닥에서 솟아오름)
 const barPrev = {}; let barRaf = 0;
+const BAR_EXPR = {};
 function tweenBars(lv, target) {
   cancelAnimationFrame(barRaf);
-  const key = lv === 'sigun' ? 'sigun' : 'code', from = barPrev[lv] || {};
+  const from = barPrev[lv] || {};
+  if (!BAR_EXPR[lv]) {
+    const h = ['coalesce', ['feature-state', 'h'], 0];
+    map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', ['interpolate', ['linear'], ['zoom'], 7.6, h, 9.6, ['*', 0.08, h]]);
+    BAR_EXPR[lv] = true;
+  }
   const set = (e) => {
-    const hp = []; curH = {};
-    for (const [k, v] of Object.entries(target)) { const h = Math.round((from[k] ?? 0) + (v - (from[k] ?? 0)) * e); curH[k] = h; hp.push(k, h); }
-    const m = hp.length ? ['match', ['get', key], ...hp, 0] : 0;
-    map.setPaintProperty(lv + '-bar', 'fill-extrusion-height', hp.length ? ['interpolate', ['linear'], ['zoom'], 7.6, m, 9.6, ['*', 0.08, m]] : 0);
+    curH = {};
+    for (const [k, v] of Object.entries(target)) { const h = Math.round((from[k] ?? 0) + (v - (from[k] ?? 0)) * e); curH[k] = h; map.setFeatureState({ source: lv, id: k }, { h }); }
     placeLabels();
   };
-  if (S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches) { set(1); barPrev[lv] = target; return; }
-  const t0 = performance.now(), dur = barPrev[lv] ? 700 : 1400;
-  const step = (now) => { const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3); set(e); if (t < 1) barRaf = requestAnimationFrame(step); else barPrev[lv] = target; };
+  // 둘러보기 중이거나 도형이 많으면(학구·읍면동) 한 번에, 아니면 약 30fps 로 부드럽게
+  const quick = S.view !== 'bar' || matchMedia('(prefers-reduced-motion:reduce)').matches || (touring && lv !== 'sigun') || Object.keys(target).length > 60;
+  if (quick) { set(1); barPrev[lv] = target; return; }
+  const t0 = performance.now(), dur = barPrev[lv] ? 700 : 1400; let last = 0;
+  const step = (now) => { const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3); if (now - last > 30 || t === 1) { set(e); last = now; } if (t < 1) barRaf = requestAnimationFrame(step); else barPrev[lv] = target; };
   barRaf = requestAnimationFrame(step);
 }
 let labelMarkers = [];
@@ -1100,6 +1138,7 @@ async function vbCell(ix, iy) {
   VB.flushT = setTimeout(() => { const p = VB.pending; VB.pending = []; if (p.length) vbRender(p); }, 180);
 }
 function vbUpdate() {
+  if (touring) return;
   clearTimeout(VB.timer);
   VB.timer = setTimeout(() => {
     if (!map || map.getZoom() < VB_MINZ - 0.3) return;
@@ -1135,8 +1174,18 @@ function vbColors() {
 }
 // 색은 지표·테마가 바뀔 때만 다시 계산(colorKey), 새로 온 칸은 'vbld-new'에서 0.6초 동안 솟은 뒤 합친다
 VB.colorKey = ''; VB.fresh = []; VB.growRaf = 0;
+function vbPrefetch(center, n = 9) {
+  const cx = center[0] / CELL, cy = center[1] / CELL, cells = [];
+  for (let ix = Math.floor(cx) - 2; ix <= Math.floor(cx) + 2; ix++) for (let iy = Math.floor(cy) - 2; iy <= Math.floor(cy) + 2; iy++) cells.push([Math.hypot(ix + 0.5 - cx, iy + 0.5 - cy), ix, iy]);
+  cells.sort((a, b) => a[0] - b[0]).slice(0, n).forEach(([, ix, iy]) => vbCell(ix, iy));
+}
 function vbRender(newFeats) {
   const src = map && map.getSource('vbld'); if (!src) return;
+  if (touring && newFeats) { // 둘러보기 중: 솟아오르기 없이 한 번에
+    const col = vbColors(); for (const f of newFeats) f.properties.c = col(f.properties);
+    const all = []; for (const arr of VB.cells.values()) all.push(...arr);
+    src.setData({ type: 'FeatureCollection', features: all }); return;
+  }
   const key = bldInd() + S.ind + DARK;
   const recolor = key !== VB.colorKey; VB.colorKey = key;
   const col = recolor || newFeats ? vbColors() : null;
@@ -1199,7 +1248,7 @@ function updateBuildings() {
 /* ---------- 지도 읽는 법(한 줄) ---------- */
 function renderReadme() {
   const I = IND[S.ind], y = YEARS[yearOf()];
-  const unit = S.level === 'sigun' ? '시군' : '읍면동';
+  const unit = { sigun: '시군', emd: '읍면동', hak: '초등학구' }[S.level];
   const when = I.future ? `${FYEARS[S.fy]}${S.fy > 4 ? ' 추정' : ''}` : S.ind === 'pjChg' || S.ind === 'pjBelow' ? '2026→2031 추정' : S.ind === 'change' ? `2022→${y}` : I.g === '폐교' ? '' : I.g === '미래 학생' ? D.stats.meta.popMonth : `${y}`;
   const how = S.view === 'bar' ? '높이·색' : '색';
   const hi = I.cat ? '높을수록 인구감소 단계' : (I.hi || (I.label + '이 큰 곳'));
@@ -1236,8 +1285,8 @@ function renderIndMenu() {
   const groups = {};
   for (const [k, I] of Object.entries(IND)) (groups[I.g] ||= []).push([k, I]);
   $('#indMenu').innerHTML = Object.entries(groups).map(([g, arr]) => `<h4>${esc(g)}</h4>` + arr.map(([k, I]) =>
-    `<button data-ind="${k}" aria-pressed="${k === S.ind}">${esc(I.label)}<small>${esc(I.desc)}${I.lv.length === 1 && I.lv[0] === 'emd' ? ' · 읍면동' : ''}</small></button>`).join('')).join('');
-  $$('#levelSeg button').forEach((b) => { const ok = IND[S.ind].lv.includes(b.dataset.lv); b.disabled = !ok; b.style.opacity = ok ? 1 : 0.4; b.setAttribute('aria-pressed', b.dataset.lv === S.level); });
+    `<button data-ind="${k}" aria-pressed="${k === S.ind}">${esc(I.label)}<small>${esc(I.desc)}${I.lv.length === 1 && I.lv[0] === 'emd' ? ' · 읍면동' : I.lv[0] === 'hak' ? ' · 학구' : ''}</small></button>`).join('')).join('');
+  $$('#levelSeg button').forEach((b) => { b.disabled = false; b.style.opacity = 1; b.setAttribute('aria-pressed', b.dataset.lv === S.level); });
 }
 function renderKinds() {
   const dis = kindlessNow();
@@ -1342,6 +1391,7 @@ function applyView(first) {
   if (map.getLayer('sigun-bar')) paint();
   // 지형에서는 색을 옅게 깔아 산 음영이 비치게
   map.setPaintProperty('sigun-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
+  map.setPaintProperty('hak-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   map.setPaintProperty('emd-fill', 'fill-opacity', terrain ? (DARK ? 0.3 : 0.42) : ['interpolate', ['linear'], ['zoom'], 11, 0.82, 13.5, DARK ? 0.1 : 0.3]);
   // 어두운 지형: 능선이 달빛처럼 보이게 음영을 밝게
   map.setPaintProperty('hillshade', 'hillshade-highlight-color', DARK ? (terrain ? '#8FA3B8' : '#2B3642') : '#FFFFFF');
@@ -1416,6 +1466,9 @@ function bindMapEvents() {
       const s = D.stats.sigun[sg], y = yearOf();
       const kr = kindRows(s)[y];
       showTip(e, `<b>${esc(sg)}</b>${s.decline ? ` <span class="dim">· ${esc(s.decline)}</span>` : ''}<br>${esc(IND[S.ind].label)} <b class="num">${esc(fmtIndU(curVals[sg]))}</b>${rankTxt(sg)}<br><span class="dim">학교 ${fmt(kr.schools)}곳 · 학생 ${fmt(kr.students)}명</span>`);
+    } else if (lv === 'hak') {
+      const code = f.properties.code, z = D.hak[code]; map.setFilter('hak-hover', ['==', ['get', 'code'], code]);
+      showTip(e, `<b>${esc(z.name)}</b><br>${esc(IND[S.ind].label)} <b class="num">${esc(fmtIndU(curVals[code]))}</b><br><span class="dim">${z.sch.length ? z.sch.map((x) => esc(shortName(x.name)) + ' ' + fmt(x.stu[4]) + '명').join(' · ') : '운영 중인 초등학교 없음'}<br>0~5세 약 ${fmt(z.kids)}명 · 면적 ${fmt(z.km2, 1)}㎢${z.chg !== null ? ' · 2031년 ' + sgn(z.chg) + '%' : ''}</span>`);
     } else {
       const code = f.properties.code, em = D.stats.emd[code]; map.setFilter('emd-hover', ['==', ['get', 'code'], code]);
       showTip(e, `<b>${esc(em.sigun)} ${esc(em.emd)}</b><br>${esc(IND[S.ind].label)} <b class="num">${esc(fmtIndU(curVals[code]))}</b><br><span class="dim">학교 ${em.schools}곳 · 학생 ${fmt(em.students)}명<br>가까운 초 ${fmt(em.nearE, 1)}km · 중 ${fmt(em.nearM, 1)}km · 고 ${fmt(em.nearH, 1)}km</span>`);
@@ -1431,6 +1484,7 @@ function bindMapEvents() {
     const f = map.queryRenderedFeatures(e.point, { layers: [S.level + (S.view === 'bar' && map.getZoom() < BAR_MAXZ ? '-bar' : '-fill')] })[0];
     if (!f) return;
     if (S.level === 'sigun') openSigun(f.properties.sigun);
+    else if (S.level === 'hak') { const z = D.hak[f.properties.code]; if (z.sch.length) openSchool([...z.sch].sort((a, b) => (b.stu[4] || 0) - (a.stu[4] || 0))[0].i); }
     else openEmd(f.properties.code);
   });
   map.on('dragstart', () => { if (S.layers.rotate) { S.layers.rotate = false; applyView(); } });
@@ -1438,7 +1492,8 @@ function bindMapEvents() {
   map.on('moveend', vbUpdate);
   map.on('zoomend', renderReadme);
 }
-function clearHover() { map.setFilter('hover-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); }
+function clearHover() { if (map.getLayer('hak-hover')) map.setFilter('hak-hover', ['==', ['get', 'code'], '']); clearHover0(); }
+function clearHover0() { map.setFilter('hover-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); }
 function rankTxt(sg) {
   const I = IND[S.ind]; if (I.cat || curVals[sg] === null || curVals[sg] === undefined) return '';
   const n = Object.values(curVals).filter((v) => v !== null && isFinite(v)).length;
@@ -1533,6 +1588,19 @@ const STORIES = [
       <p>학생 감소 신호가 3개 이상 겹친 초·중은 <b>${D.schools.filter((x) => x.riskN >= 3).length}곳</b>입니다. 지표 <b>「학생 감소 신호 3개 이상」</b>으로 시군별로 볼 수 있습니다. 학교의 앞날을 뜻하는 숫자가 아니라, 학생 수 변화를 살필 곳을 알려 주는 참고 지표입니다.</p>
       <div class="sec-l">5년 안에 60명 아래로 내려갈 학교</div><ul class="slist">${list.map((s) => schoolRow(s).replace('</span></button>', `</span></button>`)).join('')}</ul>`;
     }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 추정입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했고, 고등·특수학교는 추정하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
+  { id: 'hak', g: '앞으로 5년', q: '우리 학교 학구에는 앞으로 올 아이가 몇 명일까?', s: '초등학구 535곳의 0~5세·학생 변화 추정', ind: 'hakKids', level: 'hak', chips: ['hakKids', 'hakChg', 'hakDens', 'hakArea'],
+    cam: { pitch: 50, bearing: -10 },
+    hero: () => { const zs = Object.values(D.hak).filter((z) => z.kids !== null); const few = zs.filter((z) => z.kids < 12).length; return { l: '0~5세가 12명 미만인 초등학구', v: `${few}곳 <small>/ ${zs.length}곳</small>`, d: '학구 안에 지금 사는 0~5세(2026. 8. 주민등록)' }; },
+    body: () => {
+      const zs = Object.values(D.hak).filter((z) => z.kids !== null);
+      const few = zs.filter((z) => z.kids < 6).sort((a, b) => a.kids - b.kids);
+      const wide = [...zs].sort((a, b) => b.km2 - a.km2).slice(0, 3);
+      const rich = [...zs].sort((a, b) => b.kids - a.kids).slice(0, 3);
+      return `<p>읍면동은 행정 구역이라 학교와 맞지 않습니다. 학구는 <b>학교 하나하나가 맡은 실제 구역</b>이라, 우리 학교에 앞으로 올 아이를 바로 셀 수 있습니다.</p>
+      <p>0~5세가 <b>6명도 안 되는 학구가 ${few.length}곳</b>입니다. 반대로 아이가 가장 많은 학구는 ${rich.map((z) => `<b>${esc(z.name)}(${fmt(z.kids)}명)</b>`).join(', ')}입니다.</p>
+      <p>가장 넓은 학구는 ${wide.map((z) => `<b>${esc(z.name)}(${fmt(z.km2, 0)}㎢)</b>`).join(', ')}입니다. 지표를 「학구 1㎢당 0~5세」로 바꾸면 아이들이 흩어져 사는 곳이 보입니다.</p>
+      <p class="muted small">학구를 누르면 그 학구의 학교 카드가 열립니다.</p>`;
+    }, note: '읍면동별 주민등록 인구를 학구와 겹치는 면적 비율로 나눠 계산했습니다. 아파트 단지처럼 한쪽에 몰려 사는 곳은 실제와 차이가 날 수 있습니다. 공동통학구역은 여러 학교가 함께 씁니다.', rankHak: 'hakKids' },
   { id: 'future', g: '앞으로 5년', q: '몇 년 뒤 초등 입학생은 얼마나 줄어들까?', s: '0~2세와 지금 초1~3 또래 비교', ind: 'cohort', chips: ['cohort', 'k05', 'kidShare'],
     cam: { pitch: 55, bearing: -10 },
     hero: () => { const p = D.stats.popTotal; return { l: '경북 0~2세 ÷ 6~8세 (주민등록)', v: `${sgn(p.cohort)}%`, d: `0~2세 ${fmt(p.a0)}명 · 6~8세 ${fmt(p.a6)}명 · ${D.stats.meta.popMonth} 기준` }; },
@@ -1671,7 +1739,7 @@ function openStory(id, fly = true) {
 }
 function renderStory() {
   const st = S.story, h = st.hero();
-  const rk = st.rankEmd ? emdRankHtml(IND[S.ind].lv.includes('emd') && IND[S.ind].emd && S.ind.startsWith('near') ? S.ind : st.rankEmd) : rankHtml(S.ind);
+  const rk = st.rankHak ? hakRankHtml(S.ind) : st.rankEmd ? emdRankHtml(IND[S.ind].lv.includes('emd') && IND[S.ind].emd && S.ind.startsWith('near') ? S.ind : st.rankEmd) : rankHtml(S.ind);
   pbody.innerHTML = `<button class="back" data-act="qlist">← 질문 목록으로</button>
   <div class="cat">${esc(st.g)}</div><h2 class="q">${esc(st.q)}</h2>
   <div class="sec-l">지도에 표시할 지표</div>
@@ -1680,7 +1748,7 @@ function renderStory() {
   <div class="story">${st.body()}</div>
   ${st.note ? `<div class="note">${esc(st.note)}</div>` : ''}
   <button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 질문 화면 링크 공유</button>
-  <div class="sec-l">${st.rankEmd ? `${esc(IND[S.ind].label)} 먼 읍면동 20곳` : `22개 시군 비교 · ${esc(IND[S.ind].label)}`}</div>${rk}`;
+  <div class="sec-l">${st.rankHak ? esc(IND[S.ind].label) + ' 낮은 학구 20곳' : st.rankEmd ? `${esc(IND[S.ind].label)} 먼 읍면동 20곳` : `22개 시군 비교 · ${esc(IND[S.ind].label)}`}</div>${rk}`;
 }
 function rankHtml(indKey) {
   const I = IND[indKey];
@@ -1692,6 +1760,12 @@ function rankHtml(indKey) {
   const mx = Math.max(...arr.map(([, v]) => Math.abs(v))) || 1;
   const br = breaksOf(Object.values(vals));
   return `<ul class="rank">${arr.map(([sg, v]) => `<li tabindex="0" role="button" data-sg="${esc(sg)}" class="${S.sigun === sg ? 'on' : ''}"><span class="sw" style="background:${colorOf(v, br, I)}"></span><span class="nm"><span>${sg}${SG()[sg].decline === '인구감소지역' ? '<span class="tag">감소지역</span>' : ''}</span><span class="bar" style="width:${Math.round((Math.abs(v) / mx) * 100)}%"></span></span><span class="v num">${esc(fmtInd(v, indKey))}</span></li>`).join('')}</ul>`;
+}
+function hakRankHtml(indKey) {
+  const I = IND[indKey]; if (!I.hak) return '';
+  const arr = Object.entries(D.hak).map(([c, z]) => [c, z, I.hak(z)]).filter((x) => x[2] !== null && x[1].sch.length).sort((a, b) => a[2] - b[2]).slice(0, 20);
+  const mx = Math.max(...arr.map((x) => Math.abs(x[2]))) || 1, br = breaksOf(Object.values(D.hak).map(I.hak));
+  return `<ul class="rank">${arr.map(([c, z, v]) => `<li tabindex="0" role="button" data-hak="${c}"><span class="sw" style="background:${colorOf(v, br, I)}"></span><span class="nm"><span>${esc(z.name)} <span class="muted small">${esc(z.office.replace(/^경상북도|교육지원청$/g, ''))}</span></span><span class="bar" style="width:${Math.round((Math.abs(v) / mx) * 100)}%"></span></span><span class="v num">${esc(fmtInd(v, indKey))}</span></li>`).join('')}</ul>`;
 }
 function emdRankHtml(indKey) {
   const I = IND[indKey];
@@ -1891,7 +1965,7 @@ function renderSchool() {
     <div><div class="l">2026 입학</div><div class="v num">${fmt(s.entrants)}<small>명</small></div></div>
   </div>
   ${geoNote}
-  ${s.ze !== undefined || s.zm !== undefined ? `<div class="zone-box"><span>통학구역 <b>${esc((s.zen || s.zmn || '').replace(/통학구역|학교군|중학구$/g, (m) => m))}</b><br><span class="muted small">면적 ${fmt(s.zea ?? s.zma, 1)}㎢ · 지도에 점선으로 표시</span></span></div>` : ''}
+  ${s.ze !== undefined || s.zm !== undefined ? `<div class="zone-box"><span>통학구역 <b>${esc((s.zen || s.zmn || '').replace(/통학구역|학교군|중학구$/g, (m) => m))}</b><br><span class="muted small">면적 ${fmt(s.zea ?? s.zma, 1)}㎢ · 지도에 점선으로 표시${s.ze !== undefined ? ' · 지표 「학구 안 0~5세」로 다른 학구와 비교할 수 있습니다' : ''}</span></span></div>` : ''}
   ${riskHtml(s)}
   ${forecastHtml(s)}
   <div class="sec-l">학생 수 2022~2026</div>${barsSvg(s.stu, YEARS.map(String), { color: KIND_COLOR[s.kind], unit: '명' })}
@@ -2054,6 +2128,8 @@ function riskOf(s) {
   if (s.entrants === 0) out.push('2026학년도 신입생 0명');
   if (s.pj) {
     if (s.pj.below60) out.push(`${s.pj.below60}년 60명 아래로 추정`);
+    const c31 = s.stu[4] ? (s.pj.stu[4] / s.stu[4] - 1) * 100 : null;
+    if (c31 !== null && c31 <= -30) out.push(`2031년까지 ${Math.round(-c31)}% 줄어들 추정`);
     if (s.pj.stu[4] <= 10) out.push(`2031년 약 ${fmt(s.pj.stu[4])}명(10명 이하) 추정`);
     if (s.kind === '초등학교' && s.pj.g1.slice(0, 5).some((v) => v === 0)) out.push(`${2027 + s.pj.g1.findIndex((v) => v === 0)}년 입학생 0명 추정`);
     if (s.pj.kids05 !== undefined && s.pj.kids05 < 12) out.push(`통학구역에 사는 0~5세 약 ${fmt(s.pj.kids05)}명`);
@@ -2124,6 +2200,7 @@ const DRONE = {"decline":{"center":[128.338,36.121],"zoom":14.2,"pitch":72,"bear
 const TOUR = ['decline', 'forecast', 'future', 'small', 'mountain', 'closed'];
 const TOUR_MS = 16000;
 function startTour() {
+  try { if (devicePixelRatio > 1.25) map.setPixelRatio(1.25); } catch (e) {}
   touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
   if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
   map.resize(); tourIdx = 0; tourStep();
@@ -2133,12 +2210,13 @@ function tourStep() {
   const st = STORIES.find((x) => x.id === TOUR[tourIdx]);
   openStory(st.id, false);
   const cam = storyCam(st), dr = DRONE[st.id], step = tourIdx;
+  if (dr) vbPrefetch(dr.center, MOBILE ? 6 : 9);
   map.flyTo({ ...cam, duration: 3200, essential: true });
   // 도 전체를 보여 준 뒤 낮게 내려가 건물·깃발 사이를 난다
   clearTimeout(tourDroneT);
   if (dr && pitched()) tourDroneT = setTimeout(() => {
     if (!touring || tourIdx !== step) return;
-    map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 0.8 : dr.zoom, pitch: dr.pitch, bearing: dr.bearing, duration: 4200, curve: 1.6, essential: true });
+    map.flyTo({ center: dr.center, zoom: MOBILE ? dr.zoom - 0.8 : dr.zoom, pitch: dr.pitch, bearing: dr.bearing, duration: 4600, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
     map.once('moveend', () => { if (touring && tourIdx === step) map.easeTo({ bearing: dr.bearing + 40, duration: TOUR_MS - (dr.at || 5200) - 4400, easing: (t) => t }); });
   }, dr.at || 5200);
   const h = st.hero();
@@ -2158,6 +2236,8 @@ function tourStep() {
 function stopTour() {
   touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
   document.body.classList.remove('touring'); $('#tour').classList.remove('on'); map.resize();
+  try { map.setPixelRatio(devicePixelRatio); } catch (e) {}
+  vbUpdate();
 }
 
 /* =========================================================
@@ -2178,6 +2258,7 @@ function renderAbout() {
   <li>통학 거리: 읍면동 대표점에서 가장 가까운 학교까지 직선거리(휴교 제외). 도로 거리가 아닙니다.</li>
   <li>도서벽지: 법령 별표의 경북 학교 ${m.bjTotal}곳 중 운영 중인 ${D.schools.filter((s) => s.bj).length}곳. 별표에 있으나 이미 폐교된 곳: ${m.bjClosed.map((b) => esc(b.name)).join(', ')}. 경북교육청 인사 가산점 급지표와는 다릅니다.</li>
   <li>입학생 전망: 행정동별 주민등록 0~2세 ÷ 6~8세 − 1(${esc(m.popMonth)} 말). 전입·전출, 사립·특수학교 진학은 반영하지 않은 단순 비교입니다.</li>
+  <li>초등학구 색칠: 학구도안내시스템 초등 통학구역 535곳. 학구 안 0~5세는 읍면동 주민등록 인구를 겹치는 면적 비율로 나눈 값입니다.</li>
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
   <li>5년 뒤 추정(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
   <li>통학 거리 비교: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
@@ -2219,13 +2300,13 @@ function readHash() {
    이벤트 연결
    ========================================================= */
 document.addEventListener('click', (e) => {
-  const t = e.target.closest('button, li[data-sg], li[data-emd], tr[data-sg], tr[data-kind]');
+  const t = e.target.closest('button, li[data-sg], li[data-emd], li[data-hak], tr[data-sg], tr[data-kind]');
   if (!t || !t.closest('#inddd')) { $('#inddd').classList.remove('open'); document.body.classList.remove('menu-open'); }
   if (!t) return;
   const d = t.dataset;
   if (t.id === 'indBtn') { $('#inddd').classList.toggle('open'); document.body.classList.toggle('menu-open', $('#inddd').classList.contains('open')); return; }
   if (d.ind) { S.ind = d.ind; if (!IND[S.ind].lv.includes(S.level)) S.level = IND[S.ind].lv[0]; $('#inddd').classList.remove('open'); document.body.classList.remove('menu-open'); paint(); if (S.story) renderStory(); return; }
-  if (d.lv && !t.disabled) { S.level = d.lv; S.sigun = null; S.emd = null; map.setFilter('sel-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); paint(); renderPanel(); return; }
+  if (d.lv && !t.disabled) { if (!IND[S.ind].lv.includes(d.lv)) S.ind = { sigun: 'change', emd: 'k05', hak: 'hakChg' }[d.lv]; S.level = d.lv; map.setFilter('hak-hover', ['==', ['get', 'code'], '']); S.sigun = null; S.emd = null; map.setFilter('sel-line', ['==', ['get', 'sigun'], '']); map.setFilter('emd-hover', ['==', ['get', 'code'], '']); paint(); renderPanel(); return; }
   if (d.k) { S.kind = d.k; paint(); applySchoolFilter(); if (S.story || S.tab === 'r') renderPanel(); return; }
   if (d.kind) { S.kind = d.kind; paint(); applySchoolFilter(); return; }
   if (d.v) { const was = S.view; S.view = d.v; applyView(); if (d.v === '3d' && was !== '3d' && S.school === null && !S.story) flyMountain(); return; }
@@ -2239,6 +2320,7 @@ document.addEventListener('click', (e) => {
   if (d.schname) { const s = D.schools.find((x) => x.name === d.schname && (!d.schsg || x.sigun === d.schsg)); if (s) openSchool(s.i); return; }
   if (d.closed !== undefined) { openClosed(+d.closed); return; }
   if (d.sg) { openSigun(d.sg); return; }
+  if (d.hak) { const z = D.hak[d.hak]; if (z && z.sch.length) openSchool([...z.sch].sort((a, b) => (b.stu[4] || 0) - (a.stu[4] || 0))[0].i); return; }
   if (d.emd) { if (S.level !== 'emd' && !IND[S.ind].lv.includes('emd')) S.ind = 'nearM'; S.level = 'emd'; paint(); openEmd(d.emd); return; }
   if (d.act === 'qlist') { S.story = null; setFilter(null); S.layers.closed = false; applyView(true); renderPanel(); syncHash(); return; }
   if (d.act === 'close') { // 한 단계씩 뒤로: 학교 → 폐교 → 읍면동 → 시군
