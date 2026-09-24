@@ -916,7 +916,7 @@ const IND = {
   nearM: { g: '통학 거리', hi: '중학교가 먼 곳', label: '가까운 중학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearM, desc: '읍면동 대표점에서 가장 가까운 중학교까지 직선거리', kindless: true },
   nearH: { g: '통학 거리', hi: '고등학교가 먼 곳', label: '가까운 고등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
-    emd: (e) => e.nearH, desc: '읍면동 대표점에서 가장 가까운 고등학교까지 직선거리', kindless: true },
+    emd: (e) => e.nearH, desc: '읍면동 대표점에서 가장 가까운 고등학교까지 직선거리. 입학 자격·모집권역·배정 가능성을 뜻하지 않습니다.', kindless: true },
   pjStu: { g: '미래 학생', label: '초·중 학생 수(추정 포함)', unit: '명', ramp: 'green', future: true, yearly: false, lv: ['sigun'], d: 0, kindless: true, fixed: true,
     sigun: (s) => s.pj[S.fy], hi: '학생이 많은 곳', desc: '2022~2026 실제, 2027~2032 추정(초·중, 지금 있는 학교 기준). 높이는 모든 해를 같은 눈금으로 그려 줄어드는 만큼 낮아집니다' },
   pjChg: { g: '미래 학생', label: '5년 뒤 학생 변화(추정)', unit: '%', ramp: 'warm', invert: true, signed: true, yearly: false, lv: ['sigun'], d: 1, kindless: true,
@@ -2016,10 +2016,10 @@ const STORIES = [
       return `<p>아래 ▶를 누르면 2022년부터 2032년까지 시군 기둥이 줄어드는 모습을 볼 수 있습니다. 2027년부터는 추정입니다.</p>
       <p>지금 학생 60명 이하 학교는 ${fmt(T.small2026)}곳인데, 2031년에는 <b>약 ${fmt(T.small2031)}곳</b>으로 늘어날 것으로 보입니다. 지금은 60명이 넘지만 5년 안에 60명 아래로 내려갈 학교가 <b>${list.length}곳</b>입니다.</p>
       <p>가장 많이 줄어들 곳은 ${t.map(([sg, v]) => `<b>${esc(sg)}(${sgn(v)}%)</b>`).join(', ')}입니다. 학교를 누르면 해마다의 추정과 가까운 학교까지 통학 거리 비교를 볼 수 있습니다.</p>
-      ${T.high ? `<p>고등학교는 통학구역이 없어 시군 중3 학생 수 흐름으로 따로 어림했습니다(지도 기둥에는 넣지 않음). 경북 고등학생은 2026년 ${fmt(T.high[4])}명에서 ${T.high[6] > T.high[4] ? `2028년 약 ${fmt(Math.round(T.high[6] / 100) * 100)}명까지 조금 늘었다가 ` : ''}2031년 <b>약 ${fmt(Math.round(T.high[9] / 100) * 100)}명(${sgn(pct(T.high[4], T.high[9]))}%)</b>으로 줄어듭니다. 지금 중학생이 차례로 올라가므로 초·중보다 늦게, 덜 줄어듭니다.</p>` : ''}
+      ${T.high ? `<p>고등학교는 통학구역이 없어 중3 학생 수 변화율을 적용한 <b>재학생 규모 시나리오</b>입니다(지도 기둥에는 넣지 않음). 모집권역·정원·전형 결과를 반영하지 않으므로 입학 가능성 예측이 아닙니다. 경북 전체 고등학생은 2026년 ${fmt(T.high[4])}명에서 ${T.high[6] > T.high[4] ? `2028년 약 ${fmt(Math.round(T.high[6] / 100) * 100)}명까지 조금 늘었다가 ` : ''}2031년 <b>약 ${fmt(Math.round(T.high[9] / 100) * 100)}명(${sgn(pct(T.high[4], T.high[9]))}%)</b>으로 줄어드는 시나리오입니다.</p>` : ''}
       <p>학생 감소 신호가 3개 이상 겹친 초·중은 <b>${D.schools.filter((x) => x.riskN >= 3).length}곳</b>입니다. 지표 <b>「학생 감소 신호 3개 이상」</b>으로 시군별로 볼 수 있습니다. 학교의 앞날을 뜻하는 숫자가 아니라, 학생 수 변화를 살필 곳을 알려 주는 참고 지표입니다.</p>
       <div class="sec-l">5년 안에 60명 아래로 내려갈 학교</div><ul class="slist">${list.map((s) => schoolRow(s).replace('</span></button>', `</span></button>`)).join('')}</ul>`;
-    }, note: '통학구역 안 나이별 주민등록 인구로 입학생을 추정한 비율법 추정입니다. 전입·전출 흐름은 2025→2026 학년 진급 비율로만 반영했습니다. 고등학교는 시군(특성화·특목고는 경북 전체) 중3 학생 수 흐름으로 따로 어림했고, 특수학교는 추정하지 않았습니다. 학교 신설·재배치 계획은 들어 있지 않습니다.', rank: 'pjChg' },
+    }, note: '초·중 입학생은 통학구역 안 나이별 주민등록 인구로 추정합니다. 고등학교 값은 입학 가능성 예측이 아니라 중3 규모 변화율을 적용한 재학생 규모 시나리오입니다. 모집권역·정원·지원자·전형 결과는 반영하지 않습니다. 특수학교는 추정하지 않았습니다.', rank: 'pjChg' },
   { id: 'hak', g: '앞으로 5년', q: '우리 학교 학구에는 앞으로 올 아이가 몇 명일까?', s: '초등학구 535곳의 0~5세·학생 변화 추정', ind: 'hakKids', level: 'hak', chips: ['hakKids', 'hakChg', 'hakDens', 'hakArea'],
     cam: { pitch: 50, bearing: -10 },
     hero: () => { const zs = Object.values(D.hak).filter((z) => z.kids !== null); const few = zs.filter((z) => z.kids < 12).length; return { l: '0~5세가 12명 미만인 초등학구', v: `${few}곳 <small>/ ${zs.length}곳</small>`, d: '학구 안에 지금 사는 0~5세(2026. 8. 주민등록)' }; },
@@ -2477,7 +2477,7 @@ function forecastHtml(s) {
   if (s.pj.kids05 !== undefined) lines.push(`통학구역에 사는 0~5세 아이 약 <b class="num">${fmt(s.pj.kids05)}명</b> (앞으로 6년 동안 입학할 아이들, 사립·다른 학교 진학 포함)`);
   const sim = s.ze !== undefined || s.zm !== undefined;
   return `<div class="sec-l">학생 수 추정 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
-  <p class="small muted">${s.kind === '고등학교' ? `고등학교는 통학구역이 없어, 올해 입학생 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>가 해마다 달라지는 비율을 곱한 어림값입니다${s.pj.how === 'gb' ? '(특성화·특목고는 경북 곳곳에서 오므로)' : ''}. 다른 지역으로 오가는 학생 비율은 올해와 같다고 봤습니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
+  <p class="small muted">${s.kind === '고등학교' ? `<b>입학 가능성이나 배정 예측이 아닙니다.</b> 통학구역·모집권역·정원·지원자·전형 결과 자료가 없어, 2026년 고1 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>의 변화율을 적용한 학생 규모 시나리오입니다. 일반고 외 학교는 유형별 모집권역을 구분하지 않고 경북 전체 중3을 사용하며, 시군 밖에서 오가는 학생 비율도 그대로라고 가정합니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
   ${sim ? `<button class="simbtn" data-sim="${s.i}">가장 가까운 다른 학교까지 통학 거리 비교</button>` : ''}<div id="simOut"></div>
   <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-sg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
 }
@@ -2818,7 +2818,7 @@ async function reportHwpx(s, btn) {
     const V = {
       NAME: s.name, SUB: `${s.sigun} ${s.emd || ''} · ${s.kind} · ${s.found}${s.bj ? ' · ' + s.bj : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}`,
       STU: f0(s.stu[4]) + '명', CLS: f0(s.cls[4]), TCH: f0(s.tch[4]) + '명', PC: f1(s.perClass), PT: f1(s.perTeacher), ENT: f0(s.entrants) + '명',
-      FCNOTE: !s.pj ? '이 학교급은 추정하지 않음' : s.kind === '고등학교' ? `통학구역이 없어 올해 입학생 수에 ${s.pj.how === 'gb' ? '경북 전체' : s.sigun} 중3 학생 수 변화 비율을 곱한 어림값` : '이미 태어나 지금 통학구역에 사는 아이(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값',
+      FCNOTE: !s.pj ? '이 학교급은 추정하지 않음' : s.kind === '고등학교' ? `입학 가능성 예측이 아닌 학생 규모 시나리오. 올해 고1 수에 ${s.pj.how === 'gb' ? '경북 전체' : s.sigun} 중3 학생 수 변화 비율을 적용. 모집권역·정원·지원자·전형 결과 미반영.` : '이미 태어나 지금 통학구역에 사는 아이(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값',
       RISK: r.length ? r.join(' · ') : '통계로 보이는 감소 신호가 없습니다',
       SP: f0(s.sitePer) + '㎡', MPC: f1(m.perClass), MPT: f1(m.perTeacher), MSP: f0(m.sitePer) + '㎡',
       MEAL: d ? d.meal || '-' : '-', TEMP: d && d.temp !== null ? fmt(d.temp, 1) + '%' : '-', CLUB: d && d.club !== null ? fmt(d.club) + '개' : '-',
@@ -3355,7 +3355,7 @@ function buildBrief(sg) {
       ['초등학교', '중학교', '고등학교'].filter((k) => byKind(k, 4)).map((k) => `${k.slice(0, 1)} ${sgn(pct(byKind(k, 4), byKind(k, 9)), 0)}%`).join(' · ') + ' (2026→2031)',
       below.length ? `5년 안에 60명 아래로 내려갈 학교 <b>${below.length}곳</b>: ${below.slice(0, 4).map((x) => `${esc(shortName(x.name))}(${x.pj.below60})`).join(' · ')}${below.length > 4 ? ' 등' : ''}` : '5년 안에 새로 60명 아래로 내려갈 것으로 보이는 학교는 없습니다',
     ],
-    why: '기둥이 2022년부터 2032년까지 해마다 바뀝니다(2027년부터 추정). 이미 태어나 지금 통학구역에 사는 아이가 지금 비율대로 입학한다고 본 값이고, 고등학교는 시군 중3 흐름으로 어림했습니다.',
+    why: '기둥이 2022년부터 2032년까지 해마다 바뀝니다(2027년부터 추정). 초·중은 학구 안 아이 수를 바탕으로 계산하고, 고등학교는 중3 규모 변화율을 적용한 학생 수 시나리오입니다. 고등학교 값은 입학 가능성 예측이 아닙니다.',
     top: [`${esc(sg)} 전체`, '앞으로 5년 · <b id="brYear">2022</b>', '<b>기둥 높이</b> = 읍면동 초·중·고 학생 수 · 모든 해를 같은 눈금으로 그려 줄어드는 만큼 낮아집니다'],
     run: () => {
       const codes = emds.map(([c]) => c), Y = FYEARS.map((_, i) => Object.fromEntries(codes.map((c) => [c, brEmdStu(c, i)])));
@@ -3495,7 +3495,7 @@ function renderAbout() {
   <li>입학생 전망: 행정동별 주민등록 0~2세 ÷ 6~8세 − 1(${esc(m.popMonth)} 말). 전입·전출, 사립·특수학교 진학은 반영하지 않은 단순 비교입니다.</li>
   <li>초등학구 색칠: 학구도안내시스템 초등 통학구역 535곳. 학구 안 0~5세는 읍면동 주민등록 인구를 겹치는 면적 비율로 나눈 값입니다.</li>
   <li>통학구역: 학구도안내시스템 경계에서 학교 위치가 들어가는 구역을 찾았습니다(초 466/474곳, 중 259/260곳 연결). 공동통학구역은 여러 학교가 함께 씁니다. 법적 효력은 없습니다.</li>
-  <li>5년 뒤 추정(초·중): 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼아 2027~2032년 입학생을 계산했습니다. 학년이 올라갈 때 줄거나 느는 비율은 학교의 2025→2026 값을 시군 값 쪽으로 당겨 썼습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 고등학교는 통학구역이 없어, 2026년 입학생 수에 같은 시군 중3 학생 수(특성화·특목고는 경북 전체 중3)가 해마다 달라지는 비율을 곱해 입학생을 어림했습니다. 학교 신설·재배치 계획과 앞으로의 전입·전출 변화는 반영하지 않은 단순 추정입니다.</li>
+  <li>5년 뒤 추정(초·중·고): 초·중은 학구 경계와 행정동이 겹치는 면적 비율로 학구 안 나이별 인구를 추정하고, 2026년 실제 1학년 ÷ 같은 출생 연도 인구를 그 학교로 오는 비율로 삼았습니다. 중학교 입학생은 중학구 안 초등학교 6학년 추정에서 이어 계산했습니다. 고등학교는 2026년 실제 고1 수에 중3 학생 수의 변화율(일반고는 같은 시군, 그 외 학교는 경북 전체)을 적용한 규모 시나리오입니다. 모집권역, 정원, 지원자 수, 전형 결과를 반영하지 않아 입학 가능성·배정 예측으로 쓸 수 없으며, 일반고 외 학교도 유형별 모집 방식을 구분하지 않았습니다. 학교 신설·재배치와 앞으로의 전입·전출 변화도 반영하지 않은 단순 추정입니다.</li>
   <li>공시정보 뷰어: 학교알리미 공시 21개 항목(입학생·전출입·체력·교원·방과후·상담·급식·보건·시설 등)을 학교마다 모아 앱 안에서 보여 줍니다. 코드처럼 사람이 읽을 필요 없는 칸은 숨겼습니다.</li>
   <li>통학 거리 비교: 학구 안을 격자로 나누고 칸마다 읍면동 아이 수(초 6~11세, 중 12~14세)를 면적 비율로 나눠 실은 뒤, 가장 가까운 다른 같은 급 학교까지 직선거리를 비교했습니다. 3D 곡선은 deck.gl로 그렸습니다.</li>
   <li>건물 3D: 크게 확대하면 브이월드 오픈API(국토교통부 도로명주소건물)에서 화면 둘레 건물만 그때그때 불러와 지상층수 × 3.3m 높이로 세웁니다(저장하지 않음). 색은 건물이 속한 읍면동의 지표, 초록은 이름에 '학교'가 들어간 건물입니다.</li>
