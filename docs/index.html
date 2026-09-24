@@ -657,6 +657,35 @@ body.sat .lbl.brl span{color:#BFF0D2}
 .ttop .nr span.sm60{color:#B3261E;font-weight:600}
 .ttop .nr i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .ttop .r3{margin-top:4px;padding-top:4px;border-top:1px solid var(--line);font-size:12.5px;color:var(--tx-2)}
+/* Cinematic flight tracker */
+.flight-hud{display:none;position:fixed;top:calc(var(--top) + 14px);right:16px;width:196px;z-index:24;padding:11px 12px 10px;border:1px solid rgba(170,210,225,.32);border-radius:13px;background:rgba(7,18,27,.78);color:#E6F5FA;box-shadow:0 12px 34px rgba(0,12,22,.24);backdrop-filter:blur(12px) saturate(130%);-webkit-backdrop-filter:blur(12px) saturate(130%);pointer-events:none}
+body.flight-tour .flight-hud{display:block;animation:hud-in .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes hud-in{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.flight-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.04em;color:#B9D8E2}
+.flight-live{display:inline-flex;align-items:center;gap:5px;color:#9DF3D5}
+.flight-live i{width:7px;height:7px;border-radius:50%;background:#64F0BB;box-shadow:0 0 10px #64F0BB;animation:flight-blink 1.5s ease-in-out infinite}
+@keyframes flight-blink{50%{opacity:.35;box-shadow:0 0 2px #64F0BB}}
+.flight-map{display:block;width:100%;height:94px;margin:5px 0 1px;overflow:visible}
+.flight-grid{stroke:rgba(186,225,237,.11);stroke-width:.7;fill:none}
+.flight-route{stroke:rgba(178,219,231,.45);stroke-width:1.7;stroke-dasharray:3 3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.flight-progress{stroke:#71E7D0;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px rgba(113,231,208,.8));transition:d .65s ease}
+.flight-node{fill:#173744;stroke:#83C9D7;stroke-width:1.5;transition:fill .25s,stroke .25s}
+.flight-node.done{fill:#64F0BB;stroke:#C7FFF0}.flight-node.active{fill:#FFF1A6;stroke:#FFFFFF;stroke-width:2.4;filter:drop-shadow(0 0 4px #FFE98A)}
+.flight-drone{transition:transform .8s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 5px rgba(255,245,174,.75))}
+.flight-drone .body{fill:#FFF0A3;stroke:#FFFFFF;stroke-width:.7}.flight-drone .arm{stroke:#FFF0A3;stroke-width:1.5;stroke-linecap:round}.flight-drone .rotor{fill:none;stroke:#FFFFFF;stroke-width:1.2;transform-origin:center;animation:rotor .16s linear infinite}
+@keyframes rotor{to{transform:rotate(360deg)}}
+.flight-foot{display:flex;align-items:baseline;justify-content:space-between;gap:6px;border-top:1px solid rgba(186,225,237,.18);padding-top:7px}
+.flight-foot b{font-size:13px;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flight-foot span{font-size:10.5px;color:#A9C9D4;white-space:nowrap}
+.flight-phase{font-size:10.5px;color:#9DF3D5;margin-top:2px}
+.drone-target{position:relative;width:58px;height:58px;pointer-events:none;color:#A8FFF0}
+.drone-target:before,.drone-target:after{content:"";position:absolute;inset:8px;border:1px solid currentColor;border-radius:50%;box-shadow:0 0 12px rgba(123,255,235,.5)}
+.drone-target:before{animation:target-ping 2.4s ease-out infinite}
+.drone-target:after{inset:17px;border-style:dashed;animation:target-spin 18s linear infinite}
+@keyframes target-ping{0%{transform:scale(.75);opacity:.95}100%{transform:scale(1.9);opacity:0}}
+@keyframes target-spin{to{transform:rotate(360deg)}}
+.drone-target i{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;background:#EFFFFB;box-shadow:0 0 10px 4px rgba(106,255,220,.8);transform:translate(-50%,-50%)}
+.drone-target b{position:absolute;left:50%;top:49px;transform:translateX(-50%);padding:2px 5px;border-radius:4px;background:rgba(4,20,28,.75);font:700 8px/1.2 system-ui,sans-serif;letter-spacing:.08em;white-space:nowrap;color:#B8FFF0}
 body.dark .ttop{background:rgba(16,22,29,.8);border-color:rgba(255,255,255,.12)}
 body.sat .ttop{background:rgba(255,255,255,.92)}
 body.dark.sat .ttop{background:rgba(16,22,29,.84)}
@@ -666,10 +695,16 @@ body.touring .readme{display:none}
   .ttop{top:calc(var(--top) + 8px);width:calc(100vw - 20px);padding:8px 11px;font-size:12.5px;line-height:1.45}
   .ttop .r1{font-size:14.5px}
   .ttop .r3{font-size:12px}
+  .flight-hud{top:calc(var(--top) + 94px);right:10px;width:150px;padding:8px 9px 7px;border-radius:11px}
+  .flight-head{flex-direction:column;align-items:flex-start;gap:2px}
+  .flight-map{height:70px;margin:3px 0 0}
+  .flight-foot{padding-top:5px}.flight-foot b{font-size:12px}.flight-phase{font-size:10px}
+  body.flight-tour .ttop .nr,body.flight-tour .ttop .r3{display:none}
   .tour .twhy{font-size:12.5px;line-height:1.55;margin-top:6px}
   .tour{max-height:46vh}
 }
 .lbl.dc{opacity:0!important;pointer-events:none}
+@media (min-width:861px) and (max-width:1100px){.flight-hud{top:calc(var(--top) + 110px);width:166px}}
 .laybtn,.mobonly,.t-m,.dclose{display:none}
 #indSub{display:none}
 .ib{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
@@ -831,6 +866,7 @@ body.touring .readme{display:none}
 <div class="simbar" id="simbar"><span id="simbarTxt"></span><button id="simStop">비교 끝내기</button></div>
 
 <div class="ttop" id="ttop" aria-live="polite"></div>
+<div class="flight-hud" id="flightHud" aria-hidden="true"></div>
 <div class="bpick" id="bpick" role="dialog" aria-modal="true" aria-labelledby="bpickT"><div class="box" id="bpickBox"></div></div>
 <div class="tour" id="tour" aria-live="polite">
   <div class="nav"><button id="tPrev">이전</button><button id="tNext">다음</button><button id="tStop">끝내기</button></div>
@@ -3019,6 +3055,41 @@ $('#handle').addEventListener('click', () => {
 let touring = false, tourIdx = 0, tourTimer = null, tourT0 = 0, tourRaf = null, tourYearT = null, tourDroneT = null;
 const DRONE = {"decline":{"center":[128.338,36.121],"zoom":14.2,"pitch":72,"bearing":35},"forecast":{"center":[128.412,36.139],"zoom":14.3,"pitch":72,"bearing":-30,"at":9800},"future":{"center":[129.345,36.035],"zoom":14,"pitch":70,"bearing":20},"small":{"center":[128.698,36.352],"zoom":14.4,"pitch":72,"bearing":-20},"mountain":{"center":[129.06,37.02],"zoom":12.4,"pitch":76,"bearing":200},"closed":{"center":[129.224,35.99],"zoom":13.6,"pitch":70,"bearing":60}};
 const TOUR = ['decline', 'forecast', 'future', 'small', 'mountain', 'closed'];
+const FLIGHT_PTS = (() => {
+  const raw = TOUR.map((id) => DRONE[id].center), lon0 = Math.min(...raw.map((p) => p[0])) - 0.08, lon1 = Math.max(...raw.map((p) => p[0])) + 0.08, lat0 = Math.min(...raw.map((p) => p[1])) - 0.08, lat1 = Math.max(...raw.map((p) => p[1])) + 0.08;
+  return raw.map(([lon, lat]) => ({ x: 12 + (lon - lon0) / (lon1 - lon0) * 196, y: 8 + (lat1 - lat) / (lat1 - lat0) * 86 }));
+})();
+let droneTargetMarker = null;
+function flightPathTo(i) { return FLIGHT_PTS.slice(0, i + 1).map((p, n) => `${n ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' '); }
+function initFlightHud() {
+  const el = $('#flightHud');
+  el.innerHTML = `<div class="flight-head"><span class="flight-live"><i></i> DRONE FLIGHT</span><span>경북 항공 경로</span></div>
+    <svg class="flight-map" viewBox="0 0 220 104" role="img" aria-label="드론 비행 경로">
+      <path class="flight-grid" d="M12 29H208M12 55H208M12 81H208M60 8V94M110 8V94M160 8V94"/>
+      <path class="flight-route" id="flightPath" d="${flightPathTo(TOUR.length - 1)}"/><path class="flight-progress" id="flightProgress" d="${flightPathTo(0)}"/>
+      ${FLIGHT_PTS.map((p, i) => `<circle id="flightNode${i}" class="flight-node${i === 0 ? ' active' : ''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i === 0 ? 4.1 : 3.1}"/>`).join('')}
+      <g class="flight-drone" id="flightDrone" transform="translate(${FLIGHT_PTS[0].x.toFixed(1)} ${FLIGHT_PTS[0].y.toFixed(1)})">
+        <path class="arm" d="M-7-5L-2-1M7-5L2-1M-7 5L-2 1M7 5L2 1"/><rect class="body" x="-3.3" y="-2.5" width="6.6" height="5" rx="1.4"/>
+        <circle class="rotor" cx="-7" cy="-5" r="2.2"/><circle class="rotor" cx="7" cy="-5" r="2.2"/><circle class="rotor" cx="-7" cy="5" r="2.2"/><circle class="rotor" cx="7" cy="5" r="2.2"/>
+      </g>
+    </svg><div class="flight-foot"><b id="flightPlace">경북 상공</b><span id="flightCount">01 / 06</span></div><div class="flight-phase" id="flightPhase">광역 비행</div>`;
+  el.setAttribute('aria-hidden', 'false');
+}
+function updateFlightHud(st, phase, i = tourIdx) {
+  if (BR) return;
+  const pt = FLIGHT_PTS[i], code = emdAt(...DRONE[st.id].center), e = code && D.stats.emd[code];
+  const place = e ? `${e.sigun} ${e.emd}` : st.g;
+  $('#flightProgress').setAttribute('d', flightPathTo(i));
+  FLIGHT_PTS.forEach((p, n) => { const node = $(`#flightNode${n}`); node.classList.toggle('active', n === i); node.classList.toggle('done', n < i); node.setAttribute('r', n === i ? '4.1' : '3.1'); });
+  $('#flightDrone').setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+  $('#flightPlace').textContent = place; $('#flightCount').textContent = `${String(i + 1).padStart(2, '0')} / ${String(TOUR.length).padStart(2, '0')}`; $('#flightPhase').textContent = phase;
+}
+function setDroneTarget(point) {
+  if (!map || !point || !touring || !pitched()) { if (droneTargetMarker) droneTargetMarker.remove(); droneTargetMarker = null; return; }
+  if (droneTargetMarker) droneTargetMarker.remove();
+  const el = document.createElement('div'); el.className = 'drone-target'; el.innerHTML = '<i></i><b>DRONE TARGET</b>';
+  droneTargetMarker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(point).addTo(map);
+}
 const TOUR_MS = 16000;
 // 둘러보기 장면별 요약(화면 사용법이 아니라 내용만)
 const TOUR_TEXT = {
@@ -3068,6 +3139,8 @@ const kmBetween = (a, b) => { const x = (b[0] - a[0]) * 111.32 * Math.cos((a[1] 
 // 위 설명판: phase 'all' = 경북 전체를 보는 동안, 'drone' = 낮게 날 때
 function tourTop(st, phase) {
   const el = $('#ttop'); if (!el) return;
+  if (phase === 'drone') { updateFlightHud(st, '저고도 선회'); setDroneTarget(DRONE[st.id]?.center); }
+  else { updateFlightHud(st, '경북 광역 비행'); setDroneTarget(null); }
   renderReadme(); const read = $('#readme').innerHTML;
   const pin = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
   if (phase !== 'drone') {
@@ -3109,8 +3182,9 @@ function startTour() {
   map.on('movestart', tourMoveStart); map.on('moveend', tourMoveEnd);
   // 아래 확대 단계 조각을 미리 받아 두어야 새 조각이 오기 전 빈 사각형 대신 흐린 조각이 보인다(미리받기를 끄지 않음)
   try { if (devicePixelRatio > 1.25) map.setPixelRatio(1.25); } catch (e) {}
-  touring = true; document.body.classList.add('touring'); $('#tour').classList.add('on');
-  if (S.view === '2d' && !MOBILE) { S.view = 'bar'; applyView(); }
+  touring = true; document.body.classList.add('touring'); document.body.classList.toggle('flight-tour', !BR); $('#tour').classList.add('on');
+  if (!BR) initFlightHud();
+  if (S.view === '2d') { S.view = 'bar'; applyView(); }
   map.resize(); tourIdx = 0; tourStep();
 }
 // 비행 중 글자 숨기기: 글자 겹침 계산(심볼 배치)이 카메라가 움직이는 매 화면 다시 돌아 끊김의 큰 몫을 차지한다
@@ -3125,6 +3199,7 @@ const FLY_VIS = {};
 function rememberVis() { for (const l of map.getStyle().layers) if (l.type === 'symbol') FLY_VIS[l.id] = map.getLayoutProperty(l.id, 'visibility') || 'visible'; }
 function tourStep() {
   if (BR) return briefStep();
+  setDroneTarget(null);
   cancelAnimationFrame(smoothRaf);
   clearTimeout(tourTimer);
   const st = STORIES.find((x) => x.id === TOUR[tourIdx]);
@@ -3163,8 +3238,8 @@ function stopTour() {
   map.off('movestart', tourMoveStart); map.off('moveend', tourMoveEnd); flyLabels(false);
   cancelAnimationFrame(smoothRaf);
   try { if (map.setPrefetchZoomDelta) map.setPrefetchZoomDelta(TOUR_PREFETCH); } catch (e) {}
-  touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop();
-  document.body.classList.remove('touring'); $('#tour').classList.remove('on', 'br-end'); $('#ttop').classList.remove('on'); map.resize();
+  touring = false; clearTimeout(tourTimer); clearTimeout(tourYearT); clearTimeout(tourDroneT); cancelAnimationFrame(tourRaf); map.stop(); setDroneTarget(null);
+  document.body.classList.remove('touring', 'flight-tour'); $('#flightHud').setAttribute('aria-hidden', 'true'); $('#tour').classList.remove('on', 'br-end'); $('#ttop').classList.remove('on'); map.resize();
   if (BR) { cancelAnimationFrame(brRaf); brLayers(false); BR = null; brHnow = {}; paint(); }
   try { map.setPixelRatio(MOBILE ? Math.min(devicePixelRatio, 2) : devicePixelRatio); } catch (e) {}
   vbUpdate();
@@ -3324,7 +3399,7 @@ function brDrone(pt, sceneId, delay = 4800) {
     if (!touring || !BR || tourIdx !== step) return;
     brLow = true; brMarkers([]);
     map.flyTo({ center: pt, zoom: MOBILE ? 13.1 : 14.1, pitch: MOBILE ? 55 : 62, bearing: map.getBearing() + 40, offset: (() => { const p = brPad(); return [0, Math.round((p.top - p.bottom) / 2)]; })(), duration: 4200, curve: 1.3, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), essential: true });
-    map.once('moveend', () => { if (!touring || !BR || tourIdx !== step) return; brTopLocal(pt, sceneId); slowEase({ bearing: map.getBearing() + 35, duration: 6000, easing: (t) => t }); });
+    map.once('moveend', () => { if (!touring || !BR || tourIdx !== step) return; setDroneTarget(pt); brTopLocal(pt, sceneId); slowEase({ bearing: map.getBearing() + 35, duration: 6000, easing: (t) => t }); });
   }, delay);
 }
 /* ---------- 위 설명판 ---------- */
@@ -3477,7 +3552,7 @@ function buildBrief(sg) {
 }
 function briefStep() {
   const sc = BR.scenes[tourIdx];
-  cancelAnimationFrame(brRaf); clearTimeout(tourDroneT); clearTimeout(tourTimer); map.stop(); brLow = false;
+  cancelAnimationFrame(brRaf); clearTimeout(tourDroneT); clearTimeout(tourTimer); map.stop(); setDroneTarget(null); brLow = false;
   flyLabels(false);
   $('#tK').textContent = `${BR.sg} 브리핑 ${tourIdx + 1} / ${BR.scenes.length} · ${sc.k}`;
   $('#tH').textContent = sc.h;
