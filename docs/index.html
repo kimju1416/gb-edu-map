@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://kimju1416.github.io/gb-edu-map/og.jpg?v=20260924-1">
 <meta property="og:url" content="https://kimju1416.github.io/gb-edu-map/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#F5F3EE">
+<meta name="theme-color" content="#F2F7F8">
 <link rel="icon" type="image/svg+xml" href="art/logo.svg?v=20260924-1">
 <link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png?v=20260924-1">
 <link rel="apple-touch-icon" href="art/apple-touch-180.png?v=20260924-1">
@@ -31,7 +31,7 @@
 <style>
 :root{
   --pt:#315B75; --pt-h:#25465C; --pt-soft:#E9F0F4; --pt-line:#C4D6E0;
-  --bg:#F5F3EE; --card:#FFFFFF; --line:#E4E0D6; --line-2:#D6D1C4;
+  --bg:#F2F7F8; --card:#FFFFFF; --line:#DFE8EA; --line-2:#C9D8DC;
   --tx:#1F2A24; --tx-2:#5A635C; --tx-3:#6F766F;
   --warn:#B26B0F; --bad:#C0392B;
   --k-e:#2E8B57; --k-m:#2F6DB5; --k-h:#9C2F6E; --k-s:#1A9AA8;
@@ -231,6 +231,13 @@ body.menu-open .legend{visibility:hidden}
 .map-start{padding:14px 14px 12px;margin:4px 12px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,var(--card),var(--pt-soft))}
 .map-start h2{font-size:18px;letter-spacing:-.03em;margin:0 0 5px}
 .map-start p{font-size:13px;line-height:1.5;color:var(--tx-2);margin:0}
+.map-start{position:relative;isolation:isolate;overflow:hidden;padding:17px 16px 14px;border:1px solid rgba(31,91,113,.5);background:radial-gradient(circle at 100% 0%,rgba(72,215,199,.28),transparent 42%),linear-gradient(132deg,#102D48 0%,#14566B 58%,#147F7A 100%);box-shadow:0 10px 28px rgba(16,57,77,.2);color:#F5FCFF}
+.map-start::after{content:"";position:absolute;z-index:-1;right:-42px;top:-70px;width:190px;height:190px;border:1px solid rgba(187,247,244,.2);border-radius:50%;box-shadow:0 0 0 18px rgba(187,247,244,.045),0 0 0 40px rgba(187,247,244,.035)}
+.map-start-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+.map-start-kicker{font-size:10px;letter-spacing:.13em;font-weight:800;color:#A8E8E2}
+.map-start-count{font-size:10.5px;letter-spacing:.06em;color:#DAF8F4;border:1px solid rgba(210,250,246,.35);border-radius:999px;padding:3px 8px}
+.map-start h2{font-size:19px;color:#fff;line-height:1.3;margin:0 0 6px}
+.map-start>p:not(.map-note){color:rgba(239,250,252,.8)}
 .map-counts{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:12px 0}
 .map-counts>div{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:7px 3px;text-align:center;color:var(--tx)}
 .map-counts b{display:block;font-size:16px}.map-counts span{display:block;font-size:10.5px;color:var(--tx-2);margin-top:2px}
@@ -239,6 +246,11 @@ body.menu-open .legend{visibility:hidden}
 .map-actions button:hover{border-color:var(--pt);color:var(--pt)}
 .map-actions button:last-child{grid-column:1 / -1}
 .map-start .map-note{font-size:11.5px;color:var(--tx-3);margin-top:8px}
+.map-start .map-note{color:rgba(231,247,248,.66)}
+.map-start .map-counts>div{background:rgba(7,22,32,.44);border-color:rgba(204,241,244,.2);color:#fff}
+.map-start .map-counts span{color:rgba(231,247,248,.72)}
+.map-start .map-actions button{background:rgba(8,27,37,.74);border-color:rgba(204,241,244,.24);color:#E8FAFA}
+.map-start .map-actions button:hover{background:#E8FAFA;border-color:#E8FAFA;color:#143E55}
 .zone-help{padding:8px 9px;margin:4px 2px 8px;border-radius:8px;background:var(--pt-soft);font-size:11.5px;line-height:1.5;color:var(--tx-2)}
 .tl-bar.pred i{background:repeating-linear-gradient(135deg,#D8D3C6 0 4px,#EFEBE2 4px 8px)}
 .tl-bar.pred[aria-pressed=true] i{background:repeating-linear-gradient(135deg,#23704A 0 4px,#5E9C7C 4px 8px)}
@@ -408,6 +420,16 @@ body.touring #map{left:0}
 .ctl-r,.legend,.timeline,.readme,.seg,.inddd>button,.tour{background:rgba(255,255,255,.8)!important;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
 .timeline{border-radius:16px}
 .themebtn{width:34px;padding:0;justify-content:center}
+.themebtn .icon-sun{display:none}
+body.dark .themebtn .icon-moon{display:none}
+body.dark .themebtn .icon-sun{display:block}
+#btnTheme[aria-pressed=true]{color:#23A6A6;border-color:rgba(35,166,166,.5);background:rgba(35,166,166,.09)}
+body.dark #btnTheme[aria-pressed=true]{color:#A5F2E8;border-color:rgba(120,184,210,.5);background:rgba(120,184,210,.12)}
+body.dark .map-start{background:radial-gradient(circle at 100% 0%,rgba(72,215,199,.28),transparent 42%),linear-gradient(132deg,#102D48 0%,#14566B 58%,#147F7A 100%);border-color:rgba(98,201,201,.5);color:#F5FCFF}
+.site-foot{height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 16px;border-top:1px solid var(--line);background:var(--card);font-size:11.5px;color:var(--tx-3)}
+.site-foot a{display:inline-flex;align-items:center;gap:6px;color:var(--pt);font-weight:700;text-decoration:none}
+.site-foot a:hover{text-decoration:underline}
+body.dark .site-foot{background:rgba(14,19,25,.96)}
 /* ---------- 어두운 관제실 테마 ---------- */
 body.dark{--bg:#0B0F14;--card:#121820;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.16);--tx:#E9EEF2;--tx-2:#A7B2BC;--tx-3:#7E8994;--pt:#78B8D2;--pt-h:#9ACEE0;--pt-soft:rgba(120,184,210,.14);--pt-line:rgba(120,184,210,.38);--shadow:0 1px 3px rgba(0,0,0,.4);--float:0 10px 40px rgba(0,0,0,.55)}
 body.dark #map{background:#0B0F14}
@@ -710,12 +732,16 @@ body.touring .readme{display:none}
 .ib{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
 /* ---------- 휴대폰 조작부 한 줄(28차) ---------- */
 @media (max-width:860px){
-  .deskonly,.t-txt,#btnTheme{display:none!important}
+  .deskonly,.t-txt{display:none!important}
+  #btnTheme{display:inline-flex!important}
   .mobonly{display:inline-block}
   .t-m{display:inline}
-  #btnTour{gap:5px;padding:0 12px}
+  #btnTour{gap:5px;padding:0 10px}
   #btnAbout{width:40px;padding:0;justify-content:center}
-  .top-r{gap:6px}
+  #btnShare,#btnTheme{width:38px;padding:0;justify-content:center}
+  .top-r{gap:5px}
+  .site-foot{height:36px;padding:0 14px}
+  body.sheet-min .site-foot{display:none}
   /* 한 줄: [지표 · 단위 · 학교급 ▾] [보기] */
   .ctl-ind{top:calc(var(--top) + 8px)!important;left:10px;right:10px}
   .ctl-ind .row{display:flex;gap:8px;align-items:stretch;width:100%}
@@ -805,7 +831,7 @@ body.touring .readme{display:none}
     <span class="ref" id="refdate"></span>
     <button class="tbtn pri" id="btnTour"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg><span class="t-txt">드론 </span><span class="t-m">둘러보기</span></button>
     <button class="tbtn themebtn" id="btnShare" aria-label="지금 화면 링크 공유" title="지금 보고 있는 화면 그대로 링크 공유"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
-    <button class="tbtn themebtn" id="btnTheme" aria-label="어두운 화면으로" title="어두운 관제실 화면 / 밝은 화면"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+    <button class="tbtn themebtn" id="btnTheme" aria-label="어두운 화면으로" title="어두운 관제실 화면으로 전환"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
     <button class="tbtn" id="btnAbout" aria-label="자료·방법"><svg class="mobonly" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.3a2.6 2.6 0 015 .9c0 1.7-2.5 2.2-2.5 3.8M12 17.2v.1"/></svg><span class="deskonly">자료·방법</span></button>
   </div>
 </header>
@@ -819,6 +845,7 @@ body.touring .readme{display:none}
     <button class="ptab" role="tab" data-tab="r" aria-selected="false">시군 비교</button>
   </div>
   <div class="pbody" id="pbody" tabindex="-1"></div>
+  <footer class="site-foot"><span>경북교육지도</span><a href="https://www.instagram.com/kimju.zip/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @kimju.zip 새 탭에서 열기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>@kimju.zip</a></footer>
 </aside>
 
 <div id="map" aria-label="경상북도 교육 지도"></div>
@@ -895,12 +922,14 @@ const useDot = (u) => `<span class="dot" style="display:inline-block;background:
 const RAMP = {
   green: ['#E9F2EB', '#C3DECB', '#8EC3A0', '#4F9D6F', '#1F6B45'],
   warm: ['#F8EFE5', '#F0D5B8', '#E3AE80', '#CD7C45', '#9E4E1C'],
+  distance: ['#E8F6F7', '#B6E5E7', '#72CDD1', '#329EBA', '#285B91'],
 };
-let NODATA = '#ECEAE4';
+let NODATA = '#E7EFF1';
 // 어두운 테마: 값이 클수록 밝게 빛나는 네온 단계
 const RAMP_DARK = {
   green: ['#10302A', '#155A45', '#1E8C63', '#35C487', '#8CF5C4'],
   warm: ['#3A1F14', '#70331A', '#B24E1C', '#F0782A', '#FFC07A'],
+  distance: ['#102932', '#145167', '#167D99', '#20B5C3', '#9AF4E9'],
 };
 let DARK = false;
 try { DARK = localStorage.getItem('gbTheme') === 'dark'; } catch (e) {}
@@ -917,6 +946,11 @@ const BAR_MAXZ = 9.6; // 값 입체 기둥이 보이는 최대 배율 // 이보�
 const ALLF = ['>=', ['get', 'i'], 0];
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const syncThemeControls = () => {
+  const b = $('#btnTheme'); if (b) { b.setAttribute('aria-pressed', DARK); b.setAttribute('aria-label', DARK ? '밝은 화면으로' : '어두운 화면으로'); b.title = DARK ? '밝은 화면으로 전환' : '어두운 관제실 화면으로 전환'; }
+  const m = $('#btnTheme2'); if (m) { m.setAttribute('aria-pressed', DARK); const box = $('.bx', m); m.replaceChildren(box, document.createTextNode(DARK ? '밝은 화면' : '어두운 화면')); }
+};
+syncThemeControls();
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const NF = {};
 const fmt = (v, d = 0) => (v === null || v === undefined || !isFinite(v) ? '–' : (NF[d] ||= new Intl.NumberFormat('ko-KR', { maximumFractionDigits: d, minimumFractionDigits: d })).format(Number(v)));
@@ -965,11 +999,11 @@ const IND = {
     sigun: (s) => s.closed, emd: (e) => e.closed, desc: '교육청이 보유한 폐교 재산(매각된 곳 제외)', kindless: true },
   closedUnused: { g: '폐교', hi: '비어 있는 폐교가 많은 곳', label: '미활용 폐교', unit: '곳', ramp: 'warm', yearly: false, lv: ['sigun'], d: 0,
     sigun: (s) => s.closedUnused, desc: '대부·자체활용 없이 비어 있는 폐교 재산', kindless: true },
-  nearE: { g: '통학 거리', hi: '초등학교가 먼 곳', label: '가까운 초등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearE: { g: '통학 거리', hi: '초등학교가 먼 곳', label: '가까운 초등학교까지', unit: 'km', ramp: 'distance', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearE, desc: '읍면동 대표점에서 가장 가까운 초등학교까지 직선거리', kindless: true },
-  nearM: { g: '통학 거리', hi: '중학교가 먼 곳', label: '가까운 중학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearM: { g: '통학 거리', hi: '중학교가 먼 곳', label: '가까운 중학교까지', unit: 'km', ramp: 'distance', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearM, desc: '읍면동 대표점에서 가장 가까운 중학교까지 직선거리', kindless: true },
-  nearH: { g: '통학 거리', hi: '고등학교가 먼 곳', label: '가까운 고등학교까지', unit: 'km', ramp: 'warm', yearly: false, lv: ['emd'], d: 1,
+  nearH: { g: '통학 거리', hi: '고등학교가 먼 곳', label: '가까운 고등학교까지', unit: 'km', ramp: 'distance', yearly: false, lv: ['emd'], d: 1,
     emd: (e) => e.nearH, desc: '읍면동 대표점에서 가장 가까운 고등학교까지 직선거리. 입학 자격·모집권역·배정 가능성을 뜻하지 않습니다.', kindless: true },
   pjStu: { g: '미래 학생', label: '초·중 학생 수(추정 포함)', unit: '명', ramp: 'green', future: true, yearly: false, lv: ['sigun'], d: 0, kindless: true, fixed: true,
     sigun: (s) => s.pj[S.fy], hi: '학생이 많은 곳', desc: '2022~2026 실제, 2027~2032 추정(초·중, 지금 있는 학교 기준). 높이는 모든 해를 같은 눈금으로 그려 줄어드는 만큼 낮아집니다' },
@@ -1140,19 +1174,19 @@ function initMap() {
 const BASE_ORIG = {};
 function themeBase() {
   const dk = DARK;
-  NODATA = dk ? '#1B2129' : '#ECEAE4';
+  NODATA = dk ? '#1B2129' : '#E7EFF1';
   for (const l of map.getStyle().layers) {
     if (!BASE_ORIG[l.id]) BASE_ORIG[l.id] = { type: l.type, paint: JSON.parse(JSON.stringify(l.paint || {})) };
     if (/^(nb-|sigun|emd|hover|sel-|zone|sch-|col|closed|bld|hillshade)/.test(l.id)) continue;
     const o = BASE_ORIG[l.id].paint;
     const set = (p, v) => { try { map.setPaintProperty(l.id, p, v); } catch (e) {} };
-    if (!dk) { for (const [p, v] of Object.entries(o)) set(p, v); if (l.id === 'background') set('background-color', '#F2F0EA'); if (l.type === 'fill' && /^water/.test(l.id)) set('fill-color', '#DCE5E8'); continue; }
+    if (!dk) { for (const [p, v] of Object.entries(o)) set(p, v); if (l.id === 'background') set('background-color', '#EEF3F4'); if (l.type === 'fill' && /^water/.test(l.id)) set('fill-color', '#DCE5E8'); continue; }
     if (l.type === 'background') set('background-color', '#0B0F14');
     else if (l.type === 'fill') set('fill-color', /water/.test(l.id) ? '#08151E' : /build/.test(l.id) ? '#161C23' : '#0F151B');
     else if (l.type === 'line') set('line-color', /water|river/.test(l.id) ? '#0C2230' : /boundary|admin/.test(l.id) ? '#39424D' : '#1E252D');
     else if (l.type === 'symbol') { set('text-color', '#7F8B96'); set('text-halo-color', '#0B0F14'); }
   }
-  if (map.getLayer('nb-fill')) { map.setPaintProperty('nb-fill', 'fill-color', dk ? '#0B0F14' : '#F2F0EA'); map.setPaintProperty('nb-fill', 'fill-opacity', dk ? 0.6 : 0.55); map.setPaintProperty('nb-line', 'line-color', dk ? '#2A323B' : '#C9C3B5'); }
+  if (map.getLayer('nb-fill')) { map.setPaintProperty('nb-fill', 'fill-color', dk ? '#0B0F14' : '#EEF3F4'); map.setPaintProperty('nb-fill', 'fill-opacity', dk ? 0.6 : 0.55); map.setPaintProperty('nb-line', 'line-color', dk ? '#2A323B' : '#C9D8DC'); }
   if (map.getLayer('sigun-line')) { map.setPaintProperty('sigun-line', 'line-color', dk ? 'rgba(255,255,255,.35)' : '#FFFFFF'); map.setPaintProperty('emd-line', 'line-color', dk ? 'rgba(255,255,255,.14)' : '#FFFFFF'); }
   if (map.getLayer('hillshade')) { ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-highlight-color', dk ? '#2B3642' : '#FFFFFF')); ['hillshade', 'hillshade-hi'].forEach((h) => map.getLayer(h) && map.setPaintProperty(h, 'hillshade-accent-color', dk ? '#05080B' : '#7F7A6C')); }
   if (map.getLayer('sch-name')) {
@@ -1173,10 +1207,10 @@ function applyBase() {
     if (!map.getLayer(b.id)) continue;
     if (b.type === 'symbol') {
       try { map.setPaintProperty(b.id, 'text-color', on ? '#FFFFFF' : DARK ? '#7F8B96' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-color']) || '#555'); map.setPaintProperty(b.id, 'text-halo-color', on ? 'rgba(0,0,0,.75)' : DARK ? '#0B0F14' : (BASE_ORIG[b.id] && BASE_ORIG[b.id].paint['text-halo-color']) || '#fff'); } catch (e) {}
-    } else if (b.type === 'background') { map.setLayoutProperty(b.id, 'visibility', 'visible'); map.setPaintProperty(b.id, 'background-color', on ? '#26332A' : DARK ? '#0B0F14' : '#F2F0EA'); } // 위성 조각이 오기 전 빈자리를 숲 빛깔로
+    } else if (b.type === 'background') { map.setLayoutProperty(b.id, 'visibility', 'visible'); map.setPaintProperty(b.id, 'background-color', on ? '#26332A' : DARK ? '#0B0F14' : '#EEF3F4'); } // 위성 조각이 오기 전 빈자리를 숲 빛깔로
     else map.setLayoutProperty(b.id, 'visibility', on ? 'none' : 'visible');
   }
-  map.setPaintProperty('nb-fill', 'fill-color', on ? '#05080B' : DARK ? '#0B0F14' : '#F2F0EA');
+  map.setPaintProperty('nb-fill', 'fill-color', on ? '#05080B' : DARK ? '#0B0F14' : '#EEF3F4');
   map.setPaintProperty('nb-fill', 'fill-opacity', on ? 0.45 : DARK ? 0.6 : 0.55);
   for (const h of ['hillshade', 'hillshade-hi']) if (map.getLayer(h)) map.setPaintProperty(h, 'hillshade-exaggeration', on ? 0 : S.view === '3d' ? (DARK ? 1 : 0.85) : 0.42);
   if (on && map.getLayer('hillshade')) { map.setLayoutProperty('hillshade', 'visibility', 'none'); map.setLayoutProperty('hillshade-hi', 'visibility', 'none'); }
@@ -1187,6 +1221,7 @@ function applyBase() {
 function setTheme(dk) {
   DARK = dk; document.body.classList.toggle('dark', dk);
   try { localStorage.setItem('gbTheme', dk ? 'dark' : 'light'); } catch (e) {}
+  syncThemeControls();
   for (const k of Object.keys(barPrev)) delete barPrev[k];
   themeBase(); applyView(true); updateBuildings(); applyBase();
 }
@@ -1203,7 +1238,7 @@ function setupLayers() {
       if (/shield/.test(l.id)) map.setLayoutProperty(l.id, 'visibility', 'none'); // 도로 번호 표지는 숨김
       else if (/highway-name|road_label|transportation_name/.test(l.id)) { try { map.setPaintProperty(l.id, 'text-opacity', 0.45); } catch (e) {} }
     }
-    if (l.id === 'background') map.setPaintProperty(l.id, 'background-color', '#F2F0EA');
+    if (l.id === 'background') map.setPaintProperty(l.id, 'background-color', '#EEF3F4');
     if (l.type === 'fill' && /^water/.test(l.id)) map.setPaintProperty(l.id, 'fill-color', '#DCE5E8');
   }
   const firstSymbol = layers.find((l) => l.type === 'symbol')?.id;
@@ -1222,8 +1257,8 @@ function setupLayers() {
   // 면 자료는 높은 확대 단계에서 다시 자르지 않고 늘여 쓴다(비행 중 조각 생성 줄이기)
   map.addSource('sigun', { type: 'geojson', data: D.sigunGeo, promoteId: 'sigun', maxzoom: 10, tolerance: 0.6 });
   map.addSource('emd', { type: 'geojson', data: D.emdGeo, promoteId: 'code', maxzoom: 12 });
-  map.addLayer({ id: 'nb-fill', type: 'fill', source: 'nb', paint: { 'fill-color': '#F2F0EA', 'fill-opacity': 0.55 } }, firstSymbol);
-  map.addLayer({ id: 'nb-line', type: 'line', source: 'nb', paint: { 'line-color': '#C9C3B5', 'line-width': 0.8 } }, firstSymbol);
+  map.addLayer({ id: 'nb-fill', type: 'fill', source: 'nb', paint: { 'fill-color': '#EEF3F4', 'fill-opacity': 0.55 } }, firstSymbol);
+  map.addLayer({ id: 'nb-line', type: 'line', source: 'nb', paint: { 'line-color': '#C9D8DC', 'line-width': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'sigun-fill', type: 'fill', source: 'sigun', paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'emd-fill', type: 'fill', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'emd-line', type: 'line', source: 'emd', paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.3, 11, 1.2], 'line-opacity': 0.8 } }, firstSymbol);
@@ -1588,7 +1623,7 @@ function vbUpdate() {
 // 건물 색: 속한 읍면동의 지표(또는 가까운 학교까지 거리)
 function vbColors() {
   const k = bldInd(), I = IND[k], dist = /^near[EMH]$/.test(k) && S.ind === k;
-  const ramp = rampOf(dist ? 'warm' : I.ramp);
+  const ramp = rampOf(dist ? 'distance' : I.ramp);
   let br = [], sch = [];
   if (dist) { const kind = { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[k]; sch = D.schools.filter((x) => x.kind === kind && !x.state); }
   else br = breaksOf(Object.values(D.stats.emd).map((e) => I.emd(e)));
@@ -1661,7 +1696,7 @@ function updateBuildings() {
     const kind = { nearE: '초등학교', nearM: '중학교', nearH: '고등학교' }[k];
     const key = 'd' + kind + DARK; if (key === bldKey) return; bldKey = key;
     const pts = D.schools.filter((x) => x.kind === kind && !x.state).map((x) => [x.lon, x.lat]);
-    const r = rampOf('warm');
+    const r = rampOf('distance');
     map.setPaintProperty('bld', 'fill-extrusion-color', ['interpolate', ['linear'], ['distance', { type: 'MultiPoint', coordinates: pts }], 0, r[0], 1500, r[1], 3500, r[2], 6000, r[3], 10000, r[4]]);
     return;
   }
@@ -2288,7 +2323,7 @@ function searchResults() {
 function renderSearch() {
   if (!$('#sq')) {
     const kinds = Object.fromEntries(KIND_KEYS.slice(1).map((k) => [k, D.schools.filter((s) => s.kind === k).length]));
-    pbody.innerHTML = `<section class="map-start"><h2>우리 지역 학교·통학 살펴보기</h2><p>학교를 선택하면 위치와 학교 정보, 확인 가능한 통학구역을 지도에서 볼 수 있습니다.</p>
+    pbody.innerHTML = `<section class="map-start"><div class="map-start-head"><span class="map-start-kicker">GYEONGBUK · SCHOOL MAP</span><span class="map-start-count">${fmt(D.schools.length)} SCHOOLS</span></div><h2>우리 지역 학교·통학 살펴보기</h2><p>학교를 선택하면 위치와 학교 정보, 확인 가능한 통학구역을 지도에서 볼 수 있습니다.</p>
     <div class="map-counts">${[['초등학교', '초'], ['중학교', '중'], ['고등학교', '고'], ['특수학교', '특수']].map(([k, label]) => `<div><b>${fmt(kinds[k])}</b><span>${label}학교</span></div>`).join('')}</div>
     <div class="map-actions"><button data-ind="nearE">가까운 초등학교 거리</button><button data-ind="nearM">가까운 중학교 거리</button><button data-ind="nearH">가까운 고등학교 거리</button><button data-l="zoneE" aria-pressed="false">초등 통학구역 켜기</button><button data-l="zoneM" aria-pressed="false">중학구·학교군 켜기</button></div>
     <p class="map-note">거리는 읍면동 대표점에서 학교까지의 직선거리입니다. 고등학교 거리는 통학구역·입학 가능성·배정 결과를 뜻하지 않습니다.</p></section>
