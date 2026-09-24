@@ -2047,7 +2047,7 @@ function flySigun(sg) {
 function storyCam(st) {
   const is3d = pitched();
   const pitch = is3d ? (MOBILE ? Math.min(38, st.cam.pitch) : st.cam.pitch) : 0, bearing = is3d ? st.cam.bearing : 0;
-  const c = map.cameraForBounds(st.cam.b || GB_BOUNDS, { padding: padding(), pitch, bearing });
+  const c = map.cameraForBounds(st.cam.b || GB_BOUNDS, { padding: padding(), pitch, bearing }) || map.cameraForBounds(st.cam.b || GB_BOUNDS, { pitch, bearing }) || { ...HOME, zoom: HOME.zoom - (st.cam.dz ?? 1) };
   return { center: c.center, zoom: c.zoom + (is3d ? (st.cam.dz ?? (touring ? 1.0 : 0.6)) : 0.1), pitch, bearing };
 }
 // 봉화·영양·청송 산간: 소백·태백 줄기 사이 골짜기의 작은학교
@@ -2381,7 +2381,7 @@ function renderSigun() {
   pbody.innerHTML = `<button class="back" data-act="close">← ${S.tab === 'q' && S.story ? '질문으로' : '목록으로'}</button>
   <div class="tags">${s.decline ? `<span class="tag bj">${esc(s.decline)}</span>` : ''}<span class="tag">읍면동 ${emds.length}곳</span></div>
   <h2 class="sch">${esc(sg)}</h2><div class="sub">2026. 4. 1. 기준 · 초·중·고·특수</div>
-  <button class="brbtn" data-act="brief" data-sg="${esc(sg)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(sg)} 3D 브리핑 보기</button>
+  <button class="brbtn" data-act="brief" data-brsg="${esc(sg)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(sg)} 3D 브리핑 보기</button>
   <div class="grid5">
     <div><div class="l">학교</div><div class="v num">${fmt(a[4].schools)}<small>곳</small></div></div>
     <div><div class="l">학생</div><div class="v num">${fmt(a[4].students)}<small>명</small></div></div>
@@ -2577,7 +2577,7 @@ function discHtml(s) {
   <p class="small muted" style="margin:6px 0 0">학교알리미 2026 공시 원자료(참고용, 우열 비교가 아님)</p>`;
 }
 function forecastHtml(s) {
-  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">특수학교는 학생 수 추정을 하지 않습니다.</p><div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-sg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
+  if (!s.pj) return `<div class="sec-l">5년 뒤 추정</div><p class="small muted">특수학교는 학생 수 추정을 하지 않습니다.</p><div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-brsg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
   const all = [...s.stu, ...s.pj.stu], lab = FYEARS.map((y) => "'" + String(y).slice(2));
   const c31 = pct(s.stu[4], s.pj.stu[4]);
   const lines = [];
@@ -2590,7 +2590,7 @@ function forecastHtml(s) {
   return `<div class="sec-l">학생 수 추정 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
   <p class="small muted">${s.kind === '고등학교' ? `<b>입학 가능성이나 배정 예측이 아닙니다.</b> 이 전체 학생 수는 2026년 고1 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>의 변화율을 적용한 규모 시나리오입니다. 모집권역·정원·지원자·전형 결과를 반영하지 않았고, 일반고 외 학교의 유형별 모집권역도 구분하지 않았습니다. 그래서 고1 신입생 수 예상은 표시하지 않습니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
   ${sim ? `<button class="simbtn" data-sim="${s.i}">가장 가까운 다른 학교까지 통학 거리 비교</button>` : ''}<div id="simOut"></div>
-  <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-sg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
+  <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-brsg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
 }
 function cmpRow(label, v, med, unit, d = 1) {
   if (v === null || med === null) return '';
@@ -3213,6 +3213,7 @@ function tourPrefetch() {
   }
 }
 function startTour() {
+  map.stop(); map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 }); // 학교로 날아갈 때 남은 아래 여백이 카메라 계산을 깨뜨림
   rememberVis(); if (S.sat && !BR) tourPrefetch();
   map.on('movestart', tourMoveStart); map.on('moveend', tourMoveEnd);
   // 아래 확대 단계 조각을 미리 받아 두어야 새 조각이 오기 전 빈 사각형 대신 흐린 조각이 보인다(미리받기를 끄지 않음)
@@ -3421,7 +3422,8 @@ function brPad() {
 function slowEase(o) { flyLabels(false); map.easeTo(o, { flyLabelsKeep: true }); }
 function brOverview(dur = 2600, bearing = -18) {
   const pitch = MOBILE ? 48 : 56;
-  const c = map.cameraForBounds(BR.box, { padding: brPad(), pitch, bearing });
+  const c = map.cameraForBounds(BR.box, { padding: brPad(), pitch, bearing }) || map.cameraForBounds(BR.box, { pitch, bearing });
+  if (!c) return;
   map.flyTo({ center: c.center, zoom: c.zoom + (MOBILE ? 0.1 : 0.6), pitch, bearing, duration: dur, essential: true });
   const step = tourIdx;
   map.once('moveend', () => { if (touring && BR && tourIdx === step && !brLow) slowEase({ bearing: bearing + 22, duration: 11000, easing: (t) => t }); });
@@ -3733,7 +3735,7 @@ document.addEventListener('click', (e) => {
   if (d.brief) { startBrief(d.brief); return; }
   if (d.act === 'bp-x') { closePick(); return; }
   if (d.act === 'bp-all') { closePick(); startTour(); return; }
-  if (d.act === 'brief') { const sg = t.dataset.sg || (S.school !== null ? D.schools[S.school].sigun : S.sigun); if (sg) startBrief(sg); return; }
+  if (d.act === 'brief') { const sg = t.dataset.brsg || (S.school !== null ? D.schools[S.school].sigun : S.sigun); if (sg) startBrief(sg); return; }
   if (d.act === 'br-again' && BR) { tourIdx = 0; tourStep(); return; }
   if (d.act === 'br-pick') { stopTour(); openPick(); return; }
   if (d.act === 'br-link' && BR) { const u = location.origin + location.pathname + '#br=' + encodeURIComponent(BR.sg); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast('브리핑 링크를 복사했습니다'), () => prompt('이 주소를 복사하세요', u)); return; }
