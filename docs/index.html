@@ -2473,11 +2473,11 @@ function forecastHtml(s) {
   lines.push(`2031년 약 <span class="big num">${fmt(s.pj.stu[4])}명</span> <span class="${c31 <= -20 ? 'warn' : ''}">(${sgn(c31, 0)}%)</span>`);
   if (s.pj.below60) lines.push(`<span class="warn">지금 추세라면 ${s.pj.below60}년에 60명 아래로 내려갑니다.</span>`);
   else if ((s.stu[4] || 0) <= 60) lines.push('지금도 60명 이하 작은학교입니다.');
-  lines.push(`해마다 입학생: ${s.pj.g1.map((v, i) => `${2027 + i} <b class="num">${fmt(v)}</b>`).join(' · ')}명`);
+  if (s.kind !== '고등학교') lines.push(`해마다 입학생: ${s.pj.g1.map((v, i) => `${2027 + i} <b class="num">${fmt(v)}</b>`).join(' · ')}명`);
   if (s.pj.kids05 !== undefined) lines.push(`통학구역에 사는 0~5세 아이 약 <b class="num">${fmt(s.pj.kids05)}명</b> (앞으로 6년 동안 입학할 아이들, 사립·다른 학교 진학 포함)`);
   const sim = s.ze !== undefined || s.zm !== undefined;
   return `<div class="sec-l">학생 수 추정 (2027~2032)</div><div class="fc">${barsSvg(all, lab, { color: KIND_COLOR[s.kind], unit: '명', predFrom: 5, h: 90 })}${lines.map((l) => `<p>${l}</p>`).join('')}
-  <p class="small muted">${s.kind === '고등학교' ? `<b>입학 가능성이나 배정 예측이 아닙니다.</b> 통학구역·모집권역·정원·지원자·전형 결과 자료가 없어, 2026년 고1 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>의 변화율을 적용한 학생 규모 시나리오입니다. 일반고 외 학교는 유형별 모집권역을 구분하지 않고 경북 전체 중3을 사용하며, 시군 밖에서 오가는 학생 비율도 그대로라고 가정합니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
+  <p class="small muted">${s.kind === '고등학교' ? `<b>입학 가능성이나 배정 예측이 아닙니다.</b> 이 전체 학생 수는 2026년 고1 수에 <b>${s.pj.how === 'gb' ? '경북 전체' : esc(s.sigun)} 중3 학생 수</b>의 변화율을 적용한 규모 시나리오입니다. 모집권역·정원·지원자·전형 결과를 반영하지 않았고, 일반고 외 학교의 유형별 모집권역도 구분하지 않았습니다. 그래서 고1 신입생 수 예상은 표시하지 않습니다.` : `미래 인구를 아는 것이 아니라, <b>이미 태어나 지금 통학구역에 사는 아이</b>(2026. 8. 주민등록)가 지금 비율대로 입학한다고 본 값입니다. 이사·사립 진학·학교 신설은 반영하지 않습니다. (${s.pj.how === 'zone' ? '학구 인구 사용' : s.pj.how === 'zone-sg' ? '학구가 작아 시군 평균 비율 사용' : '학구 없음, 올해 입학생 유지 가정'}).`} 자료·방법 참고.</p></div>
   ${sim ? `<button class="simbtn" data-sim="${s.i}">가장 가까운 다른 학교까지 통학 거리 비교</button>` : ''}<div id="simOut"></div>
   <div class="dlrow"><button class="sharebtn" data-act="pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> PDF 내려받기</button><button class="sharebtn" data-act="hwpx"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg> 한글 내려받기</button></div><button class="sharebtn" data-act="report" style="height:36px;font-size:13px;font-weight:500">인쇄하기</button><button class="sharebtn" data-act="share"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> 이 학교 화면 링크 공유</button><button class="brbtn" data-act="brief" data-sg="${esc(s.sigun)}"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>${esc(s.sigun)} 3D 브리핑 보기</button>`;
 }
@@ -2730,7 +2730,7 @@ function reportHtml(s, img, forPrint, ds) {
     ${nGr ? kv([['학년별 학생(2026)', s.g.slice(0, nGr).map((v, i) => `${i + 1}학년 ${f0(v)}`).join(' · ')]]) : ''}
     ${kv([
       s.pj ? ['2031년 추정', `약 ${f0(s.pj.stu[4], '명')} (${sgn(pct(s.stu[4], s.pj.stu[4]), 0)}%)`] : null,
-      s.pj ? ['해마다 입학생 추정', s.pj.g1.map((v, i) => `${2027 + i} ${f0(v)}`).join(' · ')] : null,
+      s.pj && s.kind !== '고등학교' ? ['해마다 입학생 추정', s.pj.g1.map((v, i) => `${2027 + i} ${f0(v)}`).join(' · ')] : null,
       s.pj && s.pj.kids05 !== undefined ? ['통학구역 안 0~5세', `약 ${f0(s.pj.kids05, '명')}`] : null,
       x.moveIn !== undefined ? ['전입·전출(지난 학년도)', `전입 ${f0(x.moveIn)} · 전출 ${f0(x.moveOut)}${x.dropout ? ' · 학업중단 ' + f0(x.dropout) : ''}`] : null,
     ])}
@@ -2852,7 +2852,7 @@ async function reportHwpx(s, btn) {
       BF: x.bf ? `적정 설치 ${x.bf.ok}/${x.bf.all}항목` : '-',
       MSTU: f0(m.stu) + '명',
     });
-    for (let i = 0; i <= 10; i++) { V['Y' + i] = f0(stuIdx(s, i)); V['E' + i] = i < 4 ? '-' : i === 4 ? f0(s.g[0]) : s.pj ? f0(s.pj.g1[i - 5]) : '-'; }
+    for (let i = 0; i <= 10; i++) { V['Y' + i] = f0(stuIdx(s, i)); V['E' + i] = i < 4 ? '-' : i === 4 ? f0(s.g[0]) : s.kind === '고등학교' || !s.pj ? '-' : f0(s.pj.g1[i - 5]); }
     const xmlEsc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     for (const path of Object.keys(zip.files).filter((p) => /\.(xml|txt)$/.test(p))) {
       let x = await zip.file(path).async('string');
