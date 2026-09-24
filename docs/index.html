@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>경북교육지도</title>
-<meta name="description" content="경상북도 초·중·고·특수학교 925곳의 학생 수 변화, 작은학교, 도서벽지, 폐교, 통학 거리를 3D 지도로 보는 교사용 교육 통계 지도">
+<meta name="description" content="경상북도 초·중·고·특수학교 925곳의 위치와 통학구역을 지도에서 확인하고, 학교 정보와 읍면동별 거리를 살펴보는 교사용 교육 지도">
 <meta property="og:title" content="경북교육지도">
-<meta property="og:description" content="우리 학교는 5년 뒤 몇 명일까? 경북 학교 925곳의 5년 변화와 2032년까지 추정을 3D 지도로">
+<meta property="og:description" content="우리 지역 학교 위치와 초등 통학구역·중학구, 가까운 학교까지의 거리를 지도에서 살펴보세요.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://kimju1416.github.io/gb-edu-map/og.jpg?v=20260924-1">
 <meta property="og:url" content="https://kimju1416.github.io/gb-edu-map/">
@@ -52,6 +52,7 @@ button{cursor:pointer}
 .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:17px;letter-spacing:-.01em;white-space:nowrap;background:none;border:0;padding:0}
 .brand svg{flex:none}
 .kpis{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.school-home #kpis{display:none}
 .kpis::-webkit-scrollbar{display:none}
 .kpi{padding:0 16px;border-left:1px solid var(--line);white-space:nowrap;display:flex;flex-direction:column;justify-content:center;background:none;border-top:0;border-bottom:0;border-right:0;text-align:left}
 .kpi:first-child{border-left:0}
@@ -227,6 +228,18 @@ body.menu-open .legend{visibility:hidden}
 .gl-grid em{display:block;font-style:normal;font-size:12px;color:var(--pt);margin-top:5px;font-weight:600}
 .zone-box{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--pt-line);background:var(--pt-soft);border-radius:var(--r1);padding:9px 12px;font-size:13.5px;margin-top:12px}
 .zone-box b{font-weight:700}
+.map-start{padding:14px 14px 12px;margin:4px 12px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,var(--card),var(--pt-soft))}
+.map-start h2{font-size:18px;letter-spacing:-.03em;margin:0 0 5px}
+.map-start p{font-size:13px;line-height:1.5;color:var(--tx-2);margin:0}
+.map-counts{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:12px 0}
+.map-counts>div{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:7px 3px;text-align:center;color:var(--tx)}
+.map-counts b{display:block;font-size:16px}.map-counts span{display:block;font-size:10.5px;color:var(--tx-2);margin-top:2px}
+.map-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.map-actions button{min-height:38px;border:1px solid var(--line-2);border-radius:9px;background:var(--card);font-size:12px;font-weight:600;color:var(--tx)}
+.map-actions button:hover{border-color:var(--pt);color:var(--pt)}
+.map-actions button:last-child{grid-column:1 / -1}
+.map-start .map-note{font-size:11.5px;color:var(--tx-3);margin-top:8px}
+.zone-help{padding:8px 9px;margin:4px 2px 8px;border-radius:8px;background:var(--pt-soft);font-size:11.5px;line-height:1.5;color:var(--tx-2)}
 .tl-bar.pred i{background:repeating-linear-gradient(135deg,#D8D3C6 0 4px,#EFEBE2 4px 8px)}
 .tl-bar.pred[aria-pressed=true] i{background:repeating-linear-gradient(135deg,#23704A 0 4px,#5E9C7C 4px 8px)}
 .tl-bar.pred span::after{content:" 추정";font-size:10.5px;color:var(--tx-3)}
@@ -766,8 +779,8 @@ body.touring .readme{display:none}
   <button class="sheet-handle" id="handle" aria-label="패널 크기 바꾸기"></button>
   <div class="peek" id="peek"></div>
   <div class="ptabs" role="tablist">
-    <button class="ptab" role="tab" data-tab="q" aria-selected="true">교육문제</button>
-    <button class="ptab" role="tab" data-tab="s" aria-selected="false">학교 찾기</button>
+    <button class="ptab" role="tab" data-tab="s" aria-selected="true">학교·지역</button>
+    <button class="ptab" role="tab" data-tab="q" aria-selected="false">교육 현황</button>
     <button class="ptab" role="tab" data-tab="r" aria-selected="false">시군 비교</button>
   </div>
   <div class="pbody" id="pbody" tabindex="-1"></div>
@@ -793,6 +806,10 @@ body.touring .readme{display:none}
   <button class="tg" data-l="sat" aria-pressed="true"><span class="bx"></span>위성 사진 바탕 <small class="muted">브이월드</small></button>
   <button class="tg" data-l="schools" aria-pressed="true"><span class="bx"></span>학교 위치 <small class="muted" id="schHint"></small></button>
   <div class="kleg"><span><i style="background:var(--k-e)"></i>초</span><span><i style="background:var(--k-m)"></i>중</span><span><i style="background:var(--k-h)"></i>고</span><span><i style="background:var(--k-s)"></i>특수</span></div>
+  <h4>통학구역</h4>
+  <button class="tg" data-l="zoneE" aria-pressed="false"><span class="bx"></span>초등 통학구역 <small class="muted">파랑</small></button>
+  <button class="tg" data-l="zoneM" aria-pressed="false"><span class="bx"></span>중학구·학교군 <small class="muted">주황</small></button>
+  <div class="zone-help">선택한 학교 경계는 지도에서 굵게 강조됩니다. 고등학교는 배정 학구로 표시하지 않습니다.</div>
   <button class="tg" data-l="closed" aria-pressed="false"><span class="bx"></span>폐교 재산</button>
   <button class="tg" data-l="bj" aria-pressed="false"><span class="bx"></span>도서벽지 학교만</button>
   <button class="tg" data-l="rotate" aria-pressed="false"><span class="bx"></span>천천히 돌리기</button>
@@ -874,10 +891,11 @@ const median = (arr) => { const a = arr.filter((v) => v !== null && isFinite(v))
 let D = {};            // 자료
 let map;               // 지도
 const S = {            // 화면 상태
-  ind: 'change', level: 'sigun', kind: 'all', yi: 4, fy: 4,
-  view: 'bar', sat: (() => { try { return localStorage.getItem('gbSat') !== '0'; } catch (e) { return true; } })(), layers: { schools: true, closed: false, bj: false, rotate: false },
-  tab: 'q', story: null, school: null, sigun: null, emd: null, filter: null,
+  ind: 'nearE', level: 'emd', kind: 'all', yi: 4, fy: 4,
+  view: '2d', sat: (() => { try { return localStorage.getItem('gbSat') !== '0'; } catch (e) { return true; } })(), layers: { schools: true, closed: false, bj: false, rotate: false, zoneE: false, zoneM: false },
+  tab: 's', story: null, school: null, sigun: null, emd: null, filter: null,
 };
+document.body.classList.toggle('school-home', S.tab === 's');
 
 /* ---------- 지표 정의 ---------- */
 const kindRows = (sg) => (sg[S.kind] || sg.all);
@@ -1179,6 +1197,9 @@ function setupLayers() {
   map.addSource('hak', { type: 'geojson', data: D.hakGeo, promoteId: 'code', maxzoom: 12 });
   map.addLayer({ id: 'hak-fill', type: 'fill', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-color': NODATA, 'fill-opacity': 0.8 } }, firstSymbol);
   map.addLayer({ id: 'hak-line', type: 'line', source: 'hak', layout: { visibility: 'none' }, paint: { 'line-color': DARK ? 'rgba(255,255,255,.4)' : '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.6] } }, firstSymbol);
+  map.addLayer({ id: 'hak-zone-line', type: 'line', source: 'hak', layout: { visibility: 'none' }, paint: { 'line-color': '#1976D2', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.65, 11, 1.7], 'line-opacity': 0.88 } }, firstSymbol);
+  map.addSource('zones-m-all', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, maxzoom: 12 });
+  map.addLayer({ id: 'middle-zone-line', type: 'line', source: 'zones-m-all', layout: { visibility: 'none' }, paint: { 'line-color': '#F28C28', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.8, 11, 2], 'line-opacity': 0.9 } }, firstSymbol);
   map.addLayer({ id: 'hak-bar', type: 'fill-extrusion', source: 'hak', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
   map.addLayer({ id: 'hak-hover', type: 'line', source: 'hak', filter: ['==', ['get', 'code'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2 } });
   map.addLayer({ id: 'emd-bar', type: 'fill-extrusion', source: 'emd', layout: { visibility: 'none' }, paint: { 'fill-extrusion-color': NODATA, 'fill-extrusion-height': 0, 'fill-extrusion-opacity': 0.94, 'fill-extrusion-vertical-gradient': true } });
@@ -1195,9 +1216,9 @@ function setupLayers() {
   map.addLayer({ id: 'bld', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building', minzoom: 12.5, layout: { visibility: 'none' }, paint: {
     'fill-extrusion-color': '#E4E0D6', 'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.4, ['coalesce', ['get', 'render_height'], 7]],
     'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0], 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
-  map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#23704A', 'fill-opacity': 0.14 } });
-  map.addLayer({ id: 'zone-ext', type: 'fill-extrusion', source: 'zone', paint: { 'fill-extrusion-color': '#23704A', 'fill-extrusion-opacity': 0.28, 'fill-extrusion-height': 0, 'fill-extrusion-base': 0 } });
-  map.addLayer({ id: 'zone-line', type: 'line', source: 'zone', paint: { 'line-color': '#23704A', 'line-width': 2.5, 'line-dasharray': [2, 1] } });
+  map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zone', paint: { 'fill-color': '#1769AA', 'fill-opacity': 0.12 } });
+  map.addLayer({ id: 'zone-ext', type: 'fill-extrusion', source: 'zone', paint: { 'fill-extrusion-color': '#1769AA', 'fill-extrusion-opacity': 0.24, 'fill-extrusion-height': 0, 'fill-extrusion-base': 0 } });
+  map.addLayer({ id: 'zone-line', type: 'line', source: 'zone', paint: { 'line-color': '#075CA8', 'line-width': 3, 'line-dasharray': [2, 1] } });
   map.addLayer({ id: 'hover-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 2.2 } });
   map.addLayer({ id: 'emd-hover', type: 'line', source: 'emd', filter: ['==', ['get', 'code'], ''], paint: { 'line-color': '#1F2A24', 'line-width': 1.8 } });
   map.addLayer({ id: 'sel-line', type: 'line', source: 'sigun', filter: ['==', ['get', 'sigun'], ''], paint: { 'line-color': '#23704A', 'line-width': 3 } });
@@ -1635,8 +1656,8 @@ function renderReadme() {
 
 /* ---------- 상단 KPI ---------- */
 function renderPeek() {
-  const t = D.stats.total.all, T = D.stats.pjTotal;
-  $('#peek').innerHTML = `경북 학생 <b>${fmt(t[4].students)}명</b> · 4년 새 <em>${sgn(pct(t[0].students, t[4].students))}%</em> · 2031년 <em>${sgn(pct(T.stu[4], T.stu[9]))}%</em> 추정 <span style="float:right">위로 밀어 보기 ↑</span>`;
+  const counts = Object.fromEntries(KIND_KEYS.slice(1).map((k) => [k, D.schools.filter((s) => s.kind === k).length]));
+  $('#peek').innerHTML = `경북 학교 <b>${fmt(D.schools.length)}곳</b> · 초 ${fmt(counts.초등학교)} · 중 ${fmt(counts.중학교)} · 고 ${fmt(counts.고등학교)} · 위로 밀어 보기 ↑`;
 }
 function renderKPIs() {
   if (MOBILE) renderPeek();
@@ -1815,6 +1836,8 @@ function applyView(first) {
   map.setLayerZoomRange('sch-dim', terrain ? COL_MAXZ : bar ? BAR_MAXZ : 0, 24);
   map.setLayoutProperty('closed-circ', 'visibility', S.layers.closed && !bar ? 'visible' : 'none');
   map.setLayoutProperty('closed-flag', 'visibility', S.layers.closed ? 'visible' : 'none');
+  if (map.getLayer('hak-zone-line')) map.setLayoutProperty('hak-zone-line', 'visibility', S.layers.zoneE ? 'visible' : 'none');
+  if (map.getLayer('middle-zone-line')) map.setLayoutProperty('middle-zone-line', 'visibility', S.layers.zoneM ? 'visible' : 'none');
 
   // 값 입체는 확대하면 기둥을 낮춰 학교 점이 보이게
 
@@ -1836,7 +1859,7 @@ function applyView(first) {
   map.setPaintProperty('col', 'fill-extrusion-height', low ? ['*', ['get', 'h'], 0.35] : ['get', 'h']);
   map.setPaintProperty('col', 'fill-extrusion-opacity', low ? 0.6 : 0.92);
   map.setPaintProperty('col-dim', 'fill-extrusion-height', low ? ['*', ['get', 'h'], 0.35] : ['get', 'h']);
-  $$('.tg').forEach((b) => b.setAttribute('aria-pressed', !!S.layers[b.dataset.l]));
+  $$('[data-l]').forEach((b) => b.setAttribute('aria-pressed', !!S.layers[b.dataset.l]));
   updateLabels(); rotate();
 }
 let rotRaf = null;
@@ -1971,6 +1994,7 @@ const pbody = $('#pbody');
 function setTab(t) {
   stopSim();
   S.tab = t; S.story = null; S.school = null; S.sigun = null; S.emd = null; S.closedSel = null;
+  document.body.classList.toggle('school-home', t === 's');
   setFilter(null); S.layers.closed = false; if (map) applyView(true);
   $$('.ptab').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
   map && map.setFilter('sel-line', ['==', ['get', 'sigun'], '']);
@@ -2156,6 +2180,7 @@ function openStory(id, fly = true) {
   if (MOBILE && !touring) buzz();
   const st = STORIES.find((s) => s.id === id); if (!st) return;
   S.tab = 'q'; S.story = st; S.school = null; S.sigun = null; S.emd = null; S.closedSel = null;
+  document.body.classList.remove('school-home');
   $$('.ptab').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === 'q'));
   S.ind = st.ind; S.level = st.level || 'sigun'; S.kind = 'all';
   if (IND[S.ind].yearly) S.yi = 4;
@@ -2226,13 +2251,20 @@ function searchResults() {
 }
 function renderSearch() {
   if (!$('#sq')) {
-    pbody.innerHTML = `<div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sq" type="search" placeholder="학교 이름, 읍면동, 시군" autocomplete="off" aria-label="학교 검색"></div>
+    const kinds = Object.fromEntries(KIND_KEYS.slice(1).map((k) => [k, D.schools.filter((s) => s.kind === k).length]));
+    pbody.innerHTML = `<section class="map-start"><h2>우리 지역 학교·통학 살펴보기</h2><p>학교를 선택하면 위치와 학교 정보, 확인 가능한 통학구역을 지도에서 볼 수 있습니다.</p>
+    <div class="map-counts">${[['초등학교', '초'], ['중학교', '중'], ['고등학교', '고'], ['특수학교', '특수']].map(([k, label]) => `<div><b>${fmt(kinds[k])}</b><span>${label}학교</span></div>`).join('')}</div>
+    <div class="map-actions"><button data-ind="nearE">가까운 초등학교 거리</button><button data-ind="nearM">가까운 중학교 거리</button><button data-ind="nearH">가까운 고등학교 거리</button><button data-l="zoneE" aria-pressed="false">초등 통학구역 켜기</button><button data-l="zoneM" aria-pressed="false">중학구·학교군 켜기</button></div>
+    <p class="map-note">거리는 읍면동 대표점에서 학교까지의 직선거리입니다. 고등학교 거리는 통학구역·입학 가능성·배정 결과를 뜻하지 않습니다.</p></section>
+    <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sq" type="search" placeholder="학교 이름, 읍면동, 시군" autocomplete="off" aria-label="학교 검색"></div>
     <div class="frow"><select class="sel" id="ssg" aria-label="시군"><option value="">시군 전체</option>${D.sigunNames.map((s) => `<option>${s}</option>`).join('')}</select>
     <select class="sel" id="sk" aria-label="학교급"><option value="">학교급 전체</option>${KIND_KEYS.slice(1).map((k) => `<option>${k}</option>`).join('')}</select>
     <select class="sel" id="sc" aria-label="조건"><option value="">조건 없음</option><option value="small">60명 이하</option><option value="zero">신입생 0명</option><option value="bj">도서벽지</option><option value="branch">분교</option><option value="sp">특수학급 있음</option><option value="grow">5년간 학생 증가</option><option value="risk">학생 감소 신호 3개 이상</option><option value="below">5년 안 60명 아래로</option></select></div>
     <div class="count" id="scount"></div><ul class="slist" id="slist"></ul>`;
     const on = () => { SQ.q = $('#sq').value.trim(); SQ.sg = $('#ssg').value; SQ.k = $('#sk').value; SQ.cond = $('#sc').value; SQ.n = 60; renderSearch(); };
-    $('#sq').addEventListener('input', on); ['#ssg', '#sk', '#sc'].forEach((id) => $(id).addEventListener('change', on));
+    $('#sq').addEventListener('input', on);
+    $('#ssg').addEventListener('change', (e) => { on(); e.target.value ? flySigun(e.target.value) : goHome(); });
+    ['#sk', '#sc'].forEach((id) => $(id).addEventListener('change', on));
     $('#sq').value = SQ.q; $('#ssg').value = SQ.sg; $('#sk').value = SQ.k; $('#sc').value = SQ.cond;
   }
   const r = searchResults();
@@ -2339,6 +2371,14 @@ function renderClosed() {
 /* ---------- 학교 카드 ---------- */
 function selectSchool(i) { if (map && map.getLayer('sch-sel')) map.setFilter('sch-sel', ['==', ['get', 'i'], i]); if (i < 0) showZone(null); }
 const zoneCache = {};
+async function showAllMiddleZones() {
+  try {
+    zoneCache.m ||= await fetch('data/zones_m.geojson').then((r) => { if (!r.ok) throw new Error('중학구 자료를 불러오지 못했습니다'); return r.json(); });
+    if (S.layers.zoneM && map.getSource('zones-m-all')) map.getSource('zones-m-all').setData(zoneCache.m);
+  } catch (e) {
+    S.layers.zoneM = false; applyView(); toast('중학구 경계를 불러오지 못했습니다. 연결을 확인해 주세요.');
+  }
+}
 async function showZone(s) {
   const src = map && map.getSource('zone'); if (!src) return;
   const empty = { type: 'FeatureCollection', features: [] };
@@ -3522,7 +3562,7 @@ function syncHash() {
 }
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
-  if (p.get('i') && IND[p.get('i')]) S.ind = p.get('i');
+  if (p.get('i') && IND[p.get('i')] && !(p.get('i') === 'change' && [...p.keys()].length === 1)) S.ind = p.get('i');
   if (p.get('lv')) S.level = p.get('lv');
   if (p.get('k') && KIND_KEYS.includes(p.get('k'))) S.kind = p.get('k');
   if (p.get('y')) { const y = YEARS.indexOf(+p.get('y')); if (y >= 0) S.yi = y; }
@@ -3552,7 +3592,7 @@ document.addEventListener('click', (e) => {
   if (d.kind) { S.kind = d.kind; paint(); applySchoolFilter(); return; }
   if (d.v) { const was = S.view; S.view = d.v; applyView(); if (d.v === '3d' && was !== '3d' && S.school === null && !S.story) flyMountain(); return; }
   if (d.l === 'sat' || t.id === 'btnSat') { S.sat = !S.sat; try { localStorage.setItem('gbSat', S.sat ? '1' : '0'); } catch (e) {} applyBase(); applyView(true); return; }
-  if (d.l) { S.layers[d.l] = !S.layers[d.l]; applyView(); applySchoolFilter(); renderLegend(); return; }
+  if (d.l) { S.layers[d.l] = !S.layers[d.l]; if (d.l === 'zoneM' && S.layers.zoneM) showAllMiddleZones(); applyView(); applySchoolFilter(); renderLegend(); return; }
   if (d.y !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setYear(+d.y); return; }
   if (d.fy !== undefined && t.classList.contains('tl-bar')) { stopPlay(); setFutureYear(+d.fy); return; }
   if (d.tab) { setTab(d.tab); return; }
@@ -3577,7 +3617,7 @@ document.addEventListener('click', (e) => {
   if (t.id === 'play') { togglePlay(); return; }
   if (t.id === 'btnReset') { goHome(); return; }
   if (t.id === 'btnUlleung') { map.flyTo({ center: [131.2, 37.42], zoom: 9.4, pitch: pitched() ? 50 : 0, bearing: 0, duration: 1800 }); return; }
-  if (t.id === 'home') { stopTour(); setTab('q'); S.ind = 'change'; S.level = 'sigun'; S.kind = 'all'; S.yi = 4; setFilter(null); S.layers.closed = false; S.layers.bj = false; applyView(true); paint(); map.getSource('sch-col').setData(schoolColumns()); map.getSource('sch-pt').setData(schoolPoints()); goHome(); return; }
+  if (t.id === 'home') { stopTour(); setTab('s'); S.ind = 'nearE'; S.level = 'emd'; S.kind = 'all'; S.yi = 4; setFilter(null); S.layers.closed = false; S.layers.bj = false; applyView(true); paint(); map.getSource('sch-col').setData(schoolColumns()); map.getSource('sch-pt').setData(schoolPoints()); goHome(); return; }
   if (t.id === 'simStop') { stopSim(); return; }
   if (t.id === 'btnTour') { touring ? stopTour() : openPick(); return; }
   if (d.brief) { startBrief(d.brief); return; }
