@@ -8,12 +8,13 @@
 <meta property="og:title" content="경북교육지도">
 <meta property="og:description" content="우리 학교는 5년 뒤 몇 명일까? 경북 학교 925곳의 5년 변화와 2032년까지 추정을 3D 지도로">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://kimju1416.github.io/gb-edu-map/og.jpg">
+<meta property="og:image" content="https://kimju1416.github.io/gb-edu-map/og.jpg?v=20260924-1">
 <meta property="og:url" content="https://kimju1416.github.io/gb-edu-map/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F5F3EE">
-<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
-<link rel="apple-touch-icon" href="art/apple-touch-180.png">
+<link rel="icon" type="image/svg+xml" href="art/logo.svg?v=20260924-1">
+<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png?v=20260924-1">
+<link rel="apple-touch-icon" href="art/apple-touch-180.png?v=20260924-1">
 <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preconnect" href="https://api.vworld.kr" crossorigin>
 <link rel="preconnect" href="https://s3.amazonaws.com" crossorigin>
@@ -29,7 +30,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
 :root{
-  --pt:#23704A; --pt-h:#1B5A3B; --pt-soft:#E6F0E9; --pt-line:#BFD8C6;
+  --pt:#315B75; --pt-h:#25465C; --pt-soft:#E9F0F4; --pt-line:#C4D6E0;
   --bg:#F5F3EE; --card:#FFFFFF; --line:#E4E0D6; --line-2:#D6D1C4;
   --tx:#1F2A24; --tx-2:#5A635C; --tx-3:#6F766F;
   --warn:#B26B0F; --bad:#C0392B;
@@ -120,7 +121,7 @@ h2.q{font-size:21px;line-height:1.4;margin:0 0 16px;font-weight:700;letter-spaci
 /* 검색 */
 .search{position:relative}
 .search input{width:100%;height:46px;border:1px solid var(--line-2);border-radius:var(--r1);padding:0 14px 0 40px;font-size:15px;background:var(--card)}
-.search input:focus{border-color:var(--pt);box-shadow:0 0 0 3px rgba(35,112,74,.12);outline:0}
+.search input:focus{border-color:var(--pt);box-shadow:0 0 0 3px rgba(49,91,117,.14);outline:0}
 .search svg{position:absolute;left:13px;top:14px;color:var(--tx-3)}
 .frow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 select.sel{height:34px;border:1px solid var(--line-2);border-radius:var(--r1);background:var(--card);padding:0 8px;font-size:13px}
@@ -395,7 +396,7 @@ body.touring #map{left:0}
 .timeline{border-radius:16px}
 .themebtn{width:34px;padding:0;justify-content:center}
 /* ---------- 어두운 관제실 테마 ---------- */
-body.dark{--bg:#0B0F14;--card:#121820;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.16);--tx:#E9EEF2;--tx-2:#A7B2BC;--tx-3:#7E8994;--pt:#3DDC97;--pt-h:#2FC585;--pt-soft:rgba(61,220,151,.12);--pt-line:rgba(61,220,151,.35);--shadow:0 1px 3px rgba(0,0,0,.4);--float:0 10px 40px rgba(0,0,0,.55)}
+body.dark{--bg:#0B0F14;--card:#121820;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.16);--tx:#E9EEF2;--tx-2:#A7B2BC;--tx-3:#7E8994;--pt:#78B8D2;--pt-h:#9ACEE0;--pt-soft:rgba(120,184,210,.14);--pt-line:rgba(120,184,210,.38);--shadow:0 1px 3px rgba(0,0,0,.4);--float:0 10px 40px rgba(0,0,0,.55)}
 body.dark #map{background:#0B0F14}
 body.dark .top{background:rgba(11,15,20,.92)}
 body.dark .panel{background:rgba(14,19,25,.94);border-color:var(--line)}
@@ -748,7 +749,7 @@ body.touring .readme{display:none}
 
 <header class="top">
   <button class="brand" id="home" aria-label="처음 화면으로">
-    <img src="art/logo-96.png" width="28" height="28" alt="" style="border-radius:7px;display:block">
+    <img src="art/logo-96.png?v=20260924-1" width="28" height="28" alt="" style="display:block">
     경북교육지도
   </button>
   <div class="kpis" id="kpis"></div>
@@ -2720,7 +2721,7 @@ function reportHtml(s, img, forPrint, ds) {
   ul{margin:0;padding-left:15px}.grades{display:flex;gap:4px}.grades div{flex:1;text-align:center;background:#F4F2EC;border-radius:4px;padding:3px 0;font-size:10.5px}.grades b{display:block;font-size:12.5px}
   .note{font-size:9.5px;color:#6F766F;margin-top:8px;border-top:1px solid #E4E0D6;padding-top:5px}svg text{font-family:inherit}
   @media screen{body{max-width:820px;margin:20px auto;padding:0 16px}}</style></head><body>
-  <header><img src="${location.origin + location.pathname.replace(/[^/]*$/, '')}art/logo-96.png" alt=""><h1>${esc(s.name)}</h1><small>경북교육지도 학교 보고서<br>${new Date().toLocaleDateString('ko-KR')} 작성</small></header>
+  <header><img src="${location.origin + location.pathname.replace(/[^/]*$/, '')}art/logo-96.png?v=20260924-1" alt=""><h1>${esc(s.name)}</h1><small>경북교육지도 학교 보고서<br>${new Date().toLocaleDateString('ko-KR')} 작성</small></header>
   <div class="sub">${esc(s.sigun)} ${esc(s.emd || '')} · ${esc(s.kind)}${s.sub ? '(' + esc(s.sub) + ')' : ''} · ${esc(s.found)} · ${esc(s.region)}${s.bj ? ' · 도서벽지 ' + esc(s.bj) : ''}${s.alt !== null && s.alt !== undefined ? ' · 해발 ' + fmt(s.alt) + 'm' : ''}${s.opened ? ' · 개교 ' + s.opened.slice(0, 4) : ''}</div>
   <div class="grid"><div><span>학생</span><b>${f0(s.stu[4], '명')}</b></div><div><span>학급</span><b>${f0(s.cls[4])}</b></div><div><span>교원</span><b>${f0(s.tch[4], '명')}</b></div><div><span>학급당 학생</span><b>${f1(s.perClass)}</b></div><div><span>교원 1인당 학생</span><b>${f1(s.perTeacher)}</b></div><div><span>2026 입학</span><b>${f0(s.entrants, '명')}</b></div></div>
   <div class="cols">
